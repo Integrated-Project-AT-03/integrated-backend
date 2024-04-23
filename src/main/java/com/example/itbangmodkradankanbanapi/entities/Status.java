@@ -1,9 +1,10 @@
 package com.example.itbangmodkradankanbanapi.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Data
@@ -16,7 +17,8 @@ public class Status {
     @Basic
     @Column(name = "status")
     private Object status;
+    @JsonIgnore
     @OneToMany(mappedBy = "statusByIdstatus")
-    private Collection<Tasks> tasksByIdstatus;
+    private List<Task> tasksByIdstatus;
 
 }
