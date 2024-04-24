@@ -14,7 +14,6 @@ import java.util.Objects;
 
 
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
     private final Timestamp timestamp;
     private final int status;

@@ -32,7 +32,6 @@ private TaskService service;
         return  ResponseEntity.ok(service.getAllTask());
     }
 
-
     @DeleteMapping("{id}")
     public void deleteTask(@PathVariable String id){
          service.deleteTask(id);

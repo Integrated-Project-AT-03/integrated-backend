@@ -1,6 +1,7 @@
 package com.example.itbangmodkradankanbanapi.dtos;
 
 import com.example.itbangmodkradankanbanapi.entities.Status;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
@@ -17,7 +18,9 @@ public class FullTaskDto {
     public Object getStatus(){
             return statusByIdStatusStatus;
     }
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX")
     private Timestamp createdOn;
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX")
     private Timestamp updatedOn;
 
 
