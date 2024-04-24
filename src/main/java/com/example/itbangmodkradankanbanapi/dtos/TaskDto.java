@@ -11,8 +11,8 @@ public class TaskDto {
     private String title;
     private  String assignees;
     @JsonIgnore
-    private  String statusByStatus;
+    private  String statusByIdStatusStatus;
     public Object getStatus(){
-            return statusByStatus;
+            return statusByIdStatusStatus;
     }
 }

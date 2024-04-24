@@ -3,8 +3,6 @@ package com.example.itbangmodkradankanbanapi.services;
 import com.example.itbangmodkradankanbanapi.dtos.FullTaskDto;
 import com.example.itbangmodkradankanbanapi.dtos.TaskDto;
 import com.example.itbangmodkradankanbanapi.entities.Task;
-import com.example.itbangmodkradankanbanapi.entities.Task;
-import com.example.itbangmodkradankanbanapi.repositories.TaskRepository;
 import com.example.itbangmodkradankanbanapi.repositories.TaskRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +31,11 @@ public class TaskService {
        repository.delete(repository.findById(id).get());
     }
 
-    public Task updateTask(String id,Task newTask){
+    public Task updateTask(String id, Task newTask){
         Task task = repository.findById(id).get();
         task.setTitle(newTask.getTitle());
         task.setDescription(newTask.getDescription());
-        task.setStatusByIdstatus(newTask.getStatusByIdstatus());
+        task.setStatusByIdStatus(newTask.getStatusByIdStatus());
       return  repository.save(task);
     }
 

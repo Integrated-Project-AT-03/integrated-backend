@@ -1,6 +1,7 @@
 package com.example.itbangmodkradankanbanapi.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -13,24 +14,30 @@ import java.sql.Timestamp;
 public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @Column(name = "idTask")
-    private String idTask;
+    @Column(name = "id_task")
+    private Integer idTask;
+    @Basic
     @Column(name = "title")
     private String title;
-    @Column(name = "Description")
+    @Basic
+    @Column(name = "description")
     private String description;
-    @Column(name = "createdOn")
+    @Basic
     @CreationTimestamp
+    @Column(name = "created_on")
     private Timestamp createdOn;
-
+    @Basic
+    @UpdateTimestamp
+    @Column(name = "updated_on")
+    private Timestamp updatedOn;
+    @Basic
     @Column(name = "assignees")
     private String assignees;
-
-    @UpdateTimestamp
-    @Column(name = "updatedOn")
-    private Timestamp updatedOn;
     @ManyToOne
-    @JoinColumn(name = "idstatus", referencedColumnName = "idstatus", nullable = false)
-    private Status statusByIdstatus;
+    @JoinColumn(name = "id_status", referencedColumnName = "id_status", nullable = false)
+    private Status statusByIdStatus;
+
+
+
 
 }

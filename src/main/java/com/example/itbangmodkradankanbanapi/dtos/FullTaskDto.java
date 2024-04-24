@@ -1,5 +1,6 @@
 package com.example.itbangmodkradankanbanapi.dtos;
 
+import com.example.itbangmodkradankanbanapi.entities.Status;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
@@ -12,9 +13,9 @@ public class FullTaskDto {
     private  String assignees;
     private  String description;
     @JsonIgnore
-    private  String statusByStatus;
+    private String statusByIdStatusStatus;
     public Object getStatus(){
-            return statusByStatus;
+            return statusByIdStatusStatus;
     }
     private Timestamp createdOn;
     private Timestamp updatedOn;

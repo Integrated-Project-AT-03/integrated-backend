@@ -3,7 +3,6 @@ package com.example.itbangmodkradankanbanapi.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.util.List;
 
 @Entity
@@ -12,13 +11,23 @@ import java.util.List;
 public class Status {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @Column(name = "idstatus")
-    private String idstatus;
+    @Column(name = "id_status")
+    private Integer idStatus;
     @Basic
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private Object status;
+    private statusType status;
     @JsonIgnore
-    @OneToMany(mappedBy = "statusByIdstatus")
-    private List<Task> tasksByIdstatus;
+    @OneToMany(mappedBy = "statusByIdStatus")
+    private List<Task> tasksByIdStatus;
 
-}
+    private enum statusType {
+        to_do,
+        doing,
+        no_status,
+        done
+    }
+
+
+
+    }
