@@ -24,7 +24,7 @@ public class TaskService {
     }
 
     public List<TaskDto> getAllTask(){
-        return listMapper.mapList(repository.findAll(),TaskDto.class);
+        return listMapper.mapList(repository.findAllByOrderByCreatedOnAsc(),TaskDto.class);
     }
 
     public void deleteTask(String id){

@@ -16,7 +16,7 @@ import java.time.Instant;
 import java.util.NoSuchElementException;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:4173")
 @RequestMapping("/v1/tasks")
 public class TaskController {
     @Autowired

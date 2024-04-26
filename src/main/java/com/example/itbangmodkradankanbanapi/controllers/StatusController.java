@@ -17,7 +17,7 @@ import java.time.Instant;
 import java.util.NoSuchElementException;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:4173")
 @RequestMapping("/v1/status")
 public class StatusController {
     @Autowired
