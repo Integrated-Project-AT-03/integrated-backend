@@ -19,7 +19,7 @@ import java.util.NoSuchElementException;
 
 
 @RestController
-@CrossOrigin(origins = "${URL_CROSS_ORIGIN}")
+@CrossOrigin(origins = "${value.url.cross.origin}")
 @RequestMapping("/v1/status")
 public class StatusController {
     @Autowired
