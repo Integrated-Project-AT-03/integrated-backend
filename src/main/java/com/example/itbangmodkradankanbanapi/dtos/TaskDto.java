@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 
 @Data
 public class TaskDto {
-    private Integer idTask;
+    private Integer id;
     private String title;
     private  String assignees;
     @JsonIgnore

@@ -22,10 +22,10 @@ public class Status {
     private List<Task> tasksByIdStatus;
 
     private enum statusType {
-        to_do,
-        doing,
-        no_status,
-        done
+        TO_DO,
+        DOING,
+        NO_STATUS,
+        DONE
     }
 
 

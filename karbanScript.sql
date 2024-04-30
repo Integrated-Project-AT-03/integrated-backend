@@ -19,12 +19,15 @@
 -- Table structure for table `status`
 --
 
+DROP database IF EXISTS `karban`;
+create database karban;
+use karbanf
 DROP TABLE IF EXISTS `status`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `status` (
   `id_status` int NOT NULL AUTO_INCREMENT,
-  `status` enum('no_status','to_do','doing','done') NOT NULL,
+  `status` enum('NO_STATUS','TO_DO','DOING','DONE') NOT NULL,
   PRIMARY KEY (`id_status`),
   UNIQUE KEY `id_status_UNIQUE` (`id_status`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -36,7 +39,7 @@ CREATE TABLE `status` (
 
 LOCK TABLES `status` WRITE;
 /*!40000 ALTER TABLE `status` DISABLE KEYS */;
-INSERT INTO `status` VALUES (1,'no_status'),(2,'to_do'),(3,'doing'),(4,'done');
+INSERT INTO `status` VALUES (1,'NO_STATUS'),(2,'TO_DO'),(3,'DOING'),(4,'DONE');
 /*!40000 ALTER TABLE `status` ENABLE KEYS */;
 UNLOCK TABLES;
 

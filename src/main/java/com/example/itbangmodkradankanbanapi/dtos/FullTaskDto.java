@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 
 @Data
 public class FullTaskDto {
-    private Integer idTask;
+    private Integer id;
     private String title;
     private  String assignees;
     private  String description;
