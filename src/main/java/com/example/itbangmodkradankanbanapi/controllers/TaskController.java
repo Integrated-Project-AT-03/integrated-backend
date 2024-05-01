@@ -23,17 +23,17 @@ public class TaskController {
 private TaskService service;
 
     @GetMapping("{id}")
-    public ResponseEntity<Object> findTask(@PathVariable String id){
+    public ResponseEntity<Object> findTask(@PathVariable Integer id){
         return ResponseEntity.ok(service.getTask(id));
     }
 
     @GetMapping("")
-    public ResponseEntity<Object> gatAllTask(){
+    public ResponseEntity<Object> getAllTask(){
         return  ResponseEntity.ok(service.getAllTask());
     }
 
     @DeleteMapping("{id}")
-    public void deleteTask(@PathVariable String id){
+    public void deleteTask(@PathVariable Integer id){
          service.deleteTask(id);
     }
 
@@ -43,12 +43,10 @@ private TaskService service;
     public Task addEmployee(@RequestBody Task task){
         return service.addTask(task);
     }
-
-    @ExceptionHandler(NoSuchElementException.class)
+    @ExceptionHandler({NoSuchElementException.class,ArrayIndexOutOfBoundsException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<ErrorResponse> handleItemNotFound(Exception ex, WebRequest request) {
-       String id = request.getDescription(false).split("/")[4];
-        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.NOT_FOUND.value(),"Not Found", "Task "+ id + " dose not exist !!!!", request.getDescription(false).substring(4));
+    public ResponseEntity<ErrorResponse> handleItemNotFound(NoSuchElementException ex, WebRequest request) {
+        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.NOT_FOUND.value(),"Not Found", ex.getMessage(), request.getDescription(false).substring(4));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er);
     }
 }
