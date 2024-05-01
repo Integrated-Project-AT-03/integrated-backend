@@ -17,6 +17,7 @@ public class Task {
     @Column(name = "id_task")
     private Integer id;
     @Basic
+    @NotNull
     @Column(name = "title")
     private String title;
     @Basic
@@ -33,9 +34,13 @@ public class Task {
     @Basic
     @Column(name = "assignees")
     private String assignees;
+
+
     @ManyToOne
     @JoinColumn(name = "id_status", referencedColumnName = "id_status", nullable = false)
     private Status statusByIdStatus;
+
+
 
 
 

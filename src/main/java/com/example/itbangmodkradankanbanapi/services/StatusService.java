@@ -16,7 +16,7 @@ import java.util.List;
 public class StatusService {
     @Autowired
     private StatusRepository repository;
-    public Status getStatus(String id){
+    public Status getStatus(Integer id){
         return repository.findById(id).get();
     }
     public List<Status> getAllStatus(){

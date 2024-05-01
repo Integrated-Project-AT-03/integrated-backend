@@ -12,22 +12,12 @@ public class Status {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id_status")
-    private Integer idStatus;
+    private Integer id;
     @Basic
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private statusType status;
+    private StatusType statusType;
     @JsonIgnore
     @OneToMany(mappedBy = "statusByIdStatus")
     private List<Task> tasksByIdStatus;
-
-    private enum statusType {
-        TO_DO,
-        DOING,
-        NO_STATUS,
-        DONE
-    }
-
-
-
     }
