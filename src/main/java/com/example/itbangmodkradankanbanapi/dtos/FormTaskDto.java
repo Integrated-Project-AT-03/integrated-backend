@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -14,7 +15,8 @@ import lombok.Data;
 public class FormTaskDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer id;
-
+    @JsonDeserialize(using = EmptyToNull.class)
+    @NotNull
     private String title;
     @JsonDeserialize(using = EmptyToNull.class)
     private  String assignees;
