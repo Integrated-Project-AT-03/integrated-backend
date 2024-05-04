@@ -48,8 +48,8 @@ private TaskService service;
 
     @PostMapping("")
     @Transactional
-    public FormTaskDto addEmployee(@RequestBody FormTaskDto task){
-        return service.addTask(task);
+    public ResponseEntity<Object> addTask(@RequestBody FormTaskDto task){
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.addTask(task));
     }
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
