@@ -35,7 +35,7 @@ public class TaskService {
     }
 
     public TaskDto deleteTask(Integer id){
-      Task task =  repository.findById(id).orElseThrow(() -> new ItemNotFoundException("Not Found"));
+      Task task =  repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
        repository.delete(task);
        return modelMapper.map(task,TaskDto.class);
     }
