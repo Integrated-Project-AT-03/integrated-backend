@@ -29,7 +29,7 @@ CREATE TABLE `status` (
                           UNIQUE KEY `id_status_UNIQUE` (`id_status`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-ALTER TABLE tasks AUTO_INCREMENT = 1;
+ALTER TABLE status AUTO_INCREMENT = 1;
 --
 -- Dumping data for table `status`
 --
