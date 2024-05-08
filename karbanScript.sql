@@ -79,8 +79,23 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+CREATE TABLE IF NOT EXISTS `karban`.`statusV2` (
+                                                   `status_name` VARCHAR(50) NOT NULL,
+    `color` enum('F8719D','EAB308','3B82F6','16a34a','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15','c16') NOT NULL,
+    `status_description` VARCHAR(200) NULL,
+    PRIMARY KEY (`status_name`),
+    UNIQUE INDEX `id_status_UNIQUE` (`status_name` ASC) VISIBLE)
+    ENGINE = InnoDB
+    AUTO_INCREMENT = 5
+    DEFAULT CHARACTER SET = utf8mb4
+    COLLATE = utf8mb4_0900_ai_ci;
 
--- Dump completed on 2024-04-27 16:45:55
+LOCK TABLES `statusV2` WRITE;
+/*!40000 ALTER TABLE `statusV2` DISABLE KEYS */;
+INSERT INTO statusV2(status_name,color) VALUES ('No Status','F8719D'),('To Do','EAB308'),('Doing','3B82F6'),('Done','16a34a');
+/*!40000 ALTER TABLE `statusV2` ENABLE KEYS */;
+UNLOCK TABLES;
+
 
 CREATE TABLE IF NOT EXISTS `karban`.`tasksV2` (
                                                   `id_task` INT NOT NULL AUTO_INCREMENT,
