@@ -1,20 +1,28 @@
 package com.example.itbangmodkradankanbanapi.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Data
 public class StatusV2 {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_status")
+    private  int id;
     @Column(name = "status_name")
     private String statusName;
     @Basic
     @Column(name = "status_description")
     private String statusDescription;
-    @OneToMany(mappedBy = "statusV2ByTaskStatus")
-    private Collection<TasksV2> tasksV2sByStatusName;
+    @Basic
+    @Column(name = "color")
+    @Enumerated(EnumType.STRING)
+    private TypeColor colorHex;
+    @OneToMany(mappedBy = "status")
+    private List<TasksV2> tasks;
 }

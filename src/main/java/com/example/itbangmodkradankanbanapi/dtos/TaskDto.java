@@ -12,7 +12,7 @@ public class TaskDto {
     private  String assignees;
     @JsonIgnore
     private  String statusByIdStatusStatus;
-    public Object getStatus(){
+    public String getStatus(){
             return statusByIdStatusStatus;
     }
 }

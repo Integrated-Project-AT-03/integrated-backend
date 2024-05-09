@@ -20,12 +20,12 @@ import java.util.NoSuchElementException;
 
 @RestController
 @CrossOrigin(origins = "${value.url.cross.origin}")
-@RequestMapping("/v1/status")
+@RequestMapping("/v1/statuses")
 public class StatusController {
     @Autowired
 private StatusService service;
     @GetMapping("")
-    public ResponseEntity<Object> gatAllStatus(){
+    public ResponseEntity<Object> getAllStatus(){
         return  ResponseEntity.ok(service.getAllStatus());
     }
 

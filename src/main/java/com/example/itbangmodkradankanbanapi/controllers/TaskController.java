@@ -47,7 +47,6 @@ private TaskService service;
 
 
     @PostMapping("")
-    @Transactional
     public ResponseEntity<Object> addTask(@RequestBody FormTaskDto task){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.addTask(task));
     }

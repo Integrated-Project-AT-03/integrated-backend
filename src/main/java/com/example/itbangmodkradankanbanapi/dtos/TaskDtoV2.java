@@ -9,8 +9,8 @@ public class TaskDtoV2 {
     private String title;
     private  String assignees;
     @JsonIgnore
-    private  String taskStatus;
-    public Object getStatus(){
-            return taskStatus;
+    private  String statusStatusName;
+    public String getStatus(){
+            return statusStatusName;
     }
 }

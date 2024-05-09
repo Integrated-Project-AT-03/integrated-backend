@@ -1,6 +1,7 @@
 package com.example.itbangmodkradankanbanapi.services;
 
 import com.example.itbangmodkradankanbanapi.dtos.*;
+import com.example.itbangmodkradankanbanapi.entities.StatusV2;
 import com.example.itbangmodkradankanbanapi.entities.Task;
 import com.example.itbangmodkradankanbanapi.entities.TasksV2;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
@@ -27,13 +28,13 @@ public class TaskServiceV2 {
     private ListMapper listMapper;
     private final ModelMapper modelMapper = new ModelMapper();
     public FullTaskDtoV2 getTask(Integer id){
-
         return modelMapper.map(repository.findById(id).orElseThrow(() -> new NoSuchElementException("Task "+ id + " dose not exist !!!!")),FullTaskDtoV2.class);
     }
 
     public List<TaskDtoV2> getAllTask(){
         return listMapper.mapList(repository.findAllByOrderByCreatedOnAsc(),TaskDtoV2.class);
     }
+
 
     public TaskDtoV2 deleteTask(Integer id){
       TasksV2 task =  repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
@@ -43,24 +44,26 @@ public class TaskServiceV2 {
 
 
 
-//    public FormTaskDto updateTask(Integer id, FormTaskDto formTask){
-//        Task updateTask = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("Not Found"));
-//        updateTask.setTitle(formTask.getTitle());
-//        updateTask.setAssignees(formTask.getAssignees());
-//        updateTask.setDescription(formTask.getDescription());
-//        updateTask.setStatusByIdStatus(statusRepository.findByStatusType(formTask.getStatus()));
-//      return  modelMapper.map( repository.save(updateTask),FormTaskDto.class);
-//    }
+    public FormTaskDtoV2 updateTask(Integer id, FormTaskDtoV2 formTask){
+        TasksV2 updateTask = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("Not Found"));
+        updateTask.setTitle(formTask.getTitle());
+        updateTask.setAssignees(formTask.getAssignees());
+        updateTask.setDescription(formTask.getDescription());
+        StatusV2 status = statusRepository.findById(formTask.getId()).orElseThrow(()->  new ItemNotFoundException("NOT FOUND"));
+        updateTask.setStatus(status);
+      return  modelMapper.map( repository.save(updateTask),FormTaskDtoV2.class);
+    }
 
-//    public FormTaskDto addTask(FormTaskDto formTask){
-//        Task newTask = new Task();
-//        newTask.setTitle(formTask.getTitle());
-//        newTask.setAssignees(formTask.getAssignees());
-//        newTask.setDescription(formTask.getDescription());
-//        newTask.setStatusByIdStatus(statusRepository.findByStatusType(formTask.getStatus()));
-//
-//        return modelMapper.map( repository.save(newTask),FormTaskDto.class);
-//    }
+    public FormTaskDtoV2 addTask(FormTaskDtoV2 formTask){
+        TasksV2 newTask = new TasksV2();
+        newTask.setTitle(formTask.getTitle());
+        newTask.setAssignees(formTask.getAssignees());
+        newTask.setDescription(formTask.getDescription());
+        System.out.println(formTask);
+        StatusV2 status = statusRepository.findById(formTask.getId()).orElseThrow(()->  new ItemNotFoundException("NOT FOUND STATUS"));
+        newTask.setStatus(status);
+        return modelMapper.map( repository.save(newTask),FormTaskDtoV2.class);
+    }
 
 
 }

@@ -6,6 +6,6 @@ import com.example.itbangmodkradankanbanapi.entities.StatusV2;
 import com.example.itbangmodkradankanbanapi.entities.TasksV2;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface StatusRepositoryV2 extends JpaRepository<StatusV2,String> {
-
+public interface StatusRepositoryV2 extends JpaRepository<StatusV2,Integer> {
+    public String findByStatusName(String statusName);
 }

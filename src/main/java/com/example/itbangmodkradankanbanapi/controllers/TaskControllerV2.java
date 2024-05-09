@@ -2,7 +2,9 @@
 package com.example.itbangmodkradankanbanapi.controllers;
 
 import com.example.itbangmodkradankanbanapi.dtos.FormTaskDto;
+import com.example.itbangmodkradankanbanapi.dtos.FormTaskDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.TaskDto;
+import com.example.itbangmodkradankanbanapi.dtos.TaskDtoV2;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.services.TaskService;
@@ -35,22 +37,19 @@ private TaskServiceV2 service;
         return  ResponseEntity.ok(service.getAllTask());
     }
 
-//    @DeleteMapping("{id}")
-//    public TaskDto deleteTask(@PathVariable Integer id){
-//       return  service.deleteTask(id);
-//    }
-
-//    @PutMapping("{id}")
-//    public  ResponseEntity<Object> updateTask(@PathVariable Integer id ,@RequestBody FormTaskDto newTask){
-//       return ResponseEntity.ok( service.updateTask(id,newTask));
-//    }
-
-
-//    @PostMapping("")
-//    @Transactional
-//    public ResponseEntity<Object> addTask(@RequestBody FormTaskDto task){
-//        return ResponseEntity.status(HttpStatus.CREATED).body(service.addTask(task));
-//    }
+    @DeleteMapping("{id}")
+    public TaskDtoV2 deleteTask(@PathVariable Integer id){
+       return  service.deleteTask(id);
+    }
+    @PutMapping("{id}")
+    public  ResponseEntity<Object> updateTask(@PathVariable Integer id ,@RequestBody FormTaskDtoV2 newTask){
+       return ResponseEntity.ok( service.updateTask(id,newTask));
+    }
+    @PostMapping("")
+    @Transactional
+    public ResponseEntity<Object> addTask(@RequestBody FormTaskDtoV2 task){
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.addTask(task));
+    }
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorResponse> handleItemNotFound(NoSuchElementException ex, WebRequest request) {
