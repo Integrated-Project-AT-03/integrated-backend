@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 
 @Entity
 @Data
+@Table(name = "tasksV2")
 public class TasksV2 {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
