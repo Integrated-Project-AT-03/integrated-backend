@@ -2,7 +2,10 @@ package com.example.itbangmodkradankanbanapi.services;
 
 
 import com.example.itbangmodkradankanbanapi.dtos.StatusDtoV2;
+import com.example.itbangmodkradankanbanapi.dtos.TaskDtoV2;
+import com.example.itbangmodkradankanbanapi.entities.Status;
 import com.example.itbangmodkradankanbanapi.entities.StatusV2;
+import com.example.itbangmodkradankanbanapi.entities.TasksV2;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.repositories.StatusRepositoryV2;
 import org.modelmapper.ModelMapper;
@@ -41,6 +44,7 @@ public class StatusServiceV2 {
         }
     }
 
+
     public StatusDtoV2 addStatus(StatusDtoV2 status) {
             try {
                 StatusV2 newStatus =  repository.save(modelMapper.map(status,StatusV2.class));
@@ -50,5 +54,10 @@ public class StatusServiceV2 {
             }
 
 
+    }
+
+    public void deleteStatus(Integer id){
+        StatusV2 task =  repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+        repository.delete(task);
     }
 }

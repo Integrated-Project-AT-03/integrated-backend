@@ -36,18 +36,17 @@ private StatusServiceV2 service;
     public ResponseEntity<Object> getAllStatus(){
         return  ResponseEntity.ok(service.getAllStatus());
     }
-//
-//    @DeleteMapping("{id}")
-//    public TaskDto deleteTask(@PathVariable Integer id){
-//        return  service.deleteTask(id);
-//    }
-//
+
+    @DeleteMapping("{id}")
+    public void deleteTask(@PathVariable Integer id){
+        service.deleteStatus(id);
+    }
+
     @PutMapping("{id}")
     public  ResponseEntity<Object> updateTask(@PathVariable Integer id ,@RequestBody StatusDtoV2 status){
         return ResponseEntity.ok( service.updateStatus(id,status));
     }
-//
-//
+
     @PostMapping("")
     public ResponseEntity<Object> addStatus(@RequestBody StatusDtoV2 status){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.addStatus(status));
