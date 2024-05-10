@@ -8,7 +8,6 @@ import lombok.Data;
 public class ColorDto {
     private Integer id;
     private String name;
-
     private String hex;
 
     public String getHex(){
