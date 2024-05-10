@@ -69,33 +69,56 @@ LOCK TABLES `tasks` WRITE;
 INSERT INTO tasks(title,description,created_on,updated_on,id_status,assignees) VALUES ('TaskTitle1TaskTitle2TaskTitle3TaskTitle4TaskTitle5TaskTitle6TaskTitle7TaskTitle8TaskTitle9TaskTitle0','Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti1Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti2Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti3Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti4Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti5','2024-04-22 09:00:00','2024-04-22 09:00:00',1,'Assignees1Assignees2Assignees3'),('Repository',null,'2024-04-22 09:05:00','2024-04-22 14:00:00',2,null),('ดาต้าเบส','ສ້າງຖານຂໍ້ມູນ','2024-04-22 09:10:00','2024-04-25 00:00:00',3,'あなた、彼、彼女 (私ではありません)'),('_Infrastructure_','_Setup containers_','2024-04-22 09:15:00','2024-04-22 10:00:00',4,'ไก่งวง กับ เพนกวิน');
 /*!40000 ALTER TABLE `tasks` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-CREATE TABLE IF NOT EXISTS `karban`.`statusV2` (
+# `color` enum('C_F8719D','C_EAB308','C_3B82F6','C_16a34a','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15','c16') NOT NULL,
+
+DROP TABLE IF EXISTS `color_status`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `color_status` (
+                            `id_color` int NOT NULL AUTO_INCREMENT,
+                            `color_name` VARCHAR(50) NOT NULL unique,
+                            `color_hex` VARCHAR(50) NOT NULL unique,
+                            PRIMARY KEY (`id_color`),
+                            UNIQUE INDEX `id_status_UNIQUE` (`id_color` ASC) VISIBLE)
+    ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+LOCK TABLES `color_status` WRITE;
+/*!40000 ALTER TABLE `color_status` DISABLE KEYS */;
+INSERT INTO color_status(color_name,color_hex) VALUES ('red','F8719D'),('yellow','EAB308'),('blue','3B82F6'),('green','16a34a');
+/*!40000 ALTER TABLE `color_status` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+DROP TABLE IF EXISTS `statusV2`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `statusV2` (
     `id_status` int NOT NULL AUTO_INCREMENT,
     `status_name` VARCHAR(50) NOT NULL unique,
-    `color` enum('C_F8719D','C_EAB308','C_3B82F6','C_16a34a','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15','c16') NOT NULL,
+    `id_color` int NOT NULL DEFAULT 1,
     `status_description` VARCHAR(200) NULL,
+    `created_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id_status`),
-    UNIQUE INDEX `id_status_UNIQUE` (`id_status` ASC) VISIBLE)
+    INDEX `fk_Statuses_color_idx` (`id_color` ASC) VISIBLE,
+    CONSTRAINT `fk_Statuses_color`
+    FOREIGN KEY (`id_color`)
+    REFERENCES `karban`.`color_status` (`id_color`))
     ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 LOCK TABLES `statusV2` WRITE;
 /*!40000 ALTER TABLE `statusV2` DISABLE KEYS */;
-INSERT INTO statusV2(status_name,color) VALUES ('No Status','C_F8719D'),('To Do','C_EAB308'),('Doing','C_3B82F6'),('Done','C_16a34a');
+INSERT INTO statusV2(status_name,id_color) VALUES ('No Status',1),('To Do',2),('Doing',3),('Done',4);
 /*!40000 ALTER TABLE `statusV2` ENABLE KEYS */;
 UNLOCK TABLES;
 
 
-CREATE TABLE IF NOT EXISTS `karban`.`tasksV2` (
+DROP TABLE IF EXISTS `tasksV2`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tasksV2` (
                                                   `id_task` INT NOT NULL AUTO_INCREMENT,
                                                   `title` VARCHAR(100) NOT NULL,
     `description` VARCHAR(500) NULL DEFAULT NULL,
@@ -111,7 +134,6 @@ CREATE TABLE IF NOT EXISTS `karban`.`tasksV2` (
     ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-
 LOCK TABLES `tasksV2` WRITE;
 INSERT INTO tasksV2(title,description,created_on,updated_on,id_status,assignees) VALUES
                                                                                        ('TaskTitle1TaskTitle2TaskTitle3TaskTitle4TaskTitle5TaskTitle6TaskTitle7TaskTitle8TaskTitle9TaskTitle0',
@@ -120,3 +142,4 @@ INSERT INTO tasksV2(title,description,created_on,updated_on,id_status,assignees)
                                                                                        ('ดาต้าเบส','ສ້າງຖານຂໍ້ມູນ','2024-04-22 09:10:00','2024-04-25 00:00:00',3,'あなた、彼、彼女 (私ではありません)'),
                                                                                        ('_Infrastructure_','_Setup containers_','2024-04-22 09:15:00','2024-04-22 10:00:00',4,'ไก่งวง กับ เพนกวิน');
 UNLOCK TABLES;
+

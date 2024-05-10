@@ -1,18 +1,21 @@
 package com.example.itbangmodkradankanbanapi.dtos;
 
-import com.example.itbangmodkradankanbanapi.entities.TasksV2;
 import com.example.itbangmodkradankanbanapi.entities.TypeColor;
 import com.example.itbangmodkradankanbanapi.utils.EmptyToNullAndTrimDeserializer;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import jakarta.persistence.*;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.util.List;
+import java.sql.Timestamp;
 
 @Data
-public class StatusDtoV2 {
+public class FullStatusDtoV2 {
     private Integer id;
     @JsonProperty("name")
     private String statusName;
@@ -21,4 +24,5 @@ public class StatusDtoV2 {
     private String statusDescription;
     @Enumerated(EnumType.STRING)
     private TypeColor hex;
+
 }
