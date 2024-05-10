@@ -11,7 +11,7 @@ public class ColorDto {
 
     private String hex;
 
-    public String getColorHex(){
+    public String getHex(){
         return "#"+hex;
     }
 
