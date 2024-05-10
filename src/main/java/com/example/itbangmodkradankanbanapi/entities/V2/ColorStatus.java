@@ -13,13 +13,13 @@ public class ColorStatus {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id_color")
-    private int id;
+    private Integer id;
     @Basic
     @Column(name = "color_name")
     private String name;
     @Basic
     @Column(name = "color_hex")
-    private String Hex;
+    private String hex;
     @OneToMany(mappedBy = "color")
     private List<StatusV2> statuses;
 }

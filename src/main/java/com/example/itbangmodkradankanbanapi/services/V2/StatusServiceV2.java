@@ -23,6 +23,7 @@ public class StatusServiceV2 {
     private StatusRepositoryV2 repository;
     @Autowired
     private ListMapper listMapper;
+
     private final ModelMapper modelMapper = new ModelMapper();
         public StatusDtoV2 getStatus(Integer id){
         return modelMapper.map(repository.findById(id).orElseThrow(() -> new NoSuchElementException("Status "+ id + " dose not exist !!!!")), StatusDtoV2.class) ;

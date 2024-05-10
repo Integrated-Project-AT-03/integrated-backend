@@ -1,5 +1,6 @@
 package com.example.itbangmodkradankanbanapi.services.V2;
 
+import com.example.itbangmodkradankanbanapi.dtos.V2.ColorDto;
 import com.example.itbangmodkradankanbanapi.dtos.V2.FormTaskDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V2.FullTaskDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V2.TaskDtoV2;
@@ -23,10 +24,13 @@ import java.util.NoSuchElementException;
 public class ColorService {
     @Autowired
     private ColorRepository repository;
-    public ColorStatus getColor(Integer id){
-        return repository.findById(id).orElseThrow(() -> new NoSuchElementException("Color "+ id + " dose not exist !!!!"));
+    @Autowired
+    private ListMapper listMapper;
+    private final ModelMapper modelMapper = new ModelMapper();
+    public ColorDto getColor(Integer id){
+        return  modelMapper.map(repository.findById(id).orElseThrow(() -> new NoSuchElementException("Color "+ id + " dose not exist !!!!")),ColorDto.class);
     }
-    public List<ColorStatus> getAllColor(){
-        return repository.findAll();
+    public List<ColorDto> getAllColor(){
+        return listMapper.mapList(repository.findAll(),ColorDto.class);
     }
 }
