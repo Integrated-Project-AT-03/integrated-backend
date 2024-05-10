@@ -46,9 +46,12 @@ private TaskServiceV2 service;
        return ResponseEntity.ok( service.updateTask(id,newTask));
     }
     @PostMapping("")
-    @Transactional
     public ResponseEntity<Object> addTask(@RequestBody FormTaskDtoV2 task){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.addTask(task));
+    }
+    @GetMapping("status/{oldId}/{newId}")
+    public ResponseEntity<Object> changeTaskStatus(@PathVariable Integer oldId,@PathVariable Integer newId){
+        return ResponseEntity.ok(service.ChangeTasksByStatus(oldId,newId));
     }
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)

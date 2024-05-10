@@ -27,9 +27,8 @@ CREATE TABLE `status` (
                           `status` enum('NO_STATUS','TO_DO','DOING','DONE') NOT NULL,
                           PRIMARY KEY (`id_status`),
                           UNIQUE KEY `id_status_UNIQUE` (`id_status`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-ALTER TABLE status AUTO_INCREMENT = 1;
 --
 -- Dumping data for table `status`
 --
@@ -58,9 +57,9 @@ CREATE TABLE `tasks` (
                          PRIMARY KEY (`id_task`),
                          KEY `fk_Tasks_status_idx` (`id_status`),
                          CONSTRAINT `fk_Tasks_status` FOREIGN KEY (`id_status`) REFERENCES `status` (`id_status`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-ALTER TABLE tasks AUTO_INCREMENT = 1;
+
 --
 -- Dumping data for table `tasks`
 --
@@ -86,11 +85,9 @@ CREATE TABLE IF NOT EXISTS `karban`.`statusV2` (
     `status_description` VARCHAR(200) NULL,
     PRIMARY KEY (`id_status`),
     UNIQUE INDEX `id_status_UNIQUE` (`id_status` ASC) VISIBLE)
-    ENGINE = InnoDB
-    AUTO_INCREMENT = 5
-    DEFAULT CHARACTER SET = utf8mb4
-    COLLATE = utf8mb4_0900_ai_ci;
-ALTER TABLE statusV2 AUTO_INCREMENT = 1;
+    ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
 LOCK TABLES `statusV2` WRITE;
 /*!40000 ALTER TABLE `statusV2` DISABLE KEYS */;
 INSERT INTO statusV2(status_name,color) VALUES ('No Status','C_F8719D'),('To Do','C_EAB308'),('Doing','C_3B82F6'),('Done','C_16a34a');
@@ -111,10 +108,7 @@ CREATE TABLE IF NOT EXISTS `karban`.`tasksV2` (
     CONSTRAINT `fk_Tasks_statusV2`
     FOREIGN KEY (`id_status`)
     REFERENCES `karban`.`statusV2` (`id_status`))
-    ENGINE = InnoDB
-    AUTO_INCREMENT = 1
-    DEFAULT CHARACTER SET = utf8mb4
-    COLLATE = utf8mb4_0900_ai_ci;
+    ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 

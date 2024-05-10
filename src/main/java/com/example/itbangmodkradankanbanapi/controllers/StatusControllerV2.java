@@ -5,6 +5,7 @@ import com.example.itbangmodkradankanbanapi.dtos.FormTaskDto;
 import com.example.itbangmodkradankanbanapi.dtos.StatusDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.TaskDto;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
+import com.example.itbangmodkradankanbanapi.exceptions.ForeignKeyException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.services.StatusService;
 import com.example.itbangmodkradankanbanapi.services.StatusServiceV2;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.NoSuchElementException;
@@ -38,8 +40,8 @@ private StatusServiceV2 service;
     }
 
     @DeleteMapping("{id}")
-    public void deleteTask(@PathVariable Integer id){
-        service.deleteStatus(id);
+    public StatusDtoV2 deleteTask(@PathVariable Integer id)  {
+      return   service.deleteStatus(id);
     }
 
     @PutMapping("{id}")
@@ -67,12 +69,23 @@ private StatusServiceV2 service;
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er);
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<ErrorResponse> dataIntegrity(DataIntegrityViolationException ex, WebRequest request) {
-        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.INTERNAL_SERVER_ERROR.value(),"Internal Server Error", ex.getMessage(), request.getDescription(false).substring(4));
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er);
+//    @ExceptionHandler(DataIntegrityViolationException.class)
+//    @ResponseStatus(HttpStatus.NOT_FOUND)
+//    public ResponseEntity<ErrorResponse> dataIntegrity(DataIntegrityViolationException ex, WebRequest request) {
+//        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.INTERNAL_SERVER_ERROR.value(),"Internal Server Error", ex.getMessage(), request.getDescription(false).substring(4));
+//        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er);
+//    }
+
+
+    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ResponseEntity<ErrorResponse> ForeignKeyConflict(ForeignKeyException ex, WebRequest request) {
+        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),ex.getStatusCode().value(),"FOREIGN KEY CONFLICT", ex.getMessage(), request.getDescription(false).substring(4));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(er);
     }
+
+
+
 
 
 }

@@ -1,6 +1,7 @@
 package com.example.itbangmodkradankanbanapi.dtos;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -10,9 +11,8 @@ public class TaskDto {
     private Integer id;
     private String title;
     private  String assignees;
-    @JsonIgnore
+
+    @JsonProperty("status")
     private  String statusByIdStatusStatus;
-    public String getStatus(){
-            return statusByIdStatusStatus;
-    }
+
 }
