@@ -77,15 +77,15 @@ DROP TABLE IF EXISTS `color_status`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `color_status` (
                             `id_color` int NOT NULL AUTO_INCREMENT,
-                            `color_name` VARCHAR(50) NOT NULL unique,
-                            `color_hex` VARCHAR(50) NOT NULL unique,
+                            `color_name` VARCHAR(20) NOT NULL unique,
+                            `color_hex` VARCHAR(6) NOT NULL unique,
                             PRIMARY KEY (`id_color`),
                             UNIQUE INDEX `id_status_UNIQUE` (`id_color` ASC) VISIBLE)
     ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 LOCK TABLES `color_status` WRITE;
 /*!40000 ALTER TABLE `color_status` DISABLE KEYS */;
-INSERT INTO color_status(color_name,color_hex) VALUES ('red','F8719D'),('yellow','EAB308'),('blue','3B82F6'),('green','16a34a');
+INSERT INTO color_status(color_name,color_hex) VALUES ('red','FF0000'),('yellow','EAB308'),('blue','3B82F6'),('green','16a34a');
 /*!40000 ALTER TABLE `color_status` ENABLE KEYS */;
 UNLOCK TABLES;
 

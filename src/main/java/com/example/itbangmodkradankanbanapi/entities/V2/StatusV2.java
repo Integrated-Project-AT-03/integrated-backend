@@ -15,7 +15,7 @@ public class StatusV2 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_status")
-    private  int id;
+    private  Integer id;
     @Column(name = "status_name")
     private String statusName;
     @Basic
@@ -26,11 +26,9 @@ public class StatusV2 {
     private ColorStatus color;
     @OneToMany(mappedBy = "status")
     private List<TasksV2> tasks;
-    @Basic
     @CreationTimestamp
     @Column(name = "created_on")
     private Timestamp createdOn;
-    @Basic
     @UpdateTimestamp
     @Column(name = "updated_on")
     private Timestamp updatedOn;

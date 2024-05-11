@@ -23,6 +23,8 @@ public class FullStatusDtoV2 {
     @JsonProperty("description")
     @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)
     private String statusDescription;
+    private Integer colorId;
+    private String colorHex;
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX")
     private Timestamp createdOn;
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX")

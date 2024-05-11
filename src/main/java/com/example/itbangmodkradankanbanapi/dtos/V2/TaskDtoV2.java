@@ -13,7 +13,7 @@ public class TaskDtoV2 {
     @JsonIgnore
     private  String statusColorHex;
     public String getStatusColor(){
-        return "#"+statusColorHex.substring(2);
+        return "#"+statusColorHex;
     }
 
     @JsonProperty("status")

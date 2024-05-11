@@ -1,6 +1,8 @@
 
 package com.example.itbangmodkradankanbanapi.controllers.V2;
 
+import com.example.itbangmodkradankanbanapi.dtos.V2.FormStatusDtoV2;
+import com.example.itbangmodkradankanbanapi.dtos.V2.FormTaskDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V2.StatusDtoV2;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.ForeignKeyException;
@@ -41,12 +43,12 @@ private StatusServiceV2 service;
     }
 
     @PutMapping("{id}")
-    public  ResponseEntity<Object> updateTask(@PathVariable Integer id ,@RequestBody StatusDtoV2 status){
+    public  ResponseEntity<Object> updateTask(@PathVariable Integer id ,@RequestBody FormStatusDtoV2 status){
         return ResponseEntity.ok( service.updateStatus(id,status));
     }
 
     @PostMapping("")
-    public ResponseEntity<Object> addStatus(@RequestBody StatusDtoV2 status){
+    public ResponseEntity<Object> addStatus(@RequestBody FormStatusDtoV2 status){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.addStatus(status));
     }
 

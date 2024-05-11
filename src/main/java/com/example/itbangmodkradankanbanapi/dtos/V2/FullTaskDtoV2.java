@@ -12,6 +12,7 @@ public class FullTaskDtoV2 {
     private String title;
     private  String assignees;
     private  String description;
+
     @JsonIgnore
     private  String statusStatusName;
     public String getStatus(){

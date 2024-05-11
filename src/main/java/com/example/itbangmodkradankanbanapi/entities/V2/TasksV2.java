@@ -14,7 +14,7 @@ public class TasksV2 {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id_task")
-    private int id;
+    private Integer id;
     @Basic
     @Column(name = "title")
     private String title;
