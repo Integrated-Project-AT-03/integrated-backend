@@ -23,6 +23,12 @@ public class FormTaskDtoV2 {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("status")
     private  String statusName;
+    @JsonIgnore
+    private  String statusColorHex;
+    public String getStatusColor(){
+        return "#"+statusColorHex;
+    }
+
 
 
 }
