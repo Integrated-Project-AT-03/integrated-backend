@@ -110,7 +110,7 @@ CREATE TABLE `statusV2` (
 
 LOCK TABLES `statusV2` WRITE;
 /*!40000 ALTER TABLE `statusV2` DISABLE KEYS */;
-INSERT INTO statusV2(status_name,status_description,id_color) VALUES ('No Status','The default status',1),('To Do',null,2),('Doing',null,3),('Done',null,4);
+INSERT INTO statusV2(status_name,status_description,id_color) VALUES ('No Status','The default status',1),('To Do',null,2),('Doing','Being worked on',3),('Done','Finished',4);
 /*!40000 ALTER TABLE `statusV2` ENABLE KEYS */;
 UNLOCK TABLES;
 
