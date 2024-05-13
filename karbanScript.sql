@@ -96,7 +96,7 @@ DROP TABLE IF EXISTS `statusV2`;
 CREATE TABLE `statusV2` (
     `id_status` int NOT NULL AUTO_INCREMENT,
     `status_name` VARCHAR(50) NOT NULL unique,
-    `id_color` int NOT NULL DEFAULT 1,
+    `id_color` int DEFAULT 1,
     `status_description` VARCHAR(200) NULL,
     `created_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -110,7 +110,7 @@ CREATE TABLE `statusV2` (
 
 LOCK TABLES `statusV2` WRITE;
 /*!40000 ALTER TABLE `statusV2` DISABLE KEYS */;
-INSERT INTO statusV2(status_name,id_color) VALUES ('No Status',1),('To Do',2),('Doing',3),('Done',4);
+INSERT INTO statusV2(status_name,status_description,id_color) VALUES ('No Status','The default status',1),('To Do',null,2),('Doing',null,3),('Done',null,4);
 /*!40000 ALTER TABLE `statusV2` ENABLE KEYS */;
 UNLOCK TABLES;
 
