@@ -14,6 +14,7 @@ public class FormStatusDtoV2 {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer id;
     @JsonProperty("name")
+    @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)
     private String statusName;
     @JsonProperty("description")
     @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)
