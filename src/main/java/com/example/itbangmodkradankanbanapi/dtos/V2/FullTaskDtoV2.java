@@ -12,7 +12,12 @@ public class FullTaskDtoV2 {
     private String title;
     private  String assignees;
     private  String description;
-    private  TaskStatusDtoV2 status;
+
+    @JsonIgnore
+    private  String statusStatusName;
+    public String getStatus(){
+        return statusStatusName;
+    }
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX")
     private Timestamp createdOn;
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX")
