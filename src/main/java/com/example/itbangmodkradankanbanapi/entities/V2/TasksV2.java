@@ -1,6 +1,5 @@
 package com.example.itbangmodkradankanbanapi.entities.V2;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
@@ -34,7 +33,6 @@ public class TasksV2 {
     @Column(name = "assignees")
     private String assignees;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_status", referencedColumnName = "id_status", nullable = false)
     private StatusV2 status;

@@ -22,7 +22,7 @@ public class FormTaskDtoV2 {
     private  String description;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("status")
-    private  Integer statusId;
+    private  String statusName;
     @JsonIgnore
     private  String statusColorHex;
     public String getStatusColor(){

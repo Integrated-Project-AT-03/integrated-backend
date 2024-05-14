@@ -9,8 +9,8 @@ import java.io.IOException;
 public class EmptyToNullAndTrimDeserializer extends StringDeserializer {
     @Override
     public String deserialize(JsonParser parser, DeserializationContext ctx) throws IOException {
-        String result = super.deserialize(parser, ctx).trim();
-        if ( result.isEmpty()) {
+        String result = super.deserialize(parser, ctx);
+        if (result != null && result.isEmpty()) {
             return null;
         }
         return result.trim();

@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface TaskRepositoryV2 extends JpaRepository<TasksV2,Integer> {
     List<TasksV2> findAllByOrderByCreatedOnAsc();
+    List<TasksV2> findAllByStatus(StatusV2 status);
 }
