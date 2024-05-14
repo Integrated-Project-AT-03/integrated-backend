@@ -6,7 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import lombok.Builder;
 import lombok.Data;
+import org.modelmapper.internal.bytebuddy.implementation.bind.annotation.Default;
 
 @Data
 public class FormStatusDtoV2 {
@@ -19,7 +21,5 @@ public class FormStatusDtoV2 {
     @JsonProperty("description")
     @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)
     private String statusDescription;
-    private Integer colorId;
-
-
+    private Integer colorId = 1;
 }

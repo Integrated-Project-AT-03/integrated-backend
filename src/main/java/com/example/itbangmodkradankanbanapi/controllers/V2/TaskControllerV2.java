@@ -45,10 +45,7 @@ private TaskServiceV2 service;
     public ResponseEntity<Object> addTask(@RequestBody FormTaskDtoV2 task){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.addTask(task));
     }
-    @GetMapping("status/{oldId}/{newId}")
-    public ResponseEntity<Object> changeTaskStatus(@PathVariable Integer oldId,@PathVariable Integer newId){
-        return ResponseEntity.ok(service.ChangeTasksByStatus(oldId,newId));
-    }
+
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorResponse> handleItemNotFound(NoSuchElementException ex, WebRequest request) {
