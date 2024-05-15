@@ -143,3 +143,13 @@ INSERT INTO tasksV2(title,description,created_on,updated_on,id_status,assignees)
                                                                                        ('_Infrastructure_','_Setup containers_','2024-04-22 09:15:00','2024-04-22 10:00:00',4,'ไก่งวง กับ เพนกวิน');
 UNLOCK TABLES;
 
+CREATE TABLE `setting` (
+                           `id_setting` INT NOT NULL AUTO_INCREMENT,
+                           `name` VARCHAR(50) NOT NULL,
+                           `value` INT NULL,
+                           PRIMARY KEY (`id_setting`),
+                           UNIQUE INDEX `id_setting_UNIQUE` (`id_setting` ASC) VISIBLE)
+    ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO setting  (name,value) VALUES ('limitOfTask',10)
+
