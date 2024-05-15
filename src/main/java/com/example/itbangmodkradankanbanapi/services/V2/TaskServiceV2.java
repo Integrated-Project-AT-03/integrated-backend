@@ -64,6 +64,7 @@ public class TaskServiceV2 {
         StatusV2 status = statusRepository.findByStatusName(formTask.getStatusName());
         newTask.setStatus(status);
         return modelMapper.map( repository.save(newTask),FormTaskDtoV2.class);
+<<<<<<< HEAD
     }
     @Transactional
     public List<TaskDtoV2> ChangeTasksByStatus(Integer oldIdStatus,Integer newIdStatus){
@@ -75,6 +76,8 @@ public class TaskServiceV2 {
         }).toList();
 
        return listMapper.mapList(repository.saveAll(updatedTasks),TaskDtoV2.class);
+=======
+>>>>>>> parent of 6163f82 (fix bug)
     }
 
 
