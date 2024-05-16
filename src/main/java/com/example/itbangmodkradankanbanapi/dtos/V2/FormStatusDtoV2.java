@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 import org.modelmapper.internal.bytebuddy.implementation.bind.annotation.Default;
@@ -15,9 +18,13 @@ public class FormStatusDtoV2 {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer id;
+    @Size(max = 50)
+    @NotNull
+    @NotBlank
     @JsonProperty("name")
     @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)
     private String statusName;
+    @Size(max = 200)
     @JsonProperty("description")
     @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)
     private String statusDescription;
