@@ -48,16 +48,15 @@ public class TaskServiceV2 {
         return modelMapper.map(task,TaskDtoV2.class);
     }
 
-    public List<TaskDtoV2> getAllTaskByStatusIdIn(Integer[] statusesId, String[] sortBy,String[] direction) {
+    public List<TaskDtoV2> getAllTaskByStatusIdIn(String[] filterStatuses, String[] sortBy,String[] direction) {
         List<Sort.Order> orders = new ArrayList<>();
         if (sortBy != null && sortBy.length > 0) {
             for (int i = 0; i < sortBy.length; i++) {
                 orders.add(new Sort.Order((direction[i].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC), sortBy[i]));
             }
         }
-        if(statusesId.length == 0) return  listMapper.mapList(repository.findAll(Sort.by(orders)),TaskDtoV2.class);
-
-        List<StatusV2> statuses = Arrays.stream(statusesId).map((statusId) -> statusRepository.findById(statusId).orElseThrow(() -> new NoSuchElementException("Status " + statusId + " dose not exist !!!!"))).toList();
+        if(filterStatuses.length == 0) return  listMapper.mapList(repository.findAll(Sort.by(orders)),TaskDtoV2.class);
+        List<StatusV2> statuses = Arrays.stream(filterStatuses).map((filterStatus) -> statusRepository.findByStatusName(filterStatus)).toList();
         return listMapper.mapList(repository.findByStatusIn(statuses,Sort.by(orders)),TaskDtoV2.class);
     }
 

@@ -32,12 +32,11 @@ private TaskServiceV2 service;
 
 
     @GetMapping("")
-    public ResponseEntity<Object> getAllTask(@RequestParam(defaultValue = "") String[] statusesId,
+    public ResponseEntity<Object> getAllTask(@RequestParam(defaultValue = "") String[] filterStatuses,
                                             @RequestParam(defaultValue = "") String[] sortBy,
                                              @RequestParam(defaultValue = "ASC") String[] sortDirection)
     {
-        Integer[] statusesIdArray = Arrays.stream(statusesId).map(Integer::parseInt).toArray(Integer[]::new);
-        return  ResponseEntity.ok(service.getAllTaskByStatusIdIn(statusesIdArray,sortBy,sortDirection));
+        return  ResponseEntity.ok(service.getAllTaskByStatusIdIn(filterStatuses,sortBy,sortDirection));
     }
 
 
