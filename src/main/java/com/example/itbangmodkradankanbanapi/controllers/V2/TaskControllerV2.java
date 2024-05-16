@@ -14,6 +14,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -28,10 +29,17 @@ private TaskServiceV2 service;
         return ResponseEntity.ok(service.getTask(id));
     }
 
+
+
     @GetMapping("")
-    public ResponseEntity<Object> getAllTask(){
-        return  ResponseEntity.ok(service.getAllTask());
+    public ResponseEntity<Object> getAllTask(@RequestParam(defaultValue = "") String[] statusesId,
+                                            @RequestParam(defaultValue = "") String[] sortBy,
+                                             @RequestParam(defaultValue = "ASC") String[] sortDirection)
+    {
+        Integer[] statusesIdArray = Arrays.stream(statusesId).map(Integer::parseInt).toArray(Integer[]::new);
+        return  ResponseEntity.ok(service.getAllTaskByStatusIdIn(statusesIdArray,sortBy,sortDirection));
     }
+
 
     @DeleteMapping("{id}")
     public TaskDtoV2 deleteTask(@PathVariable Integer id){

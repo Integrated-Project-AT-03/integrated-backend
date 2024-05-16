@@ -13,8 +13,11 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -43,6 +46,19 @@ public class TaskServiceV2 {
       TasksV2 task =  repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
           repository.delete(task);
         return modelMapper.map(task,TaskDtoV2.class);
+    }
+
+    public List<TaskDtoV2> getAllTaskByStatusIdIn(Integer[] statusesId, String[] sortBy,String[] direction) {
+        List<Sort.Order> orders = new ArrayList<>();
+        if (sortBy != null && sortBy.length > 0) {
+            for (int i = 0; i < sortBy.length; i++) {
+                orders.add(new Sort.Order((direction[i].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC), sortBy[i]));
+            }
+        }
+        if(statusesId.length == 0) return  listMapper.mapList(repository.findAll(Sort.by(orders)),TaskDtoV2.class);
+
+        List<StatusV2> statuses = Arrays.stream(statusesId).map((statusId) -> statusRepository.findById(statusId).orElseThrow(() -> new NoSuchElementException("Status " + statusId + " dose not exist !!!!"))).toList();
+        return listMapper.mapList(repository.findByStatusIn(statuses,Sort.by(orders)),TaskDtoV2.class);
     }
 
 
