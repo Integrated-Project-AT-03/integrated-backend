@@ -34,9 +34,6 @@ public class GlobalExceptionHandling {
             MethodArgumentTypeMismatchException ex,
             WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(null,HttpStatus.BAD_REQUEST.value(),null,ex.getMessage(),  request.getDescription(false));
-//        for (ParameterValidationResult fieldError : ex.getAllValidationResults()) {
-//            errorResponse.addValidationError(fieldError.getMethodParameter().getParameterName(),fieldError.getResolvableErrors().get(0).getDefaultMessage(),null);
-//        }
         return ResponseEntity.badRequest().body(errorResponse);
     }
 }

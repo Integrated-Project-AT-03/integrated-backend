@@ -36,9 +36,9 @@ public class TaskServiceV2 {
         return modelMapper.map(repository.findById(id).orElseThrow(() -> new NoSuchElementException("Task "+ id + " dose not exist !!!!")),FullTaskDtoV2.class);
     }
 
-    public List<TaskDtoV2> getAllTask(){
-        return listMapper.mapList(repository.findAllByOrderByCreatedOnAsc(),TaskDtoV2.class);
-    }
+//    public List<TaskDtoV2> getAllTask(){
+//        return listMapper.mapList(repository.findAllByOrderByCreatedOnAsc(),TaskDtoV2.class);
+//    }
 
     @Transactional
     public TaskDtoV2 deleteTask(Integer id){
@@ -56,7 +56,7 @@ public class TaskServiceV2 {
             }
         }
         if(filterStatuses.length == 0) return  listMapper.mapList(repository.findAll(Sort.by(orders)),TaskDtoV2.class);
-        List<StatusV2> statuses = Arrays.stream(filterStatuses).map((filterStatus) -> statusRepository.findByStatusName(filterStatus)).toList();
+        List<StatusV2> statuses = Arrays.stream(filterStatuses).map((filterStatus) -> statusRepository.findByStatusName(filterStatus.replace("_"," "))).toList();
         return listMapper.mapList(repository.findByStatusIn(statuses,Sort.by(orders)),TaskDtoV2.class);
     }
 
