@@ -15,6 +15,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -42,8 +43,6 @@ private TaskServiceV2 service;
     {
         return  ResponseEntity.ok(service.getAllTaskByStatusIdIn(filterStatuses,sortBy,sortDirection));
     }
-
-
     @DeleteMapping("{id}")
     public TaskDtoV2 deleteTask(@PathVariable @NotNull  Integer id){
        return  service.deleteTask(id);

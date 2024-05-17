@@ -31,12 +31,6 @@ public class FormTaskDtoV2 {
     @NotNull
     @JsonProperty("status")
     private  Integer statusId;
-    @JsonIgnore
-    private  String statusColorHex;
-    public String getStatusColor(){
-        return "#"+statusColorHex;
-    }
 
-
-
+    
 }

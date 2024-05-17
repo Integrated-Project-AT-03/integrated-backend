@@ -62,27 +62,24 @@ public class TaskServiceV2 {
 
 
 
-    public FormTaskDtoV2 updateTask(Integer id, FormTaskDtoV2 formTask){
+    public TaskDtoV2 updateTask(Integer id, FormTaskDtoV2 formTask){
         TasksV2 updateTask = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("Not Found"));
         updateTask.setTitle(formTask.getTitle());
         updateTask.setAssignees(formTask.getAssignees());
         updateTask.setDescription(formTask.getDescription());
         StatusV2 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new ItemNotFoundException("Not found your status"));
         updateTask.setStatus(status);
-      return  modelMapper.map( repository.save(updateTask),FormTaskDtoV2.class);
+      return  modelMapper.map( repository.save(updateTask),TaskDtoV2.class);
     }
 
     @Transactional
-    public FormTaskDtoV2 addTask(FormTaskDtoV2 formTask){
+    public TaskDtoV2 addTask(FormTaskDtoV2 formTask){
         TasksV2 newTask = new TasksV2();
         newTask.setTitle(formTask.getTitle());
         newTask.setAssignees(formTask.getAssignees());
         newTask.setDescription(formTask.getDescription());
         StatusV2 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new ItemNotFoundException("Not Found"));
         newTask.setStatus(status);
-        return modelMapper.map( repository.save(newTask),FormTaskDtoV2.class);
+        return modelMapper.map( repository.save(newTask),TaskDtoV2.class);
     }
-
-
-
 }

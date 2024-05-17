@@ -8,7 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TaskRepositoryV2 extends JpaRepository<TasksV2,Integer> {
-
     List<TasksV2> findByStatusIn(List<StatusV2> statusV2, Sort sort);
-    List<TasksV2> findAllByOrderByCreatedOnAsc();
 }
