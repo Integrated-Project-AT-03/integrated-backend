@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 public class TaskStatusDtoV2 {
+    private  Integer id;
     @JsonProperty("name")
     private String statusName;
     private String colorHex;
