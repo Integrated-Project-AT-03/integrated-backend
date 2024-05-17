@@ -13,6 +13,4 @@ public class TaskStatusDtoV2 {
     public String getColorHex(){
         return "#"+colorHex;
     }
-
-
 }

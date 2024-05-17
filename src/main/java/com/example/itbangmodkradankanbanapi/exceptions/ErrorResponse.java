@@ -21,4 +21,22 @@ public class ErrorResponse {
     private final String error;
     private final String message;
     private final String path;
+    private List<ValidationError> errors;
+
+    @Getter
+    @Setter
+    @RequiredArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private static class ValidationError {
+        private final String field;
+        private final String message;
+        private final String[] messages;
+    }
+
+    public void addValidationError(String field, String message,String[] messages) {
+        if (Objects.isNull(errors)) {
+            errors = new ArrayList<>();
+        }
+        errors.add(new ValidationError(field, message,messages));
+    }
 }

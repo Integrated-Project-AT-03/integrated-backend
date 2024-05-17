@@ -9,6 +9,12 @@ public class TaskDtoV2 {
     private Integer id;
     private String title;
     private  String assignees;
-    private  String description;
-    private  TaskStatusDtoV2 status;
+    @JsonProperty("status")
+    private  String statusStatusName;
+    private  String statusColorHex;
+
+    public String getStatusColorHex(){
+        return "#"+statusColorHex;
+    }
+
 }
