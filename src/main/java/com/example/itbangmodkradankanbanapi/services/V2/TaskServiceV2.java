@@ -28,7 +28,8 @@ public class TaskServiceV2 {
     private TaskRepositoryV2 repository;
     @Autowired
     private StatusRepositoryV2 statusRepository;
-    private final Settings settings = new Settings();
+    @Autowired
+    private SettingService settingService;
 
     @Autowired
     private ListMapper listMapper;
@@ -66,7 +67,7 @@ public class TaskServiceV2 {
         updateTask.setAssignees(formTask.getAssignees());
         updateTask.setDescription(formTask.getDescription());
         StatusV2 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new ItemNotFoundException("Not found your status"));
-        if(status.getLimitMaximumTask() && status.getTasks().size() >= settings.getNumOfLimitsTask()) throw new DataIntegrityViolationException("The status " + status.getStatusName() + " will have too many tasks");
+        if(status.getLimitMaximumTask() && status.getTasks().size() >= settingService.getNumberOfLimitsTasks()) throw new DataIntegrityViolationException("The status " + status.getStatusName() + " will have too many tasks");
         updateTask.setStatus(status);
       return  modelMapper.map( repository.save(updateTask),TaskDtoV2.class);
     }
@@ -78,7 +79,7 @@ public class TaskServiceV2 {
         newTask.setAssignees(formTask.getAssignees());
         newTask.setDescription(formTask.getDescription());
         StatusV2 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new ItemNotFoundException("Not Found"));
-        if(status.getLimitMaximumTask() && status.getTasks().size() >= settings.getNumOfLimitsTask()) throw new DataIntegrityViolationException("The status " + status.getStatusName() + " will have too many tasks");
+        if(status.getLimitMaximumTask() && status.getTasks().size() >= settingService.getNumberOfLimitsTasks()) throw new DataIntegrityViolationException("The status " + status.getStatusName() + " will have too many tasks");
         newTask.setStatus(status);
         return modelMapper.map( repository.save(newTask),TaskDtoV2.class);
     }

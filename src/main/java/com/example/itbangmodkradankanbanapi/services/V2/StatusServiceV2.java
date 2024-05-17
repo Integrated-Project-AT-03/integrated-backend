@@ -31,7 +31,9 @@ public class StatusServiceV2 {
     private TaskRepositoryV2 taskRepository;
     @Autowired
     private ColorRepository colorRepository;
-    private final Settings settings = new Settings();
+    @Autowired
+    private SettingService settingService;
+
 
 
     @Autowired
@@ -96,7 +98,7 @@ public class StatusServiceV2 {
         StatusV2 deletedStatus = repository.findById(deletedStatusId).orElseThrow(()-> new ItemNotFoundException("Deleted status is not exist"));
         StatusV2 changeStatus = repository.findById(changeStatusId).orElseThrow(()-> new ItemNotFoundException("Change status is not exist"));
         List<TasksV2> tasks = deletedStatus.getTasks();
-        if(changeStatus.getLimitMaximumTask() && changeStatus.getTasks().size() + tasks.size() > settings.getNumOfLimitsTask()) throw new DataIntegrityViolationException("The status " + changeStatus.getStatusName() + " will have too many tasks");
+        if(changeStatus.getLimitMaximumTask() && changeStatus.getTasks().size() + tasks.size() > settingService.getNumberOfLimitsTasks()) throw new DataIntegrityViolationException("The status " + changeStatus.getStatusName() + " will have too many tasks");
         List<TasksV2> updatedTasks = tasks.stream().peek((task -> {
             task.setStatus(changeStatus);
         } )).toList();
