@@ -6,6 +6,7 @@ import com.example.itbangmodkradankanbanapi.dtos.V2.TaskDtoV2;
 import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
 import com.example.itbangmodkradankanbanapi.entities.V2.TasksV2;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
+import com.example.itbangmodkradankanbanapi.models.Settings;
 import com.example.itbangmodkradankanbanapi.repositories.V2.StatusRepositoryV2;
 import com.example.itbangmodkradankanbanapi.repositories.V2.TaskRepositoryV2;
 import com.example.itbangmodkradankanbanapi.utils.ListMapper;
@@ -27,7 +28,7 @@ public class TaskServiceV2 {
     private TaskRepositoryV2 repository;
     @Autowired
     private StatusRepositoryV2 statusRepository;
-
+    private final Settings settings = new Settings();
 
     @Autowired
     private ListMapper listMapper;
@@ -36,9 +37,6 @@ public class TaskServiceV2 {
         return modelMapper.map(repository.findById(id).orElseThrow(() -> new NoSuchElementException("Task "+ id + " dose not exist !!!!")),FullTaskDtoV2.class);
     }
 
-//    public List<TaskDtoV2> getAllTask(){
-//        return listMapper.mapList(repository.findAllByOrderByCreatedOnAsc(),TaskDtoV2.class);
-//    }
 
     @Transactional
     public TaskDtoV2 deleteTask(Integer id){
@@ -68,6 +66,7 @@ public class TaskServiceV2 {
         updateTask.setAssignees(formTask.getAssignees());
         updateTask.setDescription(formTask.getDescription());
         StatusV2 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new ItemNotFoundException("Not found your status"));
+        if(status.getLimitMaximumTask() && status.getTasks().size() >= settings.getNumOfLimitsTask()) throw new DataIntegrityViolationException("The status " + status.getStatusName() + " will have too many tasks");
         updateTask.setStatus(status);
       return  modelMapper.map( repository.save(updateTask),TaskDtoV2.class);
     }
@@ -79,6 +78,7 @@ public class TaskServiceV2 {
         newTask.setAssignees(formTask.getAssignees());
         newTask.setDescription(formTask.getDescription());
         StatusV2 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new ItemNotFoundException("Not Found"));
+        if(status.getLimitMaximumTask() && status.getTasks().size() >= settings.getNumOfLimitsTask()) throw new DataIntegrityViolationException("The status " + status.getStatusName() + " will have too many tasks");
         newTask.setStatus(status);
         return modelMapper.map( repository.save(newTask),TaskDtoV2.class);
     }

@@ -32,4 +32,8 @@ public class StatusV2 {
     @UpdateTimestamp
     @Column(name = "updated_on")
     private Timestamp updatedOn;
+
+    @Column(name = "limit_maximum_task")
+    private Boolean limitMaximumTask = true;
+
 }
