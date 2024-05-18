@@ -1,49 +1,46 @@
 package com.example.itbangmodkradankanbanapi.services.V2;
 
-import com.example.itbangmodkradankanbanapi.dtos.V2.ColorDto;
 import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
+import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.models.Settings;
-import com.example.itbangmodkradankanbanapi.repositories.V2.ColorRepository;
 import com.example.itbangmodkradankanbanapi.repositories.V2.SettingRepository;
-import com.example.itbangmodkradankanbanapi.utils.ListMapper;
-import org.modelmapper.ModelMapper;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class SettingService {
-   private Settings settings  = new Settings();
-    public Settings changSettings(Settings newSettings){
-        settings.setNumOfLimitsTask(newSettings.getNumOfLimitsTask());
-        return settings;
+    @Autowired
+   private SettingRepository repository;
+    @Transactional
+    public Setting changeSetting(String name,Integer value){
+       Setting setting =  repository.findById(name).orElseThrow(()-> new ItemNotFoundException("Not found " + name +" setting"));
+       setting.setValue(value);
+       return repository.save(setting);
+    }
+    @Transactional
+    public Setting setDisable(String name){
+        Setting setting =  repository.findById(name).orElseThrow(()-> new ItemNotFoundException("Not found " + name +" setting"));
+        setting.setEnable(false);
+        return repository.save(setting);
+    }
+    @Transactional
+    public Setting setEnable(String name){
+        Setting setting =  repository.findById(name).orElseThrow(()-> new ItemNotFoundException("Not found " + name +" setting"));
+        setting.setEnable(true);
+        return  repository.save(setting);
     }
 
-    public Integer getNumberOfLimitsTasks(){
-       return settings.getNumOfLimitsTask();
+    public List<Setting> getAllSetting(){
+        return repository.findAll();
     }
-
-    public Settings getSetting(){
-       return settings;
+    public Setting getSetting(String name){
+        return   repository.findById(name).orElseThrow(()-> new ItemNotFoundException("Not found " + name +" setting"));
     }
 
 
 }
 
 
-//@Autowired
-//private SettingRepository setting;
-//public Settings changSettings(Setting[] newSettings){
-//    return  setting.saveAll()
-//
-//}
-//
-//public Integer getNumberOfLimitsTasks(){
-//    return settings.getNumOfLimitsTask();
-//}
-//
-//public Settings getSetting(){
-//    return settings;
-//}

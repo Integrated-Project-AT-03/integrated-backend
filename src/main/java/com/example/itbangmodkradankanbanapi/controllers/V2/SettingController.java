@@ -16,16 +16,23 @@ public class SettingController {
     @Autowired
 private SettingService service;
     @GetMapping("")
-    public ResponseEntity<Object> getSettings(){
-        return ResponseEntity.ok(service.getSetting());
+    public ResponseEntity<Object> getAllSetting(){
+        return ResponseEntity.ok(service.getAllSetting());
     }
-
-    @PutMapping("")
-    public ResponseEntity<Object> setSettings(@RequestBody Settings newSettings){
-        return ResponseEntity.ok(service.changSettings(newSettings));
+    @GetMapping("{name}")
+    public ResponseEntity<Object> getSetting(@PathVariable String name){
+        return ResponseEntity.ok(service.getSetting(name));
     }
-
-
-
-
+    @PatchMapping("{name}/{value}")
+    public ResponseEntity<Object> setValue(@PathVariable String name, @PathVariable Integer value){
+        return ResponseEntity.ok(service.changeSetting(name, value));
+    }
+    @PatchMapping("{name}/disable")
+    public ResponseEntity<Object> setDisable(@PathVariable String name){
+        return ResponseEntity.ok(service.setDisable(name));
+    }
+    @PatchMapping("{name}/enable")
+    public ResponseEntity<Object> setEnable(@PathVariable String name){
+        return ResponseEntity.ok(service.setEnable(name));
+    }
 }

@@ -33,7 +33,7 @@ public class TasksV2 {
     @Basic
     @Column(name = "assignees")
     private String assignees;
-
+    
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_status", referencedColumnName = "id_status", nullable = false)

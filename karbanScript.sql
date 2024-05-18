@@ -152,5 +152,5 @@ CREATE TABLE `settings` (
                            UNIQUE INDEX `id_setting_UNIQUE` (`name_of_configure` ASC) VISIBLE)
     ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO settings  (name_of_configure,value) VALUES ('limit Of Task',10)
+INSERT INTO settings  (name_of_configure,value) VALUES ('limit_of_tasks',10)
 

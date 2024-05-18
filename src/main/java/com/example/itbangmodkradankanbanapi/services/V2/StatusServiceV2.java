@@ -5,6 +5,7 @@ import com.example.itbangmodkradankanbanapi.dtos.V2.FormStatusDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V2.FullStatusDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V2.StatusDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V2.TaskDtoV2;
+import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
 import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
 import com.example.itbangmodkradankanbanapi.entities.V2.TasksV2;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
@@ -98,7 +99,8 @@ public class StatusServiceV2 {
         StatusV2 deletedStatus = repository.findById(deletedStatusId).orElseThrow(()-> new ItemNotFoundException("Deleted status is not exist"));
         StatusV2 changeStatus = repository.findById(changeStatusId).orElseThrow(()-> new ItemNotFoundException("Change status is not exist"));
         List<TasksV2> tasks = deletedStatus.getTasks();
-        if(changeStatus.getLimitMaximumTask() && changeStatus.getTasks().size() + tasks.size() > settingService.getNumberOfLimitsTasks()) throw new DataIntegrityViolationException("The status " + changeStatus.getStatusName() + " will have too many tasks");
+        Setting setting =settingService.getSetting("limit_of_tasks");
+        if(setting.getEnable() && changeStatus.getTasks().size() + tasks.size() > setting.getValue()) throw new DataIntegrityViolationException("The status " + changeStatus.getStatusName() + " will have too many tasks");
         List<TasksV2> updatedTasks = tasks.stream().peek((task -> {
             task.setStatus(changeStatus);
         } )).toList();

@@ -3,18 +3,19 @@ package com.example.itbangmodkradankanbanapi.entities.V2;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.List;
-
 @Entity
 @Data
-@Table(name = "setting", schema = "karban")
+@Table(name = "settings")
 public class Setting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @Column(name = "id_setting")
-    private Integer id;
+    @Column(name = "name_of_configure")
+    private String nameOfConfigure;
     @Basic
-    private String name;
+    @Column(name = "value")
+    private Integer value;
     @Basic
-    private String value;
+    @Column(name = "enable")
+    private Boolean enable;
+
 }
