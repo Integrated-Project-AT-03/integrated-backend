@@ -2,7 +2,7 @@ package com.example.itbangmodkradankanbanapi.services.V2;
 
 import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
-import com.example.itbangmodkradankanbanapi.models.Settings;
+
 import com.example.itbangmodkradankanbanapi.repositories.V2.SettingRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;

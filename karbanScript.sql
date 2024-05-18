@@ -98,7 +98,6 @@ CREATE TABLE `statusV2` (
     `status_name` VARCHAR(50) NOT NULL unique,
     `id_color` int DEFAULT 1,
     `status_description` VARCHAR(200) NULL,
-    `limit_maximum_task` TINYINT(1) NOT NULL DEFAULT 1,
     `created_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id_status`),
@@ -111,7 +110,7 @@ CREATE TABLE `statusV2` (
 
 LOCK TABLES `statusV2` WRITE;
 /*!40000 ALTER TABLE `statusV2` DISABLE KEYS */;
-INSERT INTO statusV2(status_name,status_description,id_color,limit_maximum_task) VALUES ('No Status','The default status',1,0),('To Do',null,2,1),('Doing','Being worked on',3,1),('Done','Finished',4,0);
+INSERT INTO statusV2(status_name,status_description,id_color) VALUES ('No Status','The default status',1),('To Do',null,2),('Doing','Being worked on',3),('Done','Finished',4);
 /*!40000 ALTER TABLE `statusV2` ENABLE KEYS */;
 UNLOCK TABLES;
 

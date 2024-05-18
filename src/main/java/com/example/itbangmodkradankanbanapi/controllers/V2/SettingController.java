@@ -1,7 +1,6 @@
 
 package com.example.itbangmodkradankanbanapi.controllers.V2;
 
-import com.example.itbangmodkradankanbanapi.models.Settings;
 import com.example.itbangmodkradankanbanapi.services.V1.StatusService;
 import com.example.itbangmodkradankanbanapi.services.V2.SettingService;
 import org.springframework.beans.factory.annotation.Autowired;

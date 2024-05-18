@@ -7,7 +7,7 @@ import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
 import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
 import com.example.itbangmodkradankanbanapi.entities.V2.TasksV2;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
-import com.example.itbangmodkradankanbanapi.models.Settings;
+
 import com.example.itbangmodkradankanbanapi.repositories.V2.SettingRepository;
 import com.example.itbangmodkradankanbanapi.repositories.V2.StatusRepositoryV2;
 import com.example.itbangmodkradankanbanapi.repositories.V2.TaskRepositoryV2;
@@ -32,9 +32,6 @@ public class TaskServiceV2 {
     private StatusRepositoryV2 statusRepository;
     @Autowired
     private SettingService settingService;
-    @Autowired
-    private SettingRepository settingRepository;
-
     @Autowired
     private ListMapper listMapper;
     private final ModelMapper modelMapper = new ModelMapper();
@@ -72,10 +69,7 @@ public class TaskServiceV2 {
         updateTask.setDescription(formTask.getDescription());
         StatusV2 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new ItemNotFoundException("Not found your status"));
         Setting setting =settingService.getSetting("limit_of_tasks");
-        System.out.println(setting.getValue());
-        System.out.println(setting.getEnable());
-        System.out.println(setting.getEnable() && status.getTasks().size() >= setting.getValue());
-        if(setting.getEnable() && status.getTasks().size() >= setting.getValue()) throw new DataIntegrityViolationException("The status " + status.getStatusName() + " will have too many tasks");
+        if(status.getId() != 1 &&status.getId() != 4  &&  setting.getEnable() && status.getTasks().size() >= setting.getValue()) throw new DataIntegrityViolationException("The status " + status.getStatusName() + " will have too many tasks");
         updateTask.setStatus(status);
       return  modelMapper.map( repository.save(updateTask),TaskDtoV2.class);
     }
@@ -88,7 +82,7 @@ public class TaskServiceV2 {
         newTask.setDescription(formTask.getDescription());
         StatusV2 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new ItemNotFoundException("Not Found"));
         Setting setting =settingService.getSetting("limit_of_tasks");
-        if(setting.getEnable() && status.getTasks().size() >= setting.getValue()) throw new DataIntegrityViolationException("The status " + status.getStatusName() + " will have too many tasks");
+        if(status.getId() != 1 &&status.getId() != 4  && setting.getEnable() && status.getTasks().size() >= setting.getValue()) throw new DataIntegrityViolationException("The status " + status.getStatusName() + " will have too many tasks");
         newTask.setStatus(status);
         return modelMapper.map( repository.save(newTask),TaskDtoV2.class);
     }
