@@ -144,12 +144,13 @@ INSERT INTO tasksV2(title,description,created_on,updated_on,id_status,assignees)
 UNLOCK TABLES;
 
 CREATE TABLE `settings` (
-                           `name_of_configure` VARCHAR(50) NOT NULL,
-                           `value` INT NULL,
-                           `enable` TINYINT(1) NOT NULL DEFAULT 1,
-                           PRIMARY KEY (`name_of_configure`),
-                           UNIQUE INDEX `id_setting_UNIQUE` (`name_of_configure` ASC) VISIBLE)
-    ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+                            `name_of_configure` VARCHAR(50) NOT NULL,
+                            `value` INT NULL CHECK (`value` >= 10 AND `value` <= 30),
+                            `enable` TINYINT(1) NOT NULL DEFAULT 1,
+                            PRIMARY KEY (`name_of_configure`),
+                            UNIQUE INDEX `id_setting_UNIQUE` (`name_of_configure` ASC) VISIBLE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 INSERT INTO settings  (name_of_configure,value) VALUES ('limit_of_tasks',10)
 

@@ -23,18 +23,6 @@ public class SettingService {
        else if(statusSetting.equalsIgnoreCase("disable")) setting.setEnable(false);
         return repository.save(setting);
     }
-    @Transactional
-    public Setting setDisable(String name){
-        Setting setting =  repository.findById(name).orElseThrow(()-> new ItemNotFoundException("Not found " + name +" setting"));
-        setting.setEnable(false);
-        return repository.save(setting);
-    }
-    @Transactional
-    public Setting setEnable(String name){
-        Setting setting =  repository.findById(name).orElseThrow(()-> new ItemNotFoundException("Not found " + name +" setting"));
-        setting.setEnable(true);
-        return  repository.save(setting);
-    }
 
     public List<Setting> getAllSetting(){
         return repository.findAll();
