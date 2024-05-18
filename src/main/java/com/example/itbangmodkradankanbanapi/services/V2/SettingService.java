@@ -15,10 +15,13 @@ public class SettingService {
     @Autowired
    private SettingRepository repository;
     @Transactional
-    public Setting changeSetting(String name,Integer value){
+    public Setting changeSetting(String name,Integer value,String statusSetting){
        Setting setting =  repository.findById(name).orElseThrow(()-> new ItemNotFoundException("Not found " + name +" setting"));
        setting.setValue(value);
-       return repository.save(setting);
+       if (statusSetting.isBlank())  return repository.save(setting);
+       else if(statusSetting.equalsIgnoreCase("enable")) setting.setEnable(true);
+       else if(statusSetting.equalsIgnoreCase("disable")) setting.setEnable(false);
+        return repository.save(setting);
     }
     @Transactional
     public Setting setDisable(String name){
