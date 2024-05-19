@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@CrossOrigin(origins = "${value.url.cross.origin}", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PATCH })
+@CrossOrigin(origins = "${value.url.cross.origin}")
 @RequestMapping("/v2/settings")
 public class SettingController {
     @Autowired
