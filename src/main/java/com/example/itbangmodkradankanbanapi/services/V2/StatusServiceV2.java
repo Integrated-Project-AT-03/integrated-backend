@@ -8,6 +8,7 @@ import com.example.itbangmodkradankanbanapi.dtos.V2.TaskDtoV2;
 import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
 import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
 import com.example.itbangmodkradankanbanapi.entities.V2.TasksV2;
+import com.example.itbangmodkradankanbanapi.exceptions.ItemLockException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.repositories.V2.ColorRepository;
 import com.example.itbangmodkradankanbanapi.repositories.V2.StatusRepositoryV2;
@@ -52,10 +53,9 @@ public class StatusServiceV2 {
     @Transactional
 
     public StatusDtoV2 updateStatus(Integer id, FormStatusDtoV2 status) {
-        if(id == 1 ) throw new DataIntegrityViolationException("Can't not edit No Status");
-        else if(id == 4) throw new DataIntegrityViolationException("Can't not edit Done");
         try {
             StatusV2 updatedStatus = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+            if(updatedStatus.getId() == 1 || updatedStatus.getId() == 4) throw new ItemLockException("Can't not edit " + updatedStatus.getStatusName() + " status");
             updatedStatus.setStatusName(status.getStatusName());
             updatedStatus.setStatusDescription(status.getStatusDescription());
             updatedStatus.setColor(colorRepository.findById(status.getColorId()).orElseThrow(() -> new ItemNotFoundException("Color " + status.getColorId() + " dose not exist !!!!")));
@@ -80,22 +80,22 @@ public class StatusServiceV2 {
 
     @Transactional
     public StatusDtoV2 deleteStatus(Integer id) {
-        if(id == 1 ) throw new DataIntegrityViolationException("Can't not delete No Status");
-        else if(id == 4) throw new DataIntegrityViolationException("Can't not delete Done");
-        StatusV2 task;
-        task = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+
+        StatusV2 status =repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+        if(status.getId() == 1 || status.getId() == 4) throw new ItemLockException("Can't not delete " + status.getStatusName()  + " status");
+
         try {
-            repository.delete(task);
+            repository.delete(status);
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityViolationException(e.getMessage());
         }
-        return modelMapper.map(task, StatusDtoV2.class);
+        return modelMapper.map(status, StatusDtoV2.class);
     }
     @Transactional
     public Integer ChangeTasksByStatusAndDelete(Integer deletedStatusId, Integer changeStatusId){
         StatusV2 deletedStatus = repository.findById(deletedStatusId).orElseThrow(()-> new ItemNotFoundException("Deleted status is not exist"));
         StatusV2 changeStatus = repository.findById(changeStatusId).orElseThrow(()-> new ItemNotFoundException("Change status is not exist"));
-        if(deletedStatus.getId() == 1 || deletedStatus.getId() == 4) throw new DataIntegrityViolationException("Can't not delete " + deletedStatus.getStatusName());
+        if(deletedStatus.getId() == 1 || deletedStatus.getId() == 4) throw new ItemLockException("Can't not delete " + deletedStatus.getStatusName()  + " status");
         List<TasksV2> tasks = deletedStatus.getTasks();
         Setting setting =settingService.getSetting("limit_of_tasks");
         if(changeStatus.getId() != 1 &&changeStatus.getId() != 4  && setting.getEnable() && changeStatus.getTasks().size() + tasks.size() > setting.getValue()) throw new DataIntegrityViolationException("The status " + changeStatus.getStatusName() + " will have too many tasks");

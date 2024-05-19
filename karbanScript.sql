@@ -85,7 +85,7 @@ CREATE TABLE `color_status` (
 
 LOCK TABLES `color_status` WRITE;
 /*!40000 ALTER TABLE `color_status` DISABLE KEYS */;
-INSERT INTO color_status(color_name,color_hex) VALUES ('red','FF0000'),('yellow','EAB308'),('blue','3B82F6'),('green','16a34a');
+INSERT INTO color_status(color_name,color_hex) VALUES ('gray','aeaca7'),('red','FF0000'),('yellow','EAB308'),('blue','3B82F6'),('green','16a34a'),('purple','713799'),('brown','9F8170'),('orange','FF8000'),('height blue','000066'),('blood','C62D42'),('pink','FF1493'),('black','1E1E1E');
 /*!40000 ALTER TABLE `color_status` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -110,7 +110,7 @@ CREATE TABLE `statusV2` (
 
 LOCK TABLES `statusV2` WRITE;
 /*!40000 ALTER TABLE `statusV2` DISABLE KEYS */;
-INSERT INTO statusV2(status_name,status_description,id_color) VALUES ('No Status','The default status',1),('To Do',null,2),('Doing','Being worked on',3),('Done','Finished',4);
+INSERT INTO statusV2(status_name,status_description,id_color) VALUES ('No Status','The default status',1),('To Do',null,3),('Doing','Being worked on',4),('Done','Finished',5);
 /*!40000 ALTER TABLE `statusV2` ENABLE KEYS */;
 UNLOCK TABLES;
 

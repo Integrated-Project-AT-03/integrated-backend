@@ -5,6 +5,7 @@ import com.example.itbangmodkradankanbanapi.dtos.V2.FormStatusDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V2.FormTaskDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V2.StatusDtoV2;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
+import com.example.itbangmodkradankanbanapi.exceptions.ItemLockException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.services.V2.StatusServiceV2;
 import jakarta.validation.Valid;
@@ -73,6 +74,13 @@ private StatusServiceV2 service;
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er);
     }
 
+    @ExceptionHandler(ItemLockException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ResponseEntity<ErrorResponse> handleItemNotFound(ItemLockException ex, WebRequest request) {
+        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.UNPROCESSABLE_ENTITY.value(),null, ex.getReason(), request.getDescription(false).substring(4));
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(er);
+    }
+
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -92,6 +100,9 @@ private StatusServiceV2 service;
         }
         return ResponseEntity.badRequest().body(errorResponse);
     }
+
+
+
 
 
 // @ExceptionHandler(HandlerMethodValidationException.class)
