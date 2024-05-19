@@ -39,7 +39,7 @@ private TaskServiceV2 service;
     @GetMapping("")
     public ResponseEntity<Object> getAllTask(@RequestParam(defaultValue = "") String[] filterStatuses,
                                             @RequestParam(defaultValue = "") String[] sortBy,
-                                             @RequestParam(defaultValue = "ASC") String[] sortDirection)
+                                             @RequestParam(defaultValue = "asc") String[] sortDirection)
     {
         return  ResponseEntity.ok(service.getAllTaskByStatusIdIn(filterStatuses,sortBy,sortDirection));
     }

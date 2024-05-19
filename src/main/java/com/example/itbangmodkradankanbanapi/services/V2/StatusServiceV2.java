@@ -10,6 +10,7 @@ import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
 import com.example.itbangmodkradankanbanapi.entities.V2.TasksV2;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemLockException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
+import com.example.itbangmodkradankanbanapi.exceptions.ItemRelationException;
 import com.example.itbangmodkradankanbanapi.repositories.V2.ColorRepository;
 import com.example.itbangmodkradankanbanapi.repositories.V2.StatusRepositoryV2;
 import com.example.itbangmodkradankanbanapi.repositories.V2.TaskRepositoryV2;
@@ -80,15 +81,10 @@ public class StatusServiceV2 {
 
     @Transactional
     public StatusDtoV2 deleteStatus(Integer id) {
-
         StatusV2 status =repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
         if(status.getId() == 1 || status.getId() == 4) throw new ItemLockException("Can't not delete " + status.getStatusName()  + " status");
-
-        try {
-            repository.delete(status);
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityViolationException(e.getMessage());
-        }
+       else if(!status.getTasks().isEmpty()) throw new ItemRelationException("The status has relations");
+       repository.delete(status);
         return modelMapper.map(status, StatusDtoV2.class);
     }
     @Transactional
@@ -98,12 +94,12 @@ public class StatusServiceV2 {
         if(deletedStatus.getId() == 1 || deletedStatus.getId() == 4) throw new ItemLockException("Can't not delete " + deletedStatus.getStatusName()  + " status");
         List<TasksV2> tasks = deletedStatus.getTasks();
         Setting setting =settingService.getSetting("limit_of_tasks");
-        if(changeStatus.getId() != 1 &&changeStatus.getId() != 4  && setting.getEnable() && changeStatus.getTasks().size() + tasks.size() > setting.getValue()) throw new DataIntegrityViolationException("The status " + changeStatus.getStatusName() + " will have too many tasks");
+        if(changeStatus.getId() != 1 &&changeStatus.getId() != 4  && setting.getEnable() && changeStatus.getTasks().size() + tasks.size() > setting.getValue()) throw new DataIntegrityViolationException("Cannot transfer to " + changeStatus.getStatusName()+" status since it will exceed the limit. Please choose another status to transfer to.");
         List<TasksV2> updatedTasks = tasks.stream().peek((task -> {
             task.setStatus(changeStatus);
         } )).toList();
         taskRepository.saveAll(updatedTasks);
-        this.deleteStatus(deletedStatusId);
+        repository.delete(deletedStatus);
         return updatedTasks.size();
     }
 }

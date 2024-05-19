@@ -47,7 +47,8 @@ public class TaskServiceV2 {
 
     public List<TaskDtoV2> getAllTaskByStatusIdIn(String[] filterStatuses, String[] sortBy,String[] direction) {
         List<Sort.Order> orders = new ArrayList<>();
-        if (sortBy != null && sortBy.length > 0) {
+        if (sortBy != null && sortBy.length > 0  && direction != null && direction.length > 0  ) {
+            System.out.println(direction[0]);
             for (int i = 0; i < sortBy.length; i++) {
                 orders.add(new Sort.Order((direction[i].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC), sortBy[i]));
             }
