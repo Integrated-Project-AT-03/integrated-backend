@@ -4,7 +4,6 @@ package com.example.itbangmodkradankanbanapi.services.V2;
 import com.example.itbangmodkradankanbanapi.dtos.V2.FormStatusDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V2.FullStatusDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V2.StatusDtoV2;
-import com.example.itbangmodkradankanbanapi.dtos.V2.TaskDtoV2;
 import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
 import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
 import com.example.itbangmodkradankanbanapi.entities.V2.TasksV2;

@@ -1,7 +1,6 @@
 package com.example.itbangmodkradankanbanapi.dtos.V2;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.sql.Timestamp;

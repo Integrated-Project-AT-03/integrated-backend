@@ -1,7 +1,6 @@
 package com.example.itbangmodkradankanbanapi.dtos.V2;
 
 import com.example.itbangmodkradankanbanapi.utils.EmptyToNullAndTrimDeserializer;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Data;

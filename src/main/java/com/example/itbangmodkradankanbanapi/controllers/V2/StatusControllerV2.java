@@ -2,7 +2,7 @@
 package com.example.itbangmodkradankanbanapi.controllers.V2;
 
 import com.example.itbangmodkradankanbanapi.dtos.V2.FormStatusDtoV2;
-import com.example.itbangmodkradankanbanapi.dtos.V2.FormTaskDtoV2;
+
 import com.example.itbangmodkradankanbanapi.dtos.V2.StatusDtoV2;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemLockException;
@@ -10,25 +10,17 @@ import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemRelationException;
 import com.example.itbangmodkradankanbanapi.services.V2.StatusServiceV2;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.method.annotation.HandlerMethodValidationException;
-
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.NoSuchElementException;
 
 
 @RestController

@@ -1,6 +1,5 @@
 package com.example.itbangmodkradankanbanapi.entities.V2;
 
-import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
 import jakarta.persistence.*;
 import lombok.Data;
 
