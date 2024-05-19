@@ -85,7 +85,7 @@ CREATE TABLE `color_status` (
 
 LOCK TABLES `color_status` WRITE;
 /*!40000 ALTER TABLE `color_status` DISABLE KEYS */;
-INSERT INTO color_status(color_name,color_hex) VALUES ('gray','aeaca7'),('red','FF0000'),('yellow','EAB308'),('blue','3B82F6'),('green','16a34a'),('purple','713799'),('brown','9F8170'),('orange','FF8000'),('height blue','000066'),('blood','C62D42'),('pink','FF1493'),('black','1E1E1E');
+INSERT INTO color_status(color_name,color_hex) VALUES ('gray','aeaca7'),('red','FF0000'),('yellow','EAB308'),('blue','3B82F6'),('green','16a34a'),('purple','713799'),('brown','9F8170'),('orange','FF8000'),('dark blue','000066'),('blood','C62D42'),('pink','FF1493'),('black','1E1E1E');
 /*!40000 ALTER TABLE `color_status` ENABLE KEYS */;
 UNLOCK TABLES;
 
