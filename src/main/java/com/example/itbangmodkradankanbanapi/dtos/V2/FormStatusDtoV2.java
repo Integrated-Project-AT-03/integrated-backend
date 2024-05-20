@@ -17,12 +17,12 @@ public class FormStatusDtoV2 {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer id;
-    @Size(max = 50)
+    @Size(min = 1, max = 50)
     @NotNull
     @NotBlank
     @JsonProperty("name")
     @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)
-    private String statusName;
+    private String name;
     @Size(max = 200)
     @JsonProperty("description")
     @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)

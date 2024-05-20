@@ -6,6 +6,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 public class ItemLockException extends ResponseStatusException {
     public ItemLockException(String message) {
-        super(HttpStatus.UNPROCESSABLE_ENTITY,message);
+        super(HttpStatus.BAD_REQUEST,message);
     }
 }

@@ -6,16 +6,18 @@ import com.example.itbangmodkradankanbanapi.dtos.V2.TaskDtoV2;
 import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
 import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
 import com.example.itbangmodkradankanbanapi.entities.V2.TasksV2;
+import com.example.itbangmodkradankanbanapi.exceptions.InvalidFieldInputException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
+import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
 import com.example.itbangmodkradankanbanapi.repositories.V2.StatusRepositoryV2;
 import com.example.itbangmodkradankanbanapi.repositories.V2.TaskRepositoryV2;
 import com.example.itbangmodkradankanbanapi.utils.ListMapper;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +35,7 @@ public class TaskServiceV2 {
     private ListMapper listMapper;
     private final ModelMapper modelMapper = new ModelMapper();
     public FullTaskDtoV2 getTask(Integer id){
-        return modelMapper.map(repository.findById(id).orElseThrow(() -> new NoSuchElementException("Task "+ id + " dose not exist !!!!")),FullTaskDtoV2.class);
+        return modelMapper.map(repository.findById(id).orElseThrow(() -> new ItemNotFoundException("Task "+ id + " dose not exist !!!!")),FullTaskDtoV2.class);
     }
 
 
@@ -47,14 +49,15 @@ public class TaskServiceV2 {
 
     public List<TaskDtoV2> getAllTaskByStatusIdIn(String[] filterStatuses, String[] sortBy,String[] direction) {
         List<Sort.Order> orders = new ArrayList<>();
-        if (sortBy != null && sortBy.length > 0  && direction != null && direction.length > 0  ) {
-            System.out.println(direction[0]);
+        if((sortBy.length != 0 && !sortBy[0].equals("status.name"))|| sortBy.length > 1 ) throw new NotAllowedException("invalid filter parameter");
+        else if(sortBy.length !=0)
             for (int i = 0; i < sortBy.length; i++) {
                 orders.add(new Sort.Order((direction[i].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC), sortBy[i]));
             }
-        }
+        else orders.add(new Sort.Order(Sort.Direction.ASC ,"createdOn"));
         if(filterStatuses.length == 0) return  listMapper.mapList(repository.findAll(Sort.by(orders)),TaskDtoV2.class);
-        List<StatusV2> statuses = Arrays.stream(filterStatuses).map((filterStatus) -> statusRepository.findByStatusName(filterStatus.replace("_"," "))).toList();
+
+        List<StatusV2> statuses = Arrays.stream(filterStatuses).map((filterStatus) -> statusRepository.findByName(filterStatus.replace("_"," "))).toList();
         return listMapper.mapList(repository.findByStatusIn(statuses,Sort.by(orders)),TaskDtoV2.class);
     }
 
@@ -66,9 +69,9 @@ public class TaskServiceV2 {
         updateTask.setTitle(formTask.getTitle());
         updateTask.setAssignees(formTask.getAssignees());
         updateTask.setDescription(formTask.getDescription());
-        StatusV2 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new ItemNotFoundException("Not found your status"));
+        StatusV2 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new InvalidFieldInputException("status","doesn't exist"));
         Setting setting =settingService.getSetting("limit_of_tasks");
-        if(status.getId() != 1 &&status.getId() != 4  &&  setting.getEnable() && (status.getTasks().size() >= setting.getValue() && !oldStatus.equals(status))) throw new DataIntegrityViolationException("The status " + status.getStatusName() + " will have too many tasks");
+        if(status.getId() != 1 &&status.getId() != 4  &&  setting.getEnable() && (status.getTasks().size() >= setting.getValue() && !oldStatus.equals(status))) throw new InvalidFieldInputException("status","the status has reached the limit");
         updateTask.setStatus(status);
       return  modelMapper.map( repository.save(updateTask),TaskDtoV2.class);
     }
@@ -79,9 +82,9 @@ public class TaskServiceV2 {
         newTask.setTitle(formTask.getTitle());
         newTask.setAssignees(formTask.getAssignees());
         newTask.setDescription(formTask.getDescription());
-        StatusV2 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new ItemNotFoundException("Not Found"));
+        StatusV2 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new InvalidFieldInputException("status","doesn't exist"));
         Setting setting =settingService.getSetting("limit_of_tasks");
-        if(status.getId() != 1 &&status.getId() != 4  && setting.getEnable() && status.getTasks().size() >= setting.getValue()) throw new DataIntegrityViolationException("The status " + status.getStatusName() + " will have too many tasks");
+        if(setting.getEnable() && status.getTasks().size() >= setting.getValue()) throw new InvalidFieldInputException("status","the status has reached the limit");
         newTask.setStatus(status);
         return modelMapper.map( repository.save(newTask),TaskDtoV2.class);
     }

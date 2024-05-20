@@ -7,7 +7,6 @@ import com.example.itbangmodkradankanbanapi.dtos.V2.StatusDtoV2;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemLockException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
-import com.example.itbangmodkradankanbanapi.exceptions.ItemRelationException;
 import com.example.itbangmodkradankanbanapi.services.V2.StatusServiceV2;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -16,9 +15,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+
 import java.sql.Timestamp;
 import java.time.Instant;
 
@@ -46,7 +48,7 @@ private StatusServiceV2 service;
     }
 
     @PutMapping("{id}")
-    public  ResponseEntity<Object> updateTask(@PathVariable Integer id ,@RequestBody @Valid FormStatusDtoV2 status){
+    public  ResponseEntity<Object> updateTask(@PathVariable  Integer id ,@RequestBody @Valid FormStatusDtoV2 status){
         return ResponseEntity.ok( service.updateStatus(id,status));
     }
 
@@ -60,33 +62,31 @@ private StatusServiceV2 service;
         return ResponseEntity.status(HttpStatus.CREATED).body(service.addStatus(status));
     }
 
-    @ExceptionHandler(ItemNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<ErrorResponse> handleItemNotFound(ItemNotFoundException ex, WebRequest request) {
-        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.NOT_FOUND.value(),null, ex.getReason(), request.getDescription(false).substring(4));
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er);
-    }
 
     @ExceptionHandler(ItemLockException.class)
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public ResponseEntity<ErrorResponse> handleItemNotFound(ItemLockException ex, WebRequest request) {
-        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.UNPROCESSABLE_ENTITY.value(),null, ex.getReason(), request.getDescription(false).substring(4));
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(er);
-    }
-
-    @ExceptionHandler(ItemRelationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponse> itemRelationException(ItemRelationException ex, WebRequest request) {
-        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.BAD_REQUEST.value(), null, ex.getMessage(), request.getDescription(false).substring(4));
+    public ResponseEntity<ErrorResponse> handleItemNotFound(ItemLockException ex, WebRequest request) {
+        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.BAD_REQUEST.value(),null, ex.getReason(), request.getDescription(false).substring(4));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(er);
     }
-
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorResponse> ForeignKeyConflict(DataIntegrityViolationException ex, WebRequest request) {
         ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.INTERNAL_SERVER_ERROR.value(), null, ex.getMessage(), request.getDescription(false).substring(4));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(er);
     }
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErrorResponse> handlerMethodValidationException(
+            HandlerMethodValidationException ex,
+            WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(null,HttpStatus.BAD_REQUEST.value(),null,"Validation error. Check 'errors' field for details. statusForCreateOrUpdate",  request.getDescription(false));
+        for (ParameterValidationResult fieldError : ex.getAllValidationResults()) {
+            errorResponse.addValidationError(fieldError.getMethodParameter().getParameter().getName(),fieldError.getResolvableErrors().get(0).getDefaultMessage());
+        }
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(
@@ -95,27 +95,11 @@ private StatusServiceV2 service;
         ErrorResponse errorResponse = new ErrorResponse(null,HttpStatus.BAD_REQUEST.value(),null,"Validation error. Check 'errors' field for details. statusForCreateOrUpdate",  request.getDescription(false));
         for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
             errorResponse.addValidationError(fieldError.getField(),
-                    fieldError.getDefaultMessage(),null);
+                    fieldError.getDefaultMessage());
         }
         return ResponseEntity.badRequest().body(errorResponse);
     }
 
-
-
-
-
-// @ExceptionHandler(HandlerMethodValidationException.class)
-//    @ResponseStatus(HttpStatus.BAD_REQUEST)
-//    public ResponseEntity<ErrorResponse> handlerMethodValidationException(
-//            HandlerMethodValidationException ex,
-//            WebRequest request) {
-//        ErrorResponse errorResponse = new ErrorResponse(null,HttpStatus.BAD_REQUEST.value(),null,ex.getMessage(),  request.getDescription(false));
-//        for (ParameterValidationResult fieldError : ex.getAllValidationResults()) {
-//            errorResponse.addValidationError(fieldError.getMethodParameter().getParameterName(),null,(String[])
-//                    fieldError.getResolvableErrors().stream().map(MessageSourceResolvable::getDefaultMessage).toArray());
-//        }
-//        return ResponseEntity.badRequest().body(errorResponse);
-//    }
 
 
 

@@ -5,6 +5,7 @@ import com.example.itbangmodkradankanbanapi.utils.EmptyToNullAndTrimDeserializer
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data

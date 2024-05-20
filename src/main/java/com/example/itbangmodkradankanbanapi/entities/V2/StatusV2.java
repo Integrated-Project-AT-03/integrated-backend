@@ -17,7 +17,7 @@ public class StatusV2 {
     @Column(name = "id_status")
     private  Integer id;
     @Column(name = "status_name")
-    private String statusName;
+    private String name;
     @Basic
     @Column(name = "status_description")
     private String statusDescription;

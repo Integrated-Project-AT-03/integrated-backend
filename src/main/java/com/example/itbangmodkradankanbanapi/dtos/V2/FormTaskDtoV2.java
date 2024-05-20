@@ -17,7 +17,7 @@ public class FormTaskDtoV2 {
     @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)
     @NotNull
     @NotBlank
-    @Size(max = 100)
+    @Size(min = 1,max = 100)
     private String title;
     @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)
     @Size(max = 30)
@@ -25,10 +25,8 @@ public class FormTaskDtoV2 {
     @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)
     @Size(max = 500)
     private  String description;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @NotNull
     @JsonProperty("status")
-    private  Integer statusId;
+    private  Integer statusId =1;
 
     
 }

@@ -8,8 +8,7 @@ import lombok.Data;
 @Data
 public class StatusDtoV2 {
     private Integer id;
-    @JsonProperty("name")
-    private String statusName;
+    private String name;
     @JsonProperty("description")
     @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)
     private String statusDescription;

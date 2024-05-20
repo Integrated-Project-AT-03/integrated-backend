@@ -7,9 +7,10 @@ import com.example.itbangmodkradankanbanapi.dtos.V2.StatusDtoV2;
 import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
 import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
 import com.example.itbangmodkradankanbanapi.entities.V2.TasksV2;
+import com.example.itbangmodkradankanbanapi.exceptions.InvalidFieldInputException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemLockException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
-import com.example.itbangmodkradankanbanapi.exceptions.ItemRelationException;
+import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
 import com.example.itbangmodkradankanbanapi.repositories.V2.ColorRepository;
 import com.example.itbangmodkradankanbanapi.repositories.V2.StatusRepositoryV2;
 import com.example.itbangmodkradankanbanapi.repositories.V2.TaskRepositoryV2;
@@ -53,47 +54,43 @@ public class StatusServiceV2 {
     @Transactional
 
     public StatusDtoV2 updateStatus(Integer id, FormStatusDtoV2 status) {
-        try {
-            StatusV2 updatedStatus = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-            if(updatedStatus.getId() == 1 || updatedStatus.getId() == 4) throw new ItemLockException("Can't not edit " + updatedStatus.getStatusName() + " status");
-            updatedStatus.setStatusName(status.getStatusName());
+            StatusV2 updatedStatus = repository.findById(id).orElseThrow(() ->  new ItemNotFoundException("Status " + id + " dose not exist !!!!"));
+            if(repository.findByName(status.getName()) != null &&!status.getName().equals(updatedStatus.getName())) throw new InvalidFieldInputException("name","must be unique");
+            if(updatedStatus.getId() == 1 || updatedStatus.getId() == 4) throw new ItemLockException(updatedStatus.getName() + " cannot be modified.");
+            updatedStatus.setName(status.getName());
             updatedStatus.setStatusDescription(status.getStatusDescription());
             updatedStatus.setColor(colorRepository.findById(status.getColorId()).orElseThrow(() -> new ItemNotFoundException("Color " + status.getColorId() + " dose not exist !!!!")));
             return modelMapper.map(repository.save(updatedStatus), StatusDtoV2.class);
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityViolationException("could not execute statement [Duplicate entry " + status.getStatusName() + " for key 'statuses.name_UNIQUE'] (description,name) value (?,?)]; constraint [statuses.name_UNIQUE]");
-        }
     }
 
     @Transactional
     public StatusDtoV2 addStatus(FormStatusDtoV2 status) {
-        try {
+            if(repository.findByName(status.getName()) != null) throw new InvalidFieldInputException("name","must be unique");
             StatusV2 newStatus = new StatusV2();
-            newStatus.setStatusName(status.getStatusName());
+            newStatus.setName(status.getName());
             newStatus.setStatusDescription(status.getStatusDescription());
-            newStatus.setColor(colorRepository.findById(status.getColorId()).orElseThrow(() -> new NoSuchElementException("Color " + status.getColorId() + " dose not exist !!!!")));
+            newStatus.setColor(colorRepository.findById(status.getColorId()).orElseThrow(() -> new ItemNotFoundException("Color " + status.getColorId() + " dose not exist !!!!")));
             return modelMapper.map(repository.save(newStatus), StatusDtoV2.class);
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityViolationException(e.getMessage());
-        }
     }
 
     @Transactional
     public StatusDtoV2 deleteStatus(Integer id) {
         StatusV2 status =repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-        if(status.getId() == 1 || status.getId() == 4) throw new ItemLockException("Can't not delete " + status.getStatusName()  + " status");
-       else if(!status.getTasks().isEmpty()) throw new ItemRelationException("The status has relations");
+        if(status.getId() == 1 || status.getId() == 4) throw new ItemLockException(status.getName()  + " cannot be deleted.");
+       else if(!status.getTasks().isEmpty()) throw new InvalidFieldInputException("status","Cannot Delete a status that still have tasks");
        repository.delete(status);
         return modelMapper.map(status, StatusDtoV2.class);
     }
     @Transactional
     public Integer ChangeTasksByStatusAndDelete(Integer deletedStatusId, Integer changeStatusId){
-        StatusV2 deletedStatus = repository.findById(deletedStatusId).orElseThrow(()-> new ItemNotFoundException("Deleted status is not exist"));
-        StatusV2 changeStatus = repository.findById(changeStatusId).orElseThrow(()-> new ItemNotFoundException("Change status is not exist"));
-        if(deletedStatus.getId() == 1 || deletedStatus.getId() == 4) throw new ItemLockException("Can't not delete " + deletedStatus.getStatusName()  + " status");
+
+        StatusV2 deletedStatus = repository.findById(deletedStatusId).orElseThrow(()-> new NotAllowedException("destination status for task transfer not specified."));
+        StatusV2 changeStatus = repository.findById(changeStatusId).orElseThrow(()-> new NotAllowedException("the specified status for task transfer does not exist"));
+        if(deletedStatus.getId() == 1 || deletedStatus.getId() == 4) throw new ItemLockException(deletedStatus.getName()  + " cannot be deleted.");
+        if(deletedStatus.equals(changeStatus)) throw new NotAllowedException("destination status for task transfer must be different from current status");
         List<TasksV2> tasks = deletedStatus.getTasks();
         Setting setting =settingService.getSetting("limit_of_tasks");
-        if(changeStatus.getId() != 1 &&changeStatus.getId() != 4  && setting.getEnable() && changeStatus.getTasks().size() + tasks.size() > setting.getValue()) throw new DataIntegrityViolationException("Cannot transfer to " + changeStatus.getStatusName()+" status since it will exceed the limit. Please choose another status to transfer to.");
+        if(setting.getEnable() && changeStatus.getTasks().size() + tasks.size() > setting.getValue()) throw new InvalidFieldInputException("status","the destination status cannot be over the limit after transfer");
         List<TasksV2> updatedTasks = tasks.stream().peek((task -> {
             task.setStatus(changeStatus);
         } )).toList();
