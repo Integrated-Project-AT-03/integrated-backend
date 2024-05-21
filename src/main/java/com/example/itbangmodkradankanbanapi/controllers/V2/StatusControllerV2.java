@@ -5,8 +5,6 @@ import com.example.itbangmodkradankanbanapi.dtos.V2.FormStatusDtoV2;
 
 import com.example.itbangmodkradankanbanapi.dtos.V2.StatusDtoV2;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
-import com.example.itbangmodkradankanbanapi.exceptions.ItemLockException;
-import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.services.V2.StatusServiceV2;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -63,12 +61,6 @@ private StatusServiceV2 service;
     }
 
 
-    @ExceptionHandler(ItemLockException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponse> handleItemNotFound(ItemLockException ex, WebRequest request) {
-        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.BAD_REQUEST.value(),null, ex.getReason(), request.getDescription(false).substring(4));
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(er);
-    }
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorResponse> ForeignKeyConflict(DataIntegrityViolationException ex, WebRequest request) {

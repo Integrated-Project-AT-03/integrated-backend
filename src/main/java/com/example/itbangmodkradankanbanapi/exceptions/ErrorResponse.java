@@ -27,4 +27,11 @@ public class ErrorResponse {
         }
         errors.add(new ValidationError(field, message));
     }
+
+    @Data
+    public static class ValidationError {
+        private final String field;
+        private final String message;
+    }
+
 }
