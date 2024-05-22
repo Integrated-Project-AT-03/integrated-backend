@@ -74,14 +74,15 @@ public class StatusServiceV2 {
     @Transactional
     public StatusDtoV2 deleteStatus(Integer id) {
         StatusV2 status =repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+        System.out.println(status.getTasks().size());
+        System.out.println(status.getTasks().isEmpty());
         if(SettingLockStatus.isLockStatusId(id)) throw new NotAllowedException(status.getName().toLowerCase()  + " cannot be deleted.");
-       else if(!status.getTasks().isEmpty() || status.getTasks().size() ==0 ) throw new InvalidFieldInputException("status","Cannot Delete a status that still have tasks");
+       else if(status.getTasks().size() != 0) throw new InvalidFieldInputException("status","Cannot Delete a status that still have tasks");
        repository.delete(status);
         return modelMapper.map(status, StatusDtoV2.class);
     }
     @Transactional
     public Integer ChangeTasksByStatusAndDelete(Integer deletedStatusId, Integer changeStatusId){
-
         StatusV2 deletedStatus = repository.findById(deletedStatusId).orElseThrow(()-> new NotAllowedException("destination status for task transfer not specified."));
         StatusV2 changeStatus = repository.findById(changeStatusId).orElseThrow(()-> new NotAllowedException("the specified status for task transfer does not exist"));
         if(SettingLockStatus.isLockStatusId(deletedStatus.getId())) throw new NotAllowedException(deletedStatus.getName().toLowerCase()  + " cannot be deleted.");
