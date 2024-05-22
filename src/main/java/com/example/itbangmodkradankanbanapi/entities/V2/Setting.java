@@ -1,5 +1,6 @@
 package com.example.itbangmodkradankanbanapi.entities.V2;
 
+import com.example.itbangmodkradankanbanapi.models.SettingLockStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -17,5 +18,4 @@ public class Setting {
     @Basic
     @Column(name = "enable")
     private Boolean enable;
-
 }
