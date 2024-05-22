@@ -88,7 +88,7 @@ public class StatusServiceV2 {
         if(deletedStatus.equals(changeStatus)) throw new NotAllowedException("destination status for task transfer must be different from current status");
         List<TasksV2> tasks = deletedStatus.getTasks();
         Setting setting =settingService.getSetting("limit_of_tasks");
-        if(setting.getEnable() && changeStatus.getTasks().size() + tasks.size() > setting.getValue()) throw new InvalidFieldInputException("status","the destination status cannot be over the limit after transfer");
+        if(!SettingLockStatus.isLockStatusId(changeStatus.getId()) && setting.getEnable() && changeStatus.getTasks().size() + tasks.size() > setting.getValue()) throw new InvalidFieldInputException("status","the destination status cannot be over the limit after transfer");
         List<TasksV2> updatedTasks = tasks.stream().peek((task -> {
             task.setStatus(changeStatus);
         } )).toList();
