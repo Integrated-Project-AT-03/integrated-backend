@@ -43,11 +43,11 @@ private TaskServiceV2 service;
         return  ResponseEntity.ok(service.getAllTaskByStatusIdIn(filterStatuses,sortBy,sortDirection));
     }
     @DeleteMapping("{id}")
-    public TaskDtoV2 deleteTask(@PathVariable @NotNull  Integer id){
+    public TaskDtoV2 deleteTask(@PathVariable  Integer id){
        return  service.deleteTask(id);
     }
     @PutMapping("{id}")
-    public  ResponseEntity<Object> updateTask(@PathVariable @NotNull  Integer id ,@RequestBody @Valid FormTaskDtoV2 task){
+    public  ResponseEntity<Object> updateTask(@PathVariable  Integer id ,@RequestBody @Valid FormTaskDtoV2 task){
        return ResponseEntity.ok( service.updateTask(id,task));
     }
     @PostMapping("")
@@ -65,6 +65,8 @@ private TaskServiceV2 service;
         }
         return ResponseEntity.badRequest().body(errorResponse);
     }
+
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(

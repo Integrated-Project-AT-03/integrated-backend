@@ -70,7 +70,7 @@ INSERT INTO tasks(title,description,created_on,updated_on,id_status,assignees) V
 /*!40000 ALTER TABLE `tasks` ENABLE KEYS */;
 UNLOCK TABLES;
 
-# `color` enum('C_F8719D','C_EAB308','C_3B82F6','C_16a34a','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15','c16') NOT NULL,
+
 
 DROP TABLE IF EXISTS `color_status`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -110,7 +110,7 @@ CREATE TABLE `statusV2` (
 
 LOCK TABLES `statusV2` WRITE;
 /*!40000 ALTER TABLE `statusV2` DISABLE KEYS */;
-INSERT INTO statusV2(status_name,status_description,id_color) VALUES ('No Status','The default status',1),('To Do',null,3),('Doing','Being worked on',4),('Done','Finished',5);
+INSERT INTO statusV2(status_name,status_description,id_color) VALUES ('No Status','The default status',1),('To Do','The task is included in the project',3),('In Progress','The task is being worked on',7),('Reviewing','The task is being reviewed',9),('Testing','The task is being tested',8),('Waiting','The task is waiting for a resource',4),('Done','Finished',5);
 /*!40000 ALTER TABLE `statusV2` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -145,7 +145,7 @@ UNLOCK TABLES;
 
 CREATE TABLE `settings` (
                             `name_of_configure` VARCHAR(50) NOT NULL,
-                            `value` INT NULL CHECK (`value` >= 10 AND `value` <= 30),
+                            `value` INT NULL,
                             `enable` TINYINT(1) NOT NULL DEFAULT 1,
                             PRIMARY KEY (`name_of_configure`),
                             UNIQUE INDEX `id_setting_UNIQUE` (`name_of_configure` ASC) VISIBLE

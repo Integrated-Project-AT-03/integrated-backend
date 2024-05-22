@@ -10,6 +10,7 @@ import com.example.itbangmodkradankanbanapi.entities.V2.TasksV2;
 import com.example.itbangmodkradankanbanapi.exceptions.InvalidFieldInputException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
+import com.example.itbangmodkradankanbanapi.models.SettingLockStatus;
 import com.example.itbangmodkradankanbanapi.repositories.V2.ColorRepository;
 import com.example.itbangmodkradankanbanapi.repositories.V2.StatusRepositoryV2;
 import com.example.itbangmodkradankanbanapi.repositories.V2.TaskRepositoryV2;
@@ -52,8 +53,8 @@ public class StatusServiceV2 {
 
     public StatusDtoV2 updateStatus(Integer id, FormStatusDtoV2 status) {
             StatusV2 updatedStatus = repository.findById(id).orElseThrow(() ->  new ItemNotFoundException("Status " + id + " dose not exist !!!!"));
-            if(repository.findByName(status.getName()) != null &&!status.getName().equals(updatedStatus.getName())) throw new InvalidFieldInputException("name","must be unique");
-            if(updatedStatus.getId() == 1 || updatedStatus.getId() == 4) throw new NotAllowedException(updatedStatus.getName() + " cannot be modified.");
+        if(SettingLockStatus.isLockStatusId(id)) throw new NotAllowedException(updatedStatus.getName().toLowerCase() + " cannot be modified.");
+           else if(repository.findByName(status.getName()) != null &&!status.getName().equals(updatedStatus.getName())) throw new InvalidFieldInputException("name","must be unique");
             updatedStatus.setName(status.getName());
             updatedStatus.setStatusDescription(status.getStatusDescription());
             updatedStatus.setColor(colorRepository.findById(status.getColorId()).orElseThrow(() -> new ItemNotFoundException("Color " + status.getColorId() + " dose not exist !!!!")));
@@ -73,7 +74,7 @@ public class StatusServiceV2 {
     @Transactional
     public StatusDtoV2 deleteStatus(Integer id) {
         StatusV2 status =repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-        if(status.getId() == 1 || status.getId() == 4) throw new NotAllowedException(status.getName()  + " cannot be deleted.");
+        if(SettingLockStatus.isLockStatusId(id)) throw new NotAllowedException(status.getName().toLowerCase()  + " cannot be deleted.");
        else if(!status.getTasks().isEmpty()) throw new InvalidFieldInputException("status","Cannot Delete a status that still have tasks");
        repository.delete(status);
         return modelMapper.map(status, StatusDtoV2.class);
@@ -83,7 +84,7 @@ public class StatusServiceV2 {
 
         StatusV2 deletedStatus = repository.findById(deletedStatusId).orElseThrow(()-> new NotAllowedException("destination status for task transfer not specified."));
         StatusV2 changeStatus = repository.findById(changeStatusId).orElseThrow(()-> new NotAllowedException("the specified status for task transfer does not exist"));
-        if(deletedStatus.getId() == 1 || deletedStatus.getId() == 4) throw new NotAllowedException(deletedStatus.getName()  + " cannot be deleted.");
+        if(SettingLockStatus.isLockStatusId(deletedStatus.getId())) throw new NotAllowedException(deletedStatus.getName().toLowerCase()  + " cannot be deleted.");
         if(deletedStatus.equals(changeStatus)) throw new NotAllowedException("destination status for task transfer must be different from current status");
         List<TasksV2> tasks = deletedStatus.getTasks();
         Setting setting =settingService.getSetting("limit_of_tasks");
