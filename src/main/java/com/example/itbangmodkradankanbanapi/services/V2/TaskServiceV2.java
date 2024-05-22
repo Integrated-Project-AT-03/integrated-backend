@@ -75,7 +75,7 @@ public class TaskServiceV2 {
         updateTask.setDescription(formTask.getDescription());
         StatusV2 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new InvalidFieldInputException("status","does not exist"));
         Setting setting =settingService.getSetting("limit_of_tasks");
-        if(SettingLockStatus.isLockStatusId(id) &&  setting.getEnable() && (status.getTasks().size() >= setting.getValue() && !oldStatus.equals(status))) throw new InvalidFieldInputException("status","the status has reached the limit");
+        if(!SettingLockStatus.isLockStatusId(id) &&  setting.getEnable() && (status.getTasks().size() >= setting.getValue() && !oldStatus.equals(status))) throw new InvalidFieldInputException("status","the status has reached the limit");
         updateTask.setStatus(status);
       return  modelMapper.map( repository.save(updateTask),TaskDtoV2.class);
     }
@@ -88,7 +88,7 @@ public class TaskServiceV2 {
         newTask.setDescription(formTask.getDescription());
         StatusV2 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new InvalidFieldInputException("status","does not exist"));
         Setting setting =settingService.getSetting("limit_of_tasks");
-        if(setting.getEnable() && status.getTasks().size() >= setting.getValue()) throw new InvalidFieldInputException("status","the status has reached the limit");
+        if(!SettingLockStatus.isLockStatusId(status.getId()) &&setting.getEnable() && status.getTasks().size() >= setting.getValue()) throw new InvalidFieldInputException("status","the status has reached the limit");
         newTask.setStatus(status);
         return modelMapper.map( repository.save(newTask),TaskDtoV2.class);
     }
