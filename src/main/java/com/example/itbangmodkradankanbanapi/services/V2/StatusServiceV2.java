@@ -75,7 +75,7 @@ public class StatusServiceV2 {
     public StatusDtoV2 deleteStatus(Integer id) {
         StatusV2 status =repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
         if(SettingLockStatus.isLockStatusId(id)) throw new NotAllowedException(status.getName().toLowerCase()  + " cannot be deleted.");
-       else if(!status.getTasks().isEmpty()) throw new InvalidFieldInputException("status","Cannot Delete a status that still have tasks");
+       else if(!status.getTasks().isEmpty() || status.getTasks().size() ==0 ) throw new InvalidFieldInputException("status","Cannot Delete a status that still have tasks");
        repository.delete(status);
         return modelMapper.map(status, StatusDtoV2.class);
     }
