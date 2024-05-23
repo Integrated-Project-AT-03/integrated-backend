@@ -1,0 +1,9 @@
+# Use the official MySQL image as the base image
+FROM mysql:latest
+
+# Set the working directory
+WORKDIR /docker-entrypoint-initdb.d
+
+# Copy the initialization script and set the correct permissions
+COPY ./karbanScript.sql /docker-entrypoint-initdb.d/karbanScript.sql
+RUN chmod 444 /docker-entrypoint-initdb.d/karbanScript.sql
