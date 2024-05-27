@@ -20,7 +20,6 @@ public class StatusDtoV2 {
     private String colorHex;
     @JsonIgnore
     private List<TasksV2> tasks;
-
     public Integer getNumOfTask(){
         return tasks == null ? 0 : tasks.size();
     }
