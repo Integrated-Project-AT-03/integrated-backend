@@ -17,7 +17,7 @@ public class ColorService {
     @Autowired
     private ColorRepository repository;
     @Autowired
-    private ListMapper listMapper;
+    ListMapper listMapper;
     private final ModelMapper modelMapper = new ModelMapper();
     public ColorDto getColor(Integer id){
         return  modelMapper.map(repository.findById(id).orElseThrow(() -> new NoSuchElementException("Color "+ id + " dose not exist !!!!")),ColorDto.class);

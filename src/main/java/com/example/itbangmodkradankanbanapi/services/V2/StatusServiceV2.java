@@ -37,9 +37,9 @@ public class StatusServiceV2 {
 
 
     @Autowired
-    private ListMapper listMapper;
-
-    private final ModelMapper modelMapper = new ModelMapper();
+    ModelMapper modelMapper;
+    @Autowired
+    ListMapper listMapper;
 
     public FullStatusDtoV2 getStatus(Integer id) {
         return modelMapper.map(repository.findById(id).orElseThrow(() -> new ItemNotFoundException("Status " + id + " dose not exist !!!!")), FullStatusDtoV2.class);

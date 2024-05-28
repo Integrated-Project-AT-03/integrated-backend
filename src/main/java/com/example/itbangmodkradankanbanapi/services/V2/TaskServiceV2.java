@@ -32,8 +32,9 @@ public class TaskServiceV2 {
     @Autowired
     private SettingService settingService;
     @Autowired
-    private ListMapper listMapper;
-    private final ModelMapper modelMapper = new ModelMapper();
+    ModelMapper modelMapper;
+    @Autowired
+    ListMapper listMapper;
 
 
     public FullTaskDtoV2 getTask(Integer id){
