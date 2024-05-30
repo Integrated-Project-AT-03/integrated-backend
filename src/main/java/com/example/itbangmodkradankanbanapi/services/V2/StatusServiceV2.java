@@ -74,8 +74,6 @@ public class StatusServiceV2 {
     @Transactional
     public StatusDtoV2 deleteStatus(Integer id) {
         StatusV2 status =repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-        System.out.println(status.getTasks().size());
-        System.out.println(status.getTasks().isEmpty());
         if(SettingLockStatus.isLockStatusId(id)) throw new NotAllowedException(status.getName().toLowerCase()  + " cannot be deleted.");
        else if(status.getTasks().size() != 0) throw new InvalidFieldInputException("status","Cannot Delete a status that still have tasks");
        repository.delete(status);
