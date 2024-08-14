@@ -25,5 +25,5 @@ public class UserdataEntity {
     private String password;
     @Basic
     @Column(name = "role")
-    private Object role;
+    private String role;
 }
