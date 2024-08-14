@@ -16,7 +16,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableJpaRepositories(
-        basePackages = "com.example.itbangmodkradankanbanapi.repositories.V2",
+        basePackages = "com.example.itbangmodkradankanbanapi.user",
         entityManagerFactoryRef = "secondEntityManagerFactory",
         transactionManagerRef = "secondTransactionManager"
 )
@@ -37,7 +37,7 @@ public class SecondDataSourceConfig {
             @Qualifier("secondDataSource") DataSource secondDataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(secondDataSource);
-        em.setPackagesToScan("com.example.itbangmodkradankanbanapi.entities.V2");
+        em.setPackagesToScan("com.example.itbangmodkradankanbanapi.user");
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         return em;
     }

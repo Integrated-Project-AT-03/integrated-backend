@@ -12,6 +12,7 @@ import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
 import com.example.itbangmodkradankanbanapi.models.SettingLockStatus;
 import com.example.itbangmodkradankanbanapi.repositories.V2.StatusRepositoryV2;
 import com.example.itbangmodkradankanbanapi.repositories.V2.TaskRepositoryV2;
+import com.example.itbangmodkradankanbanapi.user.UserDataRepository;
 import com.example.itbangmodkradankanbanapi.utils.ListMapper;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -49,6 +50,7 @@ public class TaskServiceV2 {
           repository.delete(task);
         return modelMapper.map(task,TaskDtoV2.class);
     }
+
 
     public List<TaskDtoV2> getAllTaskByStatusIdIn(String[] filterStatuses, String[] sortBy,String[] direction) {
 

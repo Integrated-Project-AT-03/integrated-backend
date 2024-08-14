@@ -1,6 +1,5 @@
-package com.example.itbangmodkradankanbanapi.repositories.V2;
+package com.example.itbangmodkradankanbanapi.user;
 
-import com.example.itbangmodkradankanbanapi.entities.V2.UserdataEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserDataRepository extends JpaRepository<UserdataEntity, String> {

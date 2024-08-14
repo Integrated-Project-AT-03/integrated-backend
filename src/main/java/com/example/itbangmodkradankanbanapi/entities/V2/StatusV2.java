@@ -3,6 +3,7 @@ package com.example.itbangmodkradankanbanapi.entities.V2;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
@@ -24,7 +25,7 @@ public class StatusV2 {
     @ManyToOne
     @JoinColumn(name = "id_color", referencedColumnName = "id_color", nullable = false)
     private ColorStatus color;
-    @OneToMany(mappedBy = "status")
+    @OneToMany(mappedBy = "status", fetch = FetchType.EAGER) // แก้เพราะ เอา Lazy load ของ jpa ออก
     private List<TasksV2> tasks;
     @CreationTimestamp
     @Column(name = "created_on")
