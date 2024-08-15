@@ -31,7 +31,7 @@ public class FirstDataSourceConfig {
         return DataSourceBuilder.create()
                 .url("jdbc:mysql://localhost:3306/karban")
                 .username("root")
-                .password("11111111")
+                .password("!Zazaza080a")
                 .driverClassName("com.mysql.cj.jdbc.Driver")
                 .build();
     }

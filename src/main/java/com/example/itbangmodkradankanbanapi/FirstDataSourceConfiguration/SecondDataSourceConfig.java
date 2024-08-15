@@ -27,7 +27,7 @@ public class SecondDataSourceConfig {
         return DataSourceBuilder.create()
                 .url("jdbc:mysql://localhost:3306/user")
                 .username("root")
-                .password("11111111")
+                .password("!Zazaza080a")
                 .driverClassName("com.mysql.cj.jdbc.Driver")
                 .build();
     }
