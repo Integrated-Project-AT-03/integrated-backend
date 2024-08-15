@@ -5,25 +5,26 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "userdata", schema = "user", catalog = "")
+@Table(name = "users", schema = "itbkk_shared", catalog = "")
 public class UserdataEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "oid")
     private String oid;
-    @Basic
+    
     @Column(name = "name")
     private String name;
-    @Basic
+
     @Column(name = "username")
     private String username;
-    @Basic
+
     @Column(name = "email")
     private String email;
-    @Basic
+
     @Column(name = "password")
     private String password;
-    @Basic
+
     @Column(name = "role")
-    private String role;
+    @Enumerated(value = EnumType.STRING)
+    private RoleEnum role;
 }

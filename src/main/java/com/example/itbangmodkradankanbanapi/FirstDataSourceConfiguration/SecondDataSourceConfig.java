@@ -25,9 +25,9 @@ public class SecondDataSourceConfig {
     @Bean(name = "secondDataSource")
     public DataSource secondDataSource() {
         return DataSourceBuilder.create()
-                .url("jdbc:mysql://localhost:3306/user")
-                .username("root")
-                .password("!Zazaza080a")
+                .url("jdbc:mysql://ip23ft.sit.kmutt.ac.th:3306/itbkk_shared")
+                .username("authuser")
+                .password("VT4eTSRo")
                 .driverClassName("com.mysql.cj.jdbc.Driver")
                 .build();
     }

@@ -20,5 +20,12 @@
       <jdbc-url>jdbc:mysql://localhost:3306/karban</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="itbkk_shared@ip23ft.sit.kmutt.ac.th" uuid="f6c78fe1-3342-4493-9b52-47f179c6e2c0">
+      <driver-ref>mysql.8</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://ip23ft.sit.kmutt.ac.th:3306/itbkk_shared</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
