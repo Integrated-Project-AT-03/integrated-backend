@@ -1,5 +1,6 @@
 package com.example.itbangmodkradankanbanapi.Auth;
 
+import com.example.itbangmodkradankanbanapi.exceptions.UnauthorizedLoginException;
 import com.example.itbangmodkradankanbanapi.user.UserDataRepository;
 import com.example.itbangmodkradankanbanapi.user.UserdataEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class JwtUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
         UserdataEntity user = userDataRepository.findByUsername(userName);
         if(user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, userName+ " does not exist !!"); }
+            throw new UnauthorizedLoginException("Username or Password is incorrect"); }
 //        List<GrantedAuthority> roles = new ArrayList<>();
 //        GrantedAuthority grantedAuthority = new GrantedAuthority() {
 //            @Override
