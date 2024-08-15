@@ -1,5 +1,7 @@
 package com.example.itbangmodkradankanbanapi.Auth;
 
+import com.example.itbangmodkradankanbanapi.user.UserDataRepository;
+import com.example.itbangmodkradankanbanapi.user.UserdataEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.Valid;
@@ -26,6 +28,9 @@ public class AuthenticationController {
     @Autowired
     AuthenticationManager authenticationManager;
 
+    @Autowired
+    UserDataRepository userDataRepository;
+
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody @Valid JwtRequestUser jwtRequestUser) {
         Authentication authentication = authenticationManager.authenticate(
@@ -35,8 +40,8 @@ public class AuthenticationController {
             throw new UsernameNotFoundException("Invalid user or password !!!");
         }
 //        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(jwtRequestUser.getUserName());
-        String token = jwtTokenUtil.generateToken(userDetails);
+        UserdataEntity userdataEntity = userDataRepository.findByUsername(jwtRequestUser.getUserName());
+        String token = jwtTokenUtil.generateToken(userdataEntity);
         return ResponseEntity.ok(token);
     }
 

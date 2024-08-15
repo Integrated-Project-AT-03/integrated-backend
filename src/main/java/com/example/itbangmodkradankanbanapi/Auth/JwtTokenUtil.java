@@ -46,12 +46,12 @@ public class JwtTokenUtil implements Serializable {
     private Boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token); return expiration.before(new Date());
     }
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserdataEntity userdataEntity) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("oid","533c0096-a48c-4be1-8e42-769a9f05a725");
-        claims.put("email","somchai.jai@kmutt.ac.th");
-        claims.put("role","LECTURER");
-        return doGenerateToken(claims, userDetails.getUsername()); }
+        claims.put("oid",userdataEntity.getOid());
+        claims.put("email",userdataEntity.getEmail());
+        claims.put("role",userdataEntity.getRole());
+        return doGenerateToken(claims, userdataEntity.getUsername()); }
     private String doGenerateToken(Map<String, Object> claims, String subject) {
         return Jwts.builder().setHeaderParam("typ", "JWT").setClaims(claims).setSubject(subject)
                 .setIssuer("https://intproj23.sit.kmutt.ac.th/ft/")
