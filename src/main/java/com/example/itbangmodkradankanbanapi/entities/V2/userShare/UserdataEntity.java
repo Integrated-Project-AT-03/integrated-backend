@@ -1,4 +1,4 @@
-package com.example.itbangmodkradankanbanapi.user;
+package com.example.itbangmodkradankanbanapi.entities.V2.userShare;
 
 import jakarta.persistence.*;
 import lombok.Data;

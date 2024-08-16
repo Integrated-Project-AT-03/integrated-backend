@@ -1,9 +1,9 @@
 package com.example.itbangmodkradankanbanapi.services.V2;
 
-import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
+import com.example.itbangmodkradankanbanapi.entities.V2.karban.Setting;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 
-import com.example.itbangmodkradankanbanapi.repositories.V2.SettingRepository;
+import com.example.itbangmodkradankanbanapi.repositories.V2.karban.SettingRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
