@@ -30,6 +30,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 
 @RestController
+@CrossOrigin(origins = "${value.url.cross.origin}")
 @RequestMapping("/authentications")
 public class AuthenticationController {
     @Autowired

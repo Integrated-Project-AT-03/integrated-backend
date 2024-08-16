@@ -11,7 +11,7 @@ public class UserdataEntity {
     @Id
     @Column(name = "oid")
     private String oid;
-    
+
     @Column(name = "name")
     private String name;
 
