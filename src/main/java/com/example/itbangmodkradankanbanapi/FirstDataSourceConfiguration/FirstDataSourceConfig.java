@@ -2,6 +2,7 @@ package com.example.itbangmodkradankanbanapi.FirstDataSourceConfiguration;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +14,6 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
-
 import javax.sql.DataSource;
 
 @Configuration
@@ -23,18 +23,27 @@ import javax.sql.DataSource;
         transactionManagerRef = "firstTransactionManager"
 )
 
-
 public class FirstDataSourceConfig {
+    @Value("${value.datasource.first.url}")
+    private String url;
+
+    @Value("${value.datasource.first.username}")
+    private String username;
+
+    @Value("${value.datasource.first.password}")
+    private String password;
+
     @Primary
     @Bean(name = "firstDataSource")
     public DataSource firstDataSource() {
         return DataSourceBuilder.create()
-                .url("jdbc:mysql://localhost:3306/karban")
-                .username("root")
-                .password("!Zazaza080a")
+                .url(url)
+                .username(username)
+                .password(password)
                 .driverClassName("com.mysql.cj.jdbc.Driver")
                 .build();
     }
+
     @Primary
     @Bean(name = "firstEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean firstEntityManagerFactory(

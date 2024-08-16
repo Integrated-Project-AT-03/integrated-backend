@@ -2,6 +2,7 @@ package com.example.itbangmodkradankanbanapi.FirstDataSourceConfiguration;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,13 +22,20 @@ import javax.sql.DataSource;
         transactionManagerRef = "secondTransactionManager"
 )
 public class SecondDataSourceConfig {
+    @Value("${value.datasource.second.url}")
+    private String url;
 
+    @Value("${value.datasource.second.username}")
+    private String username;
+
+    @Value("${value.datasource.second.password}")
+    private String password;
     @Bean(name = "secondDataSource")
     public DataSource secondDataSource() {
         return DataSourceBuilder.create()
-                .url("jdbc:mysql://ip23ft.sit.kmutt.ac.th:3306/itbkk_shared")
-                .username("authuser")
-                .password("VT4eTSRo")
+                .url(url)
+                .username(username)
+                .password(password)
                 .driverClassName("com.mysql.cj.jdbc.Driver")
                 .build();
     }
