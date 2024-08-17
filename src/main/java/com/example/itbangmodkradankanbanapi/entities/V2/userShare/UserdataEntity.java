@@ -27,4 +27,11 @@ public class UserdataEntity {
     @Column(name = "role")
     @Enumerated(value = EnumType.STRING)
     private RoleEnum role;
+
+
+    public enum RoleEnum {
+        LECTURER,
+        STAFF,
+        STUDENT;
+    }
 }
