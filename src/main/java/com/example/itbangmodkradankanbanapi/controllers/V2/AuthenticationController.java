@@ -63,6 +63,11 @@ public class AuthenticationController {
         }
     }
 
+    @GetMapping ("/{name}")
+    public ResponseEntity<Object> login22(@PathVariable String name) {
+        return  ResponseEntity.ok(userDataRepository.findByUsername(name));
+    }
+
     @GetMapping("/validate-token")
     public ResponseEntity<Object> validateToken(@RequestHeader("Authorization") String requestTokenHeader) {
         Claims claims = null;
