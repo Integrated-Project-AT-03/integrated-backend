@@ -3,6 +3,7 @@ package com.example.itbangmodkradankanbanapi.controllers.V2;
 import com.example.itbangmodkradankanbanapi.Auth.JwtRequestUser;
 import com.example.itbangmodkradankanbanapi.Auth.JwtTokenUtil;
 import com.example.itbangmodkradankanbanapi.Auth.JwtUserDetailsService;
+import com.example.itbangmodkradankanbanapi.dtos.V2.JwtDtoV2;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.UnauthorizedLoginException;
 import com.example.itbangmodkradankanbanapi.repositories.V2.userShare.UserDataRepository;
@@ -57,7 +58,8 @@ public class AuthenticationController {
 //        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             UserdataEntity userdataEntity = userDataRepository.findByUsername(jwtRequestUser.getUserName());
             String token = jwtTokenUtil.generateToken(userdataEntity);
-            return ResponseEntity.ok(token);
+            JwtDtoV2 tokenResponse = new JwtDtoV2(token);
+            return ResponseEntity.ok(tokenResponse);
         }catch (BadCredentialsException ex){
             throw new UnauthorizedLoginException("Username or Password is Incorrect");
         }
