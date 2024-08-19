@@ -1,4 +1,4 @@
-package com.example.itbangmodkradankanbanapi.FirstDataSourceConfiguration;
+package com.example.itbangmodkradankanbanapi.FirstDataSourceConfiguration.V2;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,12 +18,15 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableJpaRepositories(
-        basePackages = "com.example.itbangmodkradankanbanapi.repositories.V2.karban",
+        basePackages ={
+                "com.example.itbangmodkradankanbanapi.repositories.V2.karban",
+                "com.example.itbangmodkradankanbanapi.repositories.V1"
+        },
         entityManagerFactoryRef = "firstEntityManagerFactory",
         transactionManagerRef = "firstTransactionManager"
 )
 
-public class FirstDataSourceConfig {
+public class KarbanDataSourceConfig {
     @Value("${value.datasource.first.url}")
     private String url;
 
@@ -50,7 +53,7 @@ public class FirstDataSourceConfig {
             @Qualifier("firstDataSource") DataSource firstDataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(firstDataSource);
-        em.setPackagesToScan("com.example.itbangmodkradankanbanapi.entities.V2.karban");
+        em.setPackagesToScan("com.example.itbangmodkradankanbanapi.entities.V2.karban","com.example.itbangmodkradankanbanapi.entities.V1");
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         return em;
     }

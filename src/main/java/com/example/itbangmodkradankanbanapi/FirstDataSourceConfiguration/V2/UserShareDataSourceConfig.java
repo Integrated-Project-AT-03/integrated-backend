@@ -1,4 +1,4 @@
-package com.example.itbangmodkradankanbanapi.FirstDataSourceConfiguration;
+package com.example.itbangmodkradankanbanapi.FirstDataSourceConfiguration.V2;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,7 +21,7 @@ import javax.sql.DataSource;
         entityManagerFactoryRef = "secondEntityManagerFactory",
         transactionManagerRef = "secondTransactionManager"
 )
-public class SecondDataSourceConfig {
+public class UserShareDataSourceConfig {
     @Value("${value.datasource.second.url}")
     private String url;
 
