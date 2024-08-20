@@ -3,15 +3,15 @@ package com.example.itbangmodkradankanbanapi.services.V2;
 import com.example.itbangmodkradankanbanapi.dtos.V2.FormTaskDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V2.FullTaskDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V2.TaskDtoV2;
-import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
-import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
-import com.example.itbangmodkradankanbanapi.entities.V2.TasksV2;
+import com.example.itbangmodkradankanbanapi.entities.V2.karban.Setting;
+import com.example.itbangmodkradankanbanapi.entities.V2.karban.StatusV2;
+import com.example.itbangmodkradankanbanapi.entities.V2.karban.TasksV2;
 import com.example.itbangmodkradankanbanapi.exceptions.InvalidFieldInputException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
 import com.example.itbangmodkradankanbanapi.models.SettingLockStatus;
-import com.example.itbangmodkradankanbanapi.repositories.V2.StatusRepositoryV2;
-import com.example.itbangmodkradankanbanapi.repositories.V2.TaskRepositoryV2;
+import com.example.itbangmodkradankanbanapi.repositories.V2.karban.StatusRepositoryV2;
+import com.example.itbangmodkradankanbanapi.repositories.V2.karban.TaskRepositoryV2;
 import com.example.itbangmodkradankanbanapi.utils.ListMapper;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -49,6 +49,7 @@ public class TaskServiceV2 {
           repository.delete(task);
         return modelMapper.map(task,TaskDtoV2.class);
     }
+
 
     public List<TaskDtoV2> getAllTaskByStatusIdIn(String[] filterStatuses, String[] sortBy,String[] direction) {
 

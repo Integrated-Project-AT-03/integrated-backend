@@ -1,6 +1,6 @@
-package com.example.itbangmodkradankanbanapi.repositories.V2;
+package com.example.itbangmodkradankanbanapi.repositories.V2.karban;
 
-import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
+import com.example.itbangmodkradankanbanapi.entities.V2.karban.Setting;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SettingRepository extends JpaRepository<Setting,String> {

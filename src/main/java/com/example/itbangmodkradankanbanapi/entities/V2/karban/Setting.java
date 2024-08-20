@@ -1,6 +1,5 @@
-package com.example.itbangmodkradankanbanapi.entities.V2;
+package com.example.itbangmodkradankanbanapi.entities.V2.karban;
 
-import com.example.itbangmodkradankanbanapi.models.SettingLockStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
