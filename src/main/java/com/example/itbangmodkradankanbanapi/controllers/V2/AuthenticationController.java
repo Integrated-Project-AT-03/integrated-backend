@@ -32,7 +32,7 @@ import java.time.Instant;
 
 @RestController
 @CrossOrigin(origins = "${value.url.cross.origin}")
-@RequestMapping("/authentications")
+@RequestMapping("")
 public class AuthenticationController {
     @Autowired
     JwtUserDetailsService jwtUserDetailsService;
