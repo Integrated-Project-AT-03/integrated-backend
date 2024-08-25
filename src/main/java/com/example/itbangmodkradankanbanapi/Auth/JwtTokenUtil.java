@@ -55,7 +55,7 @@ public class JwtTokenUtil implements Serializable {
     }
     private String doGenerateToken(Map<String, Object> claims, String subject) {
         return Jwts.builder().setHeaderParam("typ", "JWT").setClaims(claims).setSubject(subject)
-                .setIssuer("https://intproj23.sit.kmutt.ac.th/ft/")
+                .setIssuer("https://intproj23.sit.kmutt.ac.th/at3/")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
                 .signWith(signatureAlgorithm, SECRET_KEY).compact();
