@@ -75,16 +75,17 @@ UNLOCK TABLES;
 
 
 CREATE TABLE IF NOT EXISTS `karban`.`boards` (
-                                                 `id_board` INT NOT NULL AUTO_INCREMENT,
-                                                 `name` VARCHAR(120) NOT NULL,
+    `nano_id_board` VARCHAR(10) NOT NULL ,
+    `oid` VARCHAR(20) NOT NULL ,
+    `name` VARCHAR(120) NOT NULL,
     `enable_limits_task` TINYINT(1) NOT NULL,
     `limits_task` INT NOT NULL,
-    PRIMARY KEY (`id_board`))
-    ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    PRIMARY KEY (`nano_id_board`))
+    ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 LOCK TABLES `boards` WRITE;
 /*!40000 ALTER TABLE `boards` DISABLE KEYS */;
-INSERT INTO boards(name,enable_limits_task,limits_task) VALUES ('default board',0,10);
+INSERT INTO boards(nano_id_board,oid,name,enable_limits_task,limits_task) VALUES ('0000000000','0000000000','default board',0,10);
 /*!40000 ALTER TABLE `boards` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -108,6 +109,7 @@ UNLOCK TABLES;
 
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
+
 CREATE TABLE IF NOT EXISTS `karban`.`statusV2` (
                                                    `id_status` INT NOT NULL AUTO_INCREMENT,
                                                    `status_name` VARCHAR(50) NOT NULL,
@@ -115,17 +117,17 @@ CREATE TABLE IF NOT EXISTS `karban`.`statusV2` (
     `status_description` VARCHAR(200) NULL DEFAULT NULL,
     `created_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    `id_board` INT NOT NULL,
+    `nano_id_board` VARCHAR(10) NOT NULL,
     PRIMARY KEY (`id_status`),
     UNIQUE INDEX `status_name` (`status_name` ASC) VISIBLE,
     INDEX `fk_Statuses_color_idx` (`id_color` ASC) VISIBLE,
-    INDEX `fk_statusV2_boards1_idx` (`id_board` ASC) VISIBLE,
+    INDEX `fk_statusV2_boards1_idx` (`nano_id_board` ASC) VISIBLE,
     CONSTRAINT `fk_Statuses_color`
     FOREIGN KEY (`id_color`)
     REFERENCES `karban`.`color_status` (`id_color`),
     CONSTRAINT `fk_statusV2_boards1`
-    FOREIGN KEY (`id_board`)
-    REFERENCES `karban`.`boards` (`id_board`)
+    FOREIGN KEY (`nano_id_board`)
+    REFERENCES `karban`.`boards` (`nano_id_board`)
                                                              ON DELETE NO ACTION
                                                              ON UPDATE NO ACTION)
     ENGINE = InnoDB
@@ -134,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `karban`.`statusV2` (
     COLLATE = utf8mb4_0900_ai_ci;
 LOCK TABLES `statusV2` WRITE;
 /*!40000 ALTER TABLE `statusV2` DISABLE KEYS */;
-INSERT INTO statusV2(status_name,status_description,id_color,id_board) VALUES ('No Status','The default status',1,1),('To Do','The task is included in the project',3,1),('In Progress','The task is being worked on',7,1),('Reviewing','The task is being reviewed',9,1),('Testing','The task is being tested',8,1),('Waiting','The task is waiting for a resource',4,1),('Done','Finished',5,1);
+INSERT INTO statusV2(status_name,status_description,id_color,nano_id_board) VALUES ('No Status','The default status',1,1),('To Do','The task is included in the project',3,1),('In Progress','The task is being worked on',7,1),('Reviewing','The task is being reviewed',9,1),('Testing','The task is being tested',8,1),('Waiting','The task is waiting for a resource',4,1),('Done','Finished',5,1);
 /*!40000 ALTER TABLE `statusV2` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -153,16 +155,16 @@ CREATE TABLE IF NOT EXISTS `karban`.`tasksV2` (
     `updated_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `id_status` INT NOT NULL DEFAULT '1',
     `assignees` VARCHAR(30) NULL DEFAULT NULL,
-    `id_board` INT NOT NULL,
+    `nano_id_board` VARCHAR(10) NOT NULL,
     PRIMARY KEY (`id_task`),
     INDEX `fk_Tasks_status_idx` (`id_status` ASC) VISIBLE,
-    INDEX `fk_tasksV2_boards1_idx` (`id_board` ASC) VISIBLE,
+    INDEX `fk_tasksV2_boards1_idx` (`nano_id_board` ASC) VISIBLE,
     CONSTRAINT `fk_Tasks_statusV2`
     FOREIGN KEY (`id_status`)
     REFERENCES `karban`.`statusV2` (`id_status`),
     CONSTRAINT `fk_tasksV2_boards1`
-    FOREIGN KEY (`id_board`)
-    REFERENCES `karban`.`boards` (`id_board`)
+    FOREIGN KEY (`nano_id_board`)
+    REFERENCES `karban`.`boards` (`nano_id_board`)
                                                              ON DELETE NO ACTION
                                                              ON UPDATE NO ACTION)
     ENGINE = InnoDB
@@ -171,7 +173,7 @@ CREATE TABLE IF NOT EXISTS `karban`.`tasksV2` (
     COLLATE = utf8mb4_0900_ai_ci;
 
 LOCK TABLES `tasksV2` WRITE;
-INSERT INTO tasksV2(title,description,created_on,updated_on,id_status,assignees,id_board) VALUES
+INSERT INTO tasksV2(title,description,created_on,updated_on,id_status,assignees,nano_id_board) VALUES
                                                                                               ('TaskTitle1TaskTitle2TaskTitle3TaskTitle4TaskTitle5TaskTitle6TaskTitle7TaskTitle8TaskTitle9TaskTitle0',
                                                                                                'Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti1Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti2Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti3Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti4Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti5','2024-04-22 09:00:00','2024-04-22 09:00:00',1,'Assignees1Assignees2Assignees3',1),
                                                                                               ('Repository',null,'2024-04-22 09:05:00','2024-04-22 14:00:00',2,null,1),
