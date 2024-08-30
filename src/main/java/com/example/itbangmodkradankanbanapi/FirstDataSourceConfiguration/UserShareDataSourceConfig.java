@@ -45,7 +45,7 @@ public class UserShareDataSourceConfig {
             @Qualifier("secondDataSource") DataSource secondDataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(secondDataSource);
-        em.setPackagesToScan("com.example.itbangmodkradankanbanapi.entities.V2.userShare");
+        em.setPackagesToScan("com.example.itbangmodkradankanbanapi.entities.userShare");
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         return em;
     }

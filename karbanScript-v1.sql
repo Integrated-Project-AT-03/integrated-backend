@@ -17,7 +17,7 @@
 
 --
 -- Table structure for table `status`
---
+
 use karban;
 DROP TABLE IF EXISTS `status`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -70,24 +70,7 @@ INSERT INTO tasks(title,description,created_on,updated_on,id_status,assignees) V
 /*!40000 ALTER TABLE `tasks` ENABLE KEYS */;
 UNLOCK TABLES;
 
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 
-
-CREATE TABLE IF NOT EXISTS `karban`.`boards` (
-    `nano_id_board` VARCHAR(10) NOT NULL ,
-    `oid` VARCHAR(20) NOT NULL ,
-    `name` VARCHAR(120) NOT NULL,
-    `enable_limits_task` TINYINT(1) NOT NULL,
-    `limits_task` INT NOT NULL,
-    PRIMARY KEY (`nano_id_board`))
-    ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-LOCK TABLES `boards` WRITE;
-/*!40000 ALTER TABLE `boards` DISABLE KEYS */;
-INSERT INTO boards(nano_id_board,oid,name,enable_limits_task,limits_task) VALUES ('0000000000','0000000000','default board',0,10);
-/*!40000 ALTER TABLE `boards` ENABLE KEYS */;
-UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `color_status`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -107,47 +90,170 @@ INSERT INTO color_status(color_name,color_hex) VALUES ('gray','aeaca7'),('red','
 UNLOCK TABLES;
 
 
+DROP TABLE IF EXISTS `statusV2`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `statusV2` (
+                            `id_status` int NOT NULL AUTO_INCREMENT,
+                            `status_name` VARCHAR(50) NOT NULL unique,
+                            `id_color` int DEFAULT 1,
+                            `status_description` VARCHAR(200) NULL,
+                            `created_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                            `updated_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                            PRIMARY KEY (`id_status`),
+                            INDEX `fk_Statuses_color_idx` (`id_color` ASC) VISIBLE,
+                            CONSTRAINT `fk_Statuses_color`
+                                FOREIGN KEY (`id_color`)
+                                    REFERENCES `karban`.`color_status` (`id_color`))
+    ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE IF NOT EXISTS `karban`.`statusV2` (
-                                                   `id_status` INT NOT NULL AUTO_INCREMENT,
-                                                   `status_name` VARCHAR(50) NOT NULL,
-    `id_color` INT NULL DEFAULT '1',
-    `status_description` VARCHAR(200) NULL DEFAULT NULL,
-    `created_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    `nano_id_board` VARCHAR(10) NOT NULL,
-    PRIMARY KEY (`id_status`),
-    UNIQUE INDEX `status_name` (`status_name` ASC) VISIBLE,
-    INDEX `fk_Statuses_color_idx` (`id_color` ASC) VISIBLE,
-    INDEX `fk_statusV2_boards1_idx` (`nano_id_board` ASC) VISIBLE,
-    CONSTRAINT `fk_Statuses_color`
-    FOREIGN KEY (`id_color`)
-    REFERENCES `karban`.`color_status` (`id_color`),
-    CONSTRAINT `fk_statusV2_boards1`
-    FOREIGN KEY (`nano_id_board`)
-    REFERENCES `karban`.`boards` (`nano_id_board`)
-                                                             ON DELETE NO ACTION
-                                                             ON UPDATE NO ACTION)
-    ENGINE = InnoDB
-    AUTO_INCREMENT = 1
-    DEFAULT CHARACTER SET = utf8mb4
-    COLLATE = utf8mb4_0900_ai_ci;
+
 LOCK TABLES `statusV2` WRITE;
 /*!40000 ALTER TABLE `statusV2` DISABLE KEYS */;
-INSERT INTO statusV2(status_name,status_description,id_color,nano_id_board) VALUES ('No Status','The default status',1,1),('To Do','The task is included in the project',3,1),('In Progress','The task is being worked on',7,1),('Reviewing','The task is being reviewed',9,1),('Testing','The task is being tested',8,1),('Waiting','The task is waiting for a resource',4,1),('Done','Finished',5,1);
+INSERT INTO statusV2(status_name,status_description,id_color) VALUES ('No Status','The default status',1),('To Do','The task is included in the project',3),('In Progress','The task is being worked on',7),('Reviewing','The task is being reviewed',9),('Testing','The task is being tested',8),('Waiting','The task is waiting for a resource',4),('Done','Finished',5);
 /*!40000 ALTER TABLE `statusV2` ENABLE KEYS */;
 UNLOCK TABLES;
 
 
-
-
-
-
+DROP TABLE IF EXISTS `tasksV2`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `karban`.`tasksV2` (
+CREATE TABLE `tasksV2` (
+                           `id_task` INT NOT NULL AUTO_INCREMENT,
+                           `title` VARCHAR(100) NOT NULL,
+                           `description` VARCHAR(500) NULL DEFAULT NULL,
+                           `created_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                           `updated_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                           `id_status` int NOT NULL DEFAULT 1,
+                           `assignees` VARCHAR(30) NULL DEFAULT NULL,
+                           PRIMARY KEY (`id_task`),
+                           INDEX `fk_Tasks_status_idx` (`id_status` ASC) VISIBLE,
+                           CONSTRAINT `fk_Tasks_statusV2`
+                               FOREIGN KEY (`id_status`)
+                                   REFERENCES `karban`.`statusV2` (`id_status`))
+    ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+LOCK TABLES `tasksV2` WRITE;
+INSERT INTO tasksV2(title,description,created_on,updated_on,id_status,assignees) VALUES
+                                                                                     ('TaskTitle1TaskTitle2TaskTitle3TaskTitle4TaskTitle5TaskTitle6TaskTitle7TaskTitle8TaskTitle9TaskTitle0',
+                                                                                      'Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti1Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti2Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti3Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti4Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti5','2024-04-22 09:00:00','2024-04-22 09:00:00',1,'Assignees1Assignees2Assignees3'),
+                                                                                     ('Repository',null,'2024-04-22 09:05:00','2024-04-22 14:00:00',2,null),
+                                                                                     ('ดาต้าเบส','ສ້າງຖານຂໍ້ມູນ','2024-04-22 09:10:00','2024-04-25 00:00:00',3,'あなた、彼、彼女 (私ではありません)'),
+                                                                                     ('_Infrastructure_','_Setup containers_','2024-04-22 09:15:00','2024-04-22 10:00:00',4,'ไก่งวง กับ เพนกวิน');
+UNLOCK TABLES;
+
+CREATE TABLE `settings` (
+                            `name_of_configure` VARCHAR(50) NOT NULL,
+                            `value` INT NULL,
+                            `enable` TINYINT(1) NOT NULL DEFAULT 1,
+                            PRIMARY KEY (`name_of_configure`),
+                            UNIQUE INDEX `id_setting_UNIQUE` (`name_of_configure` ASC) VISIBLE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+INSERT INTO settings  (name_of_configure,value) VALUES ('limit_of_tasks',10);
+
+
+
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+-- -----------------------------------------------------
+-- Schema karban
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema karban
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `karban` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci ;
+USE `karban` ;
+
+-- -----------------------------------------------------
+-- Table `karban`.`boards`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `karban`.`boards` (
+    `nano_id_board` VARCHAR(10) NOT NULL,
+    `name` VARCHAR(120) NOT NULL,
+    `enable_limits_task` BIT(1) NOT NULL DEFAULT 1,
+    `limits_task` INT NOT NULL DEFAULT 10,
+    `enable_status_center` varchar(4) NOT NULL DEFAULT 1111,
+    PRIMARY KEY (`nano_id_board`))
+    ENGINE = InnoDB
+    DEFAULT CHARACTER SET = utf8mb4
+    COLLATE = utf8mb4_0900_ai_ci;
+
+
+LOCK TABLES `boards` WRITE;
+/*!40000 ALTER TABLE `boards` DISABLE KEYS */;
+INSERT INTO boards(nano_id_board,name) VALUES ('0000000000','default broad'),('1111111111','olarn broad');
+/*!40000 ALTER TABLE `boards` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+-- -----------------------------------------------------
+-- Table `karban`.`statusV3`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `karban`.`statusV3` (
+                                                   `id_status` INT NOT NULL AUTO_INCREMENT,
+                                                   `status_name` VARCHAR(50) NOT NULL,
+    `id_color` INT NOT NULL DEFAULT '1',
+    `status_description` VARCHAR(200) NULL DEFAULT NULL,
+    `created_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `nano_id_board` VARCHAR(10) NOT NULL,
+    PRIMARY KEY (`id_status`, `status_name`),
+    UNIQUE INDEX `status_name` (`status_name` ASC) VISIBLE,
+    INDEX `fk_Statuses_color_idx` (`id_color` ASC) VISIBLE,
+    INDEX `fk_statusV2_boards1_idx` (`nano_id_board` ASC) VISIBLE,
+    CONSTRAINT `fk_Statuses_color_v3`
+    FOREIGN KEY (`id_color`)
+    REFERENCES `karban`.`color_status` (`id_color`),
+    CONSTRAINT `fk_statusV3_boards1`
+    FOREIGN KEY (`nano_id_board`)
+    REFERENCES `karban`.`boards` (`nano_id_board`))
+    ENGINE = InnoDB
+    AUTO_INCREMENT = 8
+    DEFAULT CHARACTER SET = utf8mb4
+    COLLATE = utf8mb4_0900_ai_ci;
+
+LOCK TABLES `statusV3` WRITE;
+/*!40000 ALTER TABLE `statusV3` DISABLE KEYS */;
+INSERT INTO statusV3(nano_id_board,status_name,status_description,id_color) VALUES ('0000000000','No Status','The default status',1),('0000000000','To Do','The task is included in the project',3),('0000000000','Doing','The task is being worked on',7),('0000000000','Done','Finished',5);
+/*!40000 ALTER TABLE `statusV3` ENABLE KEYS */;
+UNLOCK TABLES;
+
+-- -----------------------------------------------------
+-- Table `karban`.`center_status`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `karban`.`center_status` (
+                                                        `id_status` INT NOT NULL,
+                                                        `enable_config` BIT(1) NOT NULL,
+    INDEX `fk_center_status_statusV21_idx` (`id_status` ASC) VISIBLE,
+    PRIMARY KEY (`id_status`),
+    CONSTRAINT `fk_center_status_statusV21`
+    FOREIGN KEY (`id_status`)
+    REFERENCES `karban`.`statusV3` (`id_status`))
+    ENGINE = InnoDB
+    DEFAULT CHARACTER SET = utf8mb4
+    COLLATE = utf8mb4_0900_ai_ci;
+
+LOCK TABLES `center_status` WRITE;
+/*!40000 ALTER TABLE `center_status` DISABLE KEYS */;
+INSERT INTO center_status(id_status,enable_config) VALUES (1,0),(2,1),(3,1),(4,0);
+/*!40000 ALTER TABLE `center_status` ENABLE KEYS */;
+UNLOCK TABLES;
+
+-- -----------------------------------------------------
+-- Table `karban`.`tasksV3`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `karban`.`tasksV3` (
                                                   `id_task` INT NOT NULL AUTO_INCREMENT,
                                                   `title` VARCHAR(100) NOT NULL,
     `description` VARCHAR(500) NULL DEFAULT NULL,
@@ -159,46 +265,50 @@ CREATE TABLE IF NOT EXISTS `karban`.`tasksV2` (
     PRIMARY KEY (`id_task`),
     INDEX `fk_Tasks_status_idx` (`id_status` ASC) VISIBLE,
     INDEX `fk_tasksV2_boards1_idx` (`nano_id_board` ASC) VISIBLE,
-    CONSTRAINT `fk_Tasks_statusV2`
+    CONSTRAINT `fk_Tasks_statusV3`
     FOREIGN KEY (`id_status`)
-    REFERENCES `karban`.`statusV2` (`id_status`),
-    CONSTRAINT `fk_tasksV2_boards1`
+    REFERENCES `karban`.`statusV3` (`id_status`),
+    CONSTRAINT `fk_tasksV3_boards1`
     FOREIGN KEY (`nano_id_board`)
-    REFERENCES `karban`.`boards` (`nano_id_board`)
-                                                             ON DELETE NO ACTION
-                                                             ON UPDATE NO ACTION)
+    REFERENCES `karban`.`boards` (`nano_id_board`))
     ENGINE = InnoDB
     AUTO_INCREMENT = 1
     DEFAULT CHARACTER SET = utf8mb4
     COLLATE = utf8mb4_0900_ai_ci;
 
-LOCK TABLES `tasksV2` WRITE;
-INSERT INTO tasksV2(title,description,created_on,updated_on,id_status,assignees,nano_id_board) VALUES
-                                                                                              ('TaskTitle1TaskTitle2TaskTitle3TaskTitle4TaskTitle5TaskTitle6TaskTitle7TaskTitle8TaskTitle9TaskTitle0',
-                                                                                               'Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti1Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti2Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti3Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti4Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti5','2024-04-22 09:00:00','2024-04-22 09:00:00',1,'Assignees1Assignees2Assignees3',1),
-                                                                                              ('Repository',null,'2024-04-22 09:05:00','2024-04-22 14:00:00',2,null,1),
-                                                                                              ('ดาต้าเบส','ສ້າງຖານຂໍ້ມູນ','2024-04-22 09:10:00','2024-04-25 00:00:00',3,'あなた、彼、彼女 (私ではありません)',1),
-                                                                                              ('_Infrastructure_','_Setup containers_','2024-04-22 09:15:00','2024-04-22 10:00:00',4,'ไก่งวง กับ เพนกวิน',1);
+LOCK TABLES `tasksV3` WRITE;
+INSERT INTO tasksV3(nano_id_board,title,description,created_on,updated_on,id_status,assignees) VALUES
+                                                                                     ('1111111111','TaskTitle1TaskTitle2TaskTitle3TaskTitle4TaskTitle5TaskTitle6TaskTitle7TaskTitle8TaskTitle9TaskTitle0',
+                                                                                      'Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti1Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti2Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti3Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti4Descripti1Descripti2Descripti3Descripti4Descripti5Descripti6Descripti7Descripti8Descripti9Descripti5','2024-04-22 09:00:00','2024-04-22 09:00:00',1,'Assignees1Assignees2Assignees3'),
+                                                                                     ('1111111111','Repository',null,'2024-04-22 09:05:00','2024-04-22 14:00:00',2,null),
+                                                                                     ('1111111111','ดาต้าเบส','ສ້າງຖານຂໍ້ມູນ','2024-04-22 09:10:00','2024-04-25 00:00:00',3,'あなた、彼、彼女 (私ではありません)'),
+                                                                                     ('1111111111','_Infrastructure_','_Setup containers_','2024-04-22 09:15:00','2024-04-22 10:00:00',4,'ไก่งวง กับ เพนกวิน');
 UNLOCK TABLES;
 
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `karban`.`center_status` (
-                                                        `id_center_status` INT NOT NULL AUTO_INCREMENT,
-                                                        `id_status` INT NOT NULL,
-                                                        `enable_config` VARCHAR(45) NOT NULL,
-    PRIMARY KEY (`id_center_status`),
-    INDEX `fk_center_status_statusV21_idx` (`id_status` ASC) VISIBLE,
-    CONSTRAINT `fk_center_status_statusV21`
-    FOREIGN KEY (`id_status`)
-    REFERENCES `karban`.`statusV2` (`id_status`)
+
+-- -----------------------------------------------------
+-- Table `karban`.`share_board`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `karban`.`share_board` (
+                                                      `oid_user_share` VARCHAR(36) NOT NULL,
+    `nano_id_board` VARCHAR(10) NOT NULL,
+    `role` ENUM("OWNER", "WRITER", "READER") NOT NULL,
+    PRIMARY KEY (`oid_user_share`, `nano_id_board`),
+    INDEX `fk_share_board_boards1_idx` (`nano_id_board` ASC) VISIBLE,
+    CONSTRAINT `fk_share_board_boards1`
+    FOREIGN KEY (`nano_id_board`)
+    REFERENCES `karban`.`boards` (`nano_id_board`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-    ENGINE = InnoDB
-    AUTO_INCREMENT = 1
-    DEFAULT CHARACTER SET = utf8mb4
-    COLLATE = utf8mb4_0900_ai_ci;
+    ENGINE = InnoDB;
 
-LOCK TABLES `center_status` WRITE;
-INSERT INTO center_status(id_status,enable_config) VALUES (1,0),(7,0);
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+    LOCK TABLES `share_board` WRITE;
+/*!40000 ALTER TABLE `share_board` DISABLE KEYS */;
+INSERT INTO share_board(oid_user_share,nano_id_board,role) VALUES ("51b67db4-0947-4bbd-895a-8ed9a7adffc0","1111111111","OWNER");
+/*!40000 ALTER TABLE `share_board` ENABLE KEYS */;
 UNLOCK TABLES;

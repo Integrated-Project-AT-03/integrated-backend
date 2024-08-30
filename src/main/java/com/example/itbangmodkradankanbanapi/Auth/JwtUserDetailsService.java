@@ -2,7 +2,7 @@ package com.example.itbangmodkradankanbanapi.Auth;
 
 import com.example.itbangmodkradankanbanapi.exceptions.UnauthorizedLoginException;
 import com.example.itbangmodkradankanbanapi.repositories.V2.userShare.UserDataRepository;
-import com.example.itbangmodkradankanbanapi.entities.V2.userShare.UserdataEntity;
+import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

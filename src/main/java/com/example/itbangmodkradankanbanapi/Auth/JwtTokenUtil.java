@@ -1,6 +1,6 @@
 package com.example.itbangmodkradankanbanapi.Auth;
 
-import com.example.itbangmodkradankanbanapi.entities.V2.userShare.UserdataEntity;
+import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
