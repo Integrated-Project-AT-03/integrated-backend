@@ -1,4 +1,4 @@
-package com.example.itbangmodkradankanbanapi.FirstDataSourceConfiguration;
+package com.example.itbangmodkradankanbanapi.DataSourceConfiguration;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,7 +17,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableJpaRepositories(
-        basePackages = "com.example.itbangmodkradankanbanapi.repositories.V2.userShare",
+        basePackages = "com.example.itbangmodkradankanbanapi.repositories.userShare",
         entityManagerFactoryRef = "secondEntityManagerFactory",
         transactionManagerRef = "secondTransactionManager"
 )

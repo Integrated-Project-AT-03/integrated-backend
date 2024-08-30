@@ -183,7 +183,7 @@ CREATE TABLE IF NOT EXISTS `karban`.`boards` (
     `name` VARCHAR(120) NOT NULL,
     `enable_limits_task` BIT(1) NOT NULL DEFAULT 1,
     `limits_task` INT NOT NULL DEFAULT 10,
-    `enable_status_center` varchar(4) NOT NULL DEFAULT 1111,
+    `enable_status_center` BIT(4) NOT NULL DEFAULT b'1111',
     PRIMARY KEY (`nano_id_board`))
     ENGINE = InnoDB
     DEFAULT CHARACTER SET = utf8mb4

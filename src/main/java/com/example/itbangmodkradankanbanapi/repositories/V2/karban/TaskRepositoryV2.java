@@ -1,7 +1,7 @@
 package com.example.itbangmodkradankanbanapi.repositories.V2.karban;
 
-import com.example.itbangmodkradankanbanapi.entities.V2.karban.StatusV2;
-import com.example.itbangmodkradankanbanapi.entities.V2.karban.TasksV2;
+import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
+import com.example.itbangmodkradankanbanapi.entities.V2.TasksV2;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 

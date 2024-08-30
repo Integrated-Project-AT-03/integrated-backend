@@ -6,7 +6,7 @@ import com.example.itbangmodkradankanbanapi.Auth.JwtUserDetailsService;
 import com.example.itbangmodkradankanbanapi.dtos.V2.JwtDtoV2;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.UnauthorizedLoginException;
-import com.example.itbangmodkradankanbanapi.repositories.V2.userShare.UserDataRepository;
+import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
 import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

@@ -1,4 +1,4 @@
-package com.example.itbangmodkradankanbanapi.entities.V2.karban;
+package com.example.itbangmodkradankanbanapi.entities.V2;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

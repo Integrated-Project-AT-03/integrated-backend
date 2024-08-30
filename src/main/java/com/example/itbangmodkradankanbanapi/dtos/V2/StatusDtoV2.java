@@ -1,7 +1,7 @@
 package com.example.itbangmodkradankanbanapi.dtos.V2;
 
 
-import com.example.itbangmodkradankanbanapi.entities.V2.karban.TasksV2;
+import com.example.itbangmodkradankanbanapi.entities.V2.TasksV2;
 import com.example.itbangmodkradankanbanapi.utils.EmptyToNullAndTrimDeserializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
