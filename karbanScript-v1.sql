@@ -17,7 +17,6 @@
 
 --
 -- Table structure for table `status`
-
 use karban;
 DROP TABLE IF EXISTS `status`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -202,14 +201,13 @@ UNLOCK TABLES;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `karban`.`statusV3` (
                                                    `id_status` INT NOT NULL AUTO_INCREMENT,
-                                                   `status_name` VARCHAR(50) NOT NULL,
+    `status_name` VARCHAR(50) NOT NULL,
     `id_color` INT NOT NULL DEFAULT '1',
     `status_description` VARCHAR(200) NULL DEFAULT NULL,
     `created_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_on` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `nano_id_board` VARCHAR(10) NOT NULL,
-    PRIMARY KEY (`id_status`, `status_name`),
-    UNIQUE INDEX `status_name` (`status_name` ASC) VISIBLE,
+    PRIMARY KEY (`id_status`),
     INDEX `fk_Statuses_color_idx` (`id_color` ASC) VISIBLE,
     INDEX `fk_statusV2_boards1_idx` (`nano_id_board` ASC) VISIBLE,
     CONSTRAINT `fk_Statuses_color_v3`
@@ -219,7 +217,7 @@ CREATE TABLE IF NOT EXISTS `karban`.`statusV3` (
     FOREIGN KEY (`nano_id_board`)
     REFERENCES `karban`.`boards` (`nano_id_board`))
     ENGINE = InnoDB
-    AUTO_INCREMENT = 8
+    AUTO_INCREMENT = 1
     DEFAULT CHARACTER SET = utf8mb4
     COLLATE = utf8mb4_0900_ai_ci;
 

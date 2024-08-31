@@ -1,5 +1,6 @@
 package com.example.itbangmodkradankanbanapi.entities.V2;
 
+import com.example.itbangmodkradankanbanapi.entities.V3.StatusV3;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -21,4 +22,7 @@ public class ColorStatus {
     private String hex;
     @OneToMany(mappedBy = "color")
     private List<StatusV2> statuses;
+
+    @OneToMany(mappedBy = "color")
+    private List<StatusV3> statusesV3;
 }

@@ -1,0 +1,88 @@
+package com.example.itbangmodkradankanbanapi.services.V3;
+
+import com.example.itbangmodkradankanbanapi.dtos.V1.FormTaskDto;
+import com.example.itbangmodkradankanbanapi.dtos.V1.FullTaskDto;
+import com.example.itbangmodkradankanbanapi.dtos.V1.TaskDto;
+import com.example.itbangmodkradankanbanapi.dtos.V3.board.BoardDtoV3;
+import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardDtoV3;
+import com.example.itbangmodkradankanbanapi.dtos.V3.board.FullBoardDtoV3;
+import com.example.itbangmodkradankanbanapi.dtos.V3.task.FormTaskDtoV3;
+import com.example.itbangmodkradankanbanapi.dtos.V3.task.TaskDtoV3;
+import com.example.itbangmodkradankanbanapi.entities.V1.Task;
+import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
+import com.example.itbangmodkradankanbanapi.entities.V3.*;
+import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
+import com.example.itbangmodkradankanbanapi.exceptions.InvalidFieldInputException;
+import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
+import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
+import com.example.itbangmodkradankanbanapi.models.SettingLockStatus;
+import com.example.itbangmodkradankanbanapi.repositories.V1.StatusRepository;
+import com.example.itbangmodkradankanbanapi.repositories.V1.TaskRepository;
+import com.example.itbangmodkradankanbanapi.repositories.V3.BoardRepositoryV3;
+import com.example.itbangmodkradankanbanapi.repositories.V3.ShareBoardRepositoryV3;
+import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
+import com.example.itbangmodkradankanbanapi.utils.CustomNanoId;
+import com.example.itbangmodkradankanbanapi.utils.ListMapper;
+import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.NoSuchElementException;
+
+@Service
+public class BoardService {
+    @Autowired
+    private ShareBoardRepositoryV3 shareBoardRepository;
+
+    @Autowired
+    private BoardRepositoryV3 repository;
+    @Autowired
+    private UserDataRepository userDataRepository;
+    @Autowired
+    private ListMapper listMapper;
+    private final ModelMapper modelMapper = new ModelMapper();
+
+//    public FullBoardDtoV3 addBoard(String nanoId){
+//
+//        return modelMapper.map(repository.findById(nanoId).orElseThrow(() -> new NoSuchElementException("board "+ nanoId + " dose not exist !!!!")),FullBoardDtoV3.class);
+//    }
+    public FullBoardDtoV3 getBoard(String nanoId){
+        Board board = repository.findById(nanoId).orElseThrow(() -> new NoSuchElementException("Board id "+ nanoId + " not found"));
+        FullBoardDtoV3 boardDto = modelMapper.map(board,FullBoardDtoV3.class);
+        String oidOwner = board.getShareBoards().stream().filter(shareBoard -> shareBoard.getRole() == ShareBoardsRole.OWNER).findFirst().orElseThrow(()-> new NotAllowedException("The default board is not allowed to access")).getOidUserShare();
+        UserdataEntity user = userDataRepository.findById(oidOwner).orElseThrow(()-> new ItemNotFoundException("Not found user oid "+ oidOwner ));
+        FullBoardDtoV3.Owner owner = new FullBoardDtoV3.Owner();
+        owner.setOid(user.getOid());
+        owner.setName(user.getName());
+        boardDto.setOwner(owner);
+        return boardDto;
+
+    }
+
+    @Transactional
+    public FullBoardDtoV3 createBoard(FormBoardDtoV3 newBoardForm){
+      UserdataEntity user = userDataRepository.findById(newBoardForm.getOwnerOid()).orElseThrow(()-> new InvalidFieldInputException("owner","not found user id " + newBoardForm.getOwnerOid()));
+        Board newBoard = new Board();
+        String nanoId = CustomNanoId.generate(10);
+        newBoard.setNanoIdBoard(nanoId);
+        newBoard.setName(newBoardForm.getName());
+        Board board =  repository.save(newBoard);
+        ShareBoard newShareBoard = new ShareBoard();
+        newShareBoard.setBoard(board);
+        newShareBoard.setRole(ShareBoardsRole.OWNER);
+        newShareBoard.setOidUserShare(newBoardForm.getOwnerOid());
+        shareBoardRepository.save(newShareBoard);
+        FullBoardDtoV3.Owner owner = new FullBoardDtoV3.Owner();
+        FullBoardDtoV3 boardDto = modelMapper.map(board,FullBoardDtoV3.class);
+        owner.setOid(user.getOid());
+        owner.setName(user.getName());
+        boardDto.setOwner(owner);
+        return boardDto;
+    }
+
+    public List<BoardDtoV3> getAllBoard(){
+        return listMapper.mapList(repository.findAll(), BoardDtoV3.class);
+    }
+}
