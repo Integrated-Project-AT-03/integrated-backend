@@ -19,6 +19,7 @@ import javax.sql.DataSource;
 @Configuration
 @EnableJpaRepositories(
         basePackages ={
+                "com.example.itbangmodkradankanbanapi.repositories.V3",
                 "com.example.itbangmodkradankanbanapi.repositories.V2",
                 "com.example.itbangmodkradankanbanapi.repositories.V1"
         },
@@ -53,7 +54,7 @@ public class KarbanDataSourceConfig {
             @Qualifier("firstDataSource") DataSource firstDataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(firstDataSource);
-        em.setPackagesToScan("com.example.itbangmodkradankanbanapi.entities.V2","com.example.itbangmodkradankanbanapi.entities.V1");
+        em.setPackagesToScan("com.example.itbangmodkradankanbanapi.entities.V3","com.example.itbangmodkradankanbanapi.entities.V2","com.example.itbangmodkradankanbanapi.entities.V1");
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         return em;
     }

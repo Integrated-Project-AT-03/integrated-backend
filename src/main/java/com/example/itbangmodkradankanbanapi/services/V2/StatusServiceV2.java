@@ -11,9 +11,9 @@ import com.example.itbangmodkradankanbanapi.exceptions.InvalidFieldInputExceptio
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
 import com.example.itbangmodkradankanbanapi.models.SettingLockStatus;
-import com.example.itbangmodkradankanbanapi.repositories.V2.karban.ColorRepository;
-import com.example.itbangmodkradankanbanapi.repositories.V2.karban.StatusRepositoryV2;
-import com.example.itbangmodkradankanbanapi.repositories.V2.karban.TaskRepositoryV2;
+import com.example.itbangmodkradankanbanapi.repositories.V2.ColorRepository;
+import com.example.itbangmodkradankanbanapi.repositories.V2.StatusRepositoryV2;
+import com.example.itbangmodkradankanbanapi.repositories.V2.TaskRepositoryV2;
 import com.example.itbangmodkradankanbanapi.utils.ListMapper;
 import jakarta.transaction.Transactional;
 

@@ -2,7 +2,7 @@ package com.example.itbangmodkradankanbanapi.services.V2;
 
 import com.example.itbangmodkradankanbanapi.dtos.V2.ColorDto;
 
-import com.example.itbangmodkradankanbanapi.repositories.V2.karban.ColorRepository;
+import com.example.itbangmodkradankanbanapi.repositories.V2.ColorRepository;
 
 import com.example.itbangmodkradankanbanapi.utils.ListMapper;
 import org.modelmapper.ModelMapper;
