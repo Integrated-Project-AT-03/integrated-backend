@@ -23,3 +23,5 @@ public class FullStatusDtoV3 {
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX")
     private Timestamp updatedOn;
 }
+//   "field": "boardNanoId",
+//           "message": "must not be null"

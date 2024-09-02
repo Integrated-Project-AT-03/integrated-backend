@@ -34,10 +34,21 @@ private BoardService service;
         return ResponseEntity.ok(service.getBoard(nanoId));
     }
     @GetMapping("")
-    public ResponseEntity<Object> getAllTask(){
+    public ResponseEntity<Object> getAllBoards(){
         return  ResponseEntity.ok(service.getAllBoard());
     }
 
+    @GetMapping("{nanoId}/tasks")
+    public ResponseEntity<Object> getAllTasksByBoard(@PathVariable String nanoId){
+        return  ResponseEntity.ok(service.getAllTasksByBoard(nanoId));
+    }
+
+
+
+    @GetMapping("{nanoId}/statuses")
+    public ResponseEntity<Object> getAllStatusesByBoard(@PathVariable String nanoId){
+        return  ResponseEntity.ok(service.getAllStatusesByBoard(nanoId));
+    }
 
     @PostMapping("")
     public ResponseEntity<Object> createBoard(@RequestBody @Valid FormBoardDtoV3 newBoard){

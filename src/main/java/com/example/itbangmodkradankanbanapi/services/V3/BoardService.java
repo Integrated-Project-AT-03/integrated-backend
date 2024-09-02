@@ -3,9 +3,11 @@ package com.example.itbangmodkradankanbanapi.services.V3;
 import com.example.itbangmodkradankanbanapi.dtos.V1.FormTaskDto;
 import com.example.itbangmodkradankanbanapi.dtos.V1.FullTaskDto;
 import com.example.itbangmodkradankanbanapi.dtos.V1.TaskDto;
+import com.example.itbangmodkradankanbanapi.dtos.V2.TaskDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.BoardDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.FullBoardDtoV3;
+import com.example.itbangmodkradankanbanapi.dtos.V3.status.StatusDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.FormTaskDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.TaskDtoV3;
 import com.example.itbangmodkradankanbanapi.entities.V1.Task;
@@ -19,6 +21,7 @@ import com.example.itbangmodkradankanbanapi.models.SettingLockStatus;
 import com.example.itbangmodkradankanbanapi.repositories.V1.StatusRepository;
 import com.example.itbangmodkradankanbanapi.repositories.V1.TaskRepository;
 import com.example.itbangmodkradankanbanapi.repositories.V3.BoardRepositoryV3;
+import com.example.itbangmodkradankanbanapi.repositories.V3.CenterStatusRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.V3.ShareBoardRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
 import com.example.itbangmodkradankanbanapi.utils.CustomNanoId;
@@ -28,8 +31,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class BoardService {
@@ -40,14 +45,15 @@ public class BoardService {
     private BoardRepositoryV3 repository;
     @Autowired
     private UserDataRepository userDataRepository;
+
+    @Autowired
+    private CenterStatusRepositoryV3 centerStatusRepository;
+
     @Autowired
     private ListMapper listMapper;
     private final ModelMapper modelMapper = new ModelMapper();
 
-//    public FullBoardDtoV3 addBoard(String nanoId){
-//
-//        return modelMapper.map(repository.findById(nanoId).orElseThrow(() -> new NoSuchElementException("board "+ nanoId + " dose not exist !!!!")),FullBoardDtoV3.class);
-//    }
+
     public FullBoardDtoV3 getBoard(String nanoId){
         Board board = repository.findById(nanoId).orElseThrow(() -> new NoSuchElementException("Board id "+ nanoId + " not found"));
         FullBoardDtoV3 boardDto = modelMapper.map(board,FullBoardDtoV3.class);
@@ -66,6 +72,11 @@ public class BoardService {
       UserdataEntity user = userDataRepository.findById(newBoardForm.getOwnerOid()).orElseThrow(()-> new InvalidFieldInputException("owner","not found user id " + newBoardForm.getOwnerOid()));
         Board newBoard = new Board();
         String nanoId = CustomNanoId.generate(10);
+        AtomicInteger time = new AtomicInteger(0);
+        while (repository.findById(nanoId).orElse(null) != null) {
+            nanoId = CustomNanoId.generate(10);
+           if (time.getAndIncrement() == 10) throw new NotAllowedException("Boards is too much for creating");
+        }
         newBoard.setNanoIdBoard(nanoId);
         newBoard.setName(newBoardForm.getName());
         Board board =  repository.save(newBoard);
@@ -84,5 +95,26 @@ public class BoardService {
 
     public List<BoardDtoV3> getAllBoard(){
         return listMapper.mapList(repository.findAll(), BoardDtoV3.class);
+    }
+
+    public List<TaskDtoV2> getAllTasksByBoard(String nanoId){
+        return listMapper.mapList(repository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Board id "+ nanoId + " not found")).getTasks(), TaskDtoV2.class);
+    }
+
+
+    public List<StatusDtoV3> getAllStatusesByBoard(String nanoId){
+
+        Board board = repository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Board id "+ nanoId + " not found"));
+        List<StatusV3> tempStatus = new ArrayList<>();
+
+        AtomicInteger index = new AtomicInteger(0);
+        List<StatusV3> centerStatus = centerStatusRepository.findAll().stream().map(CenterStatus::getStatus).filter((status) -> {
+            int idx = index.getAndIncrement();
+           return String.valueOf(board.getEnableStatusCenter().charAt(idx)).equals("1");
+        }).toList();
+        tempStatus.addAll(centerStatus);
+        tempStatus.addAll( board.getStatuses());
+
+        return listMapper.mapList(tempStatus, StatusDtoV3.class);
     }
 }

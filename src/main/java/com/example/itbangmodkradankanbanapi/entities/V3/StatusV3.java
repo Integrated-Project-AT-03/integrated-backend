@@ -13,8 +13,8 @@ import java.util.List;
 @Entity
 @Data
 public class StatusV3 {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_status")
     private Integer id;
     @Basic
@@ -29,8 +29,11 @@ public class StatusV3 {
     @UpdateTimestamp
     @Column(name = "updated_on")
     private Timestamp updatedOn;
-    @OneToOne(mappedBy = "statusV3ByIdStatus")
-    private CenterStatus centerStatusByIdStatus;
+
+    @OneToOne(mappedBy = "status")
+    private CenterStatus centerStatus;
+
+
     @ManyToOne
     @JoinColumn(name = "nano_id_board", referencedColumnName = "nano_id_board", nullable = false)
     private Board board;

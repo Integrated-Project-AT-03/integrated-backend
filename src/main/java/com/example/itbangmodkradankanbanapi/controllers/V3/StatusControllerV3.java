@@ -39,9 +39,9 @@ private StatusServiceV3 service;
         return  ResponseEntity.ok(service.getAllStatus());
     }
 
-    @DeleteMapping("{id}")
-    public StatusDtoV3 deleteTask(@PathVariable @NotNull  Integer id)  {
-      return   service.deleteStatus(id);
+    @DeleteMapping("{id}/board/{nanoIdBoard}")
+    public StatusDtoV3 deleteTask(@PathVariable @NotNull  Integer id, @PathVariable @NotNull String nanoIdBoard)  {
+      return   service.deleteStatus(id,nanoIdBoard);
     }
 
     @PutMapping("{id}")
@@ -49,9 +49,9 @@ private StatusServiceV3 service;
         return ResponseEntity.ok( service.updateStatus(id,status));
     }
 
-    @DeleteMapping("{deletedId}/{changeId}")
-    public ResponseEntity<Object> changeTaskStatus(@PathVariable @NotNull Integer deletedId,@PathVariable @NotNull Integer changeId){
-        return ResponseEntity.ok(service.ChangeTasksByStatusAndDelete(deletedId,changeId));
+    @DeleteMapping("{deletedId}/{changeId}/board/{nanoIdBoard}")
+    public ResponseEntity<Object> changeTaskStatus(@PathVariable @NotNull Integer deletedId,@PathVariable @NotNull Integer changeId,@PathVariable @NotNull String nanoIdBoard){
+        return ResponseEntity.ok(service.ChangeTasksByStatusAndDelete(deletedId,changeId,nanoIdBoard));
     }
 
     @PostMapping("")
