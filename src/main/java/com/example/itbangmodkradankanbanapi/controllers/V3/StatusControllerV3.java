@@ -45,7 +45,7 @@ private StatusServiceV3 service;
     }
 
     @PutMapping("{id}")
-    public  ResponseEntity<Object> updateTask(@PathVariable  Integer id ,@RequestBody @Valid FormStatusDtoV3 status){
+    public  ResponseEntity<Object> updateStatus(@PathVariable  Integer id ,@RequestBody @Valid FormStatusDtoV3 status){
         return ResponseEntity.ok( service.updateStatus(id,status));
     }
 

@@ -11,7 +11,7 @@ public class TaskDtoV3 {
     @JsonProperty("status")
     private  String statusStatusName;
     private  String statusColorHex;
-
+    private String boardNanoId;
     public String getStatusColorHex(){
         return "#"+statusColorHex;
     }

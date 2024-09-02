@@ -18,6 +18,7 @@ public class FullStatusDtoV3 {
     private String statusDescription;
     private Integer colorId;
     private String colorHex;
+    private String boardNanoId;
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX")
     private Timestamp createdOn;
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX")

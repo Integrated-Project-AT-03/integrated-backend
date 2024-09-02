@@ -15,6 +15,7 @@ import java.util.List;
 public class StatusDtoV3 {
     private Integer id;
     private String name;
+    private String boardNanoId;
     @JsonProperty("description")
     @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)
     private String statusDescription;

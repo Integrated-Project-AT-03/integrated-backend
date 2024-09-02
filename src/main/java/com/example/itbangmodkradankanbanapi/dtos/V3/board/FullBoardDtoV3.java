@@ -29,12 +29,9 @@ public class FullBoardDtoV3 {
     private String name;
     private Owner owner = null;
 
-//    private Boolean enableLimitsTask;
-//    private Integer limitsTask;
-//    private String enableStatusCenter;
-//    private List<StatusDtoV3> statuses;
-//    private List<TaskDtoV3> tasks;
-
+    private Boolean enableLimitsTask;
+    private Integer limitsTask;
+    private String enableStatusCenter;
         @Data
         public static class Owner{
             private String oid;
