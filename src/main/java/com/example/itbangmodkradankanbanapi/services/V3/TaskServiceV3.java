@@ -83,9 +83,16 @@ public class TaskServiceV3 {
         updateTask.setAssignees(formTask.getAssignees());
         updateTask.setDescription(formTask.getDescription());
         StatusV3 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new InvalidFieldInputException("status","does not exist"));
-        Setting setting =settingService.getSetting("limit_of_tasks");
-        if(!SettingLockStatus.isLockStatusId(status.getId()) &&  setting.getEnable() && (status.getTasks().size() >= setting.getValue() && !oldStatus.equals(status))) throw new InvalidFieldInputException("status","the status has reached the limit");
-        updateTask.setStatus(status);
+        Board board = updateTask.getBoard();
+
+        if(status.getCenterStatus() != null) {
+            if (!oldStatus.equals(status) && status.getCenterStatus().getEnableConfig() && board.getEnableLimitsTask() && status.getTasks().size() >= board.getLimitsTask())
+                throw new InvalidFieldInputException("status", "status cannot be over the limit ");
+        }else {
+            if (!oldStatus.equals(status) && board.getEnableLimitsTask() && status.getTasks().size() >= board.getLimitsTask())
+                throw new InvalidFieldInputException("status", "status cannot be over the limit ");
+        }
+
       return  modelMapper.map( repository.save(updateTask),TaskDtoV3.class);
     }
 
@@ -98,9 +105,17 @@ public class TaskServiceV3 {
         Board board = boardRepository.findById(formTask.getBoardNanoId()).orElseThrow(() -> new InvalidFieldInputException("boardNanoId","does not exist"));
         newTask.setBoard(board);
         StatusV3 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new InvalidFieldInputException("status","does not exist"));
-        Setting setting =settingService.getSetting("limit_of_tasks");
-        if(!SettingLockStatus.isLockStatusId(status.getId()) &&setting.getEnable() && status.getTasks().size() >= setting.getValue()) throw new InvalidFieldInputException("status","the status has reached the limit");
+        if(status.getCenterStatus() != null) {
+            if (status.getCenterStatus().getEnableConfig() && board.getEnableLimitsTask() && status.getTasks().size() >= board.getLimitsTask())
+                throw new InvalidFieldInputException("status", "status cannot be over the limit");
+        }else {
+            if (board.getEnableLimitsTask() && status.getTasks().size() >= board.getLimitsTask())
+                throw new InvalidFieldInputException("status", "status cannot be over the limit");
+        }
         newTask.setStatus(status);
+
+
+
         return modelMapper.map( repository.save(newTask),TaskDtoV3.class);
     }
 }

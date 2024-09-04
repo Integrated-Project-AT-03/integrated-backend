@@ -6,6 +6,7 @@ import com.example.itbangmodkradankanbanapi.dtos.V1.TaskDto;
 import com.example.itbangmodkradankanbanapi.dtos.V2.TaskDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.BoardDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardDtoV3;
+import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardSettingDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.FullBoardDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.status.StatusDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.FormTaskDtoV3;
@@ -53,6 +54,17 @@ public class BoardService {
     private ListMapper listMapper;
     private final ModelMapper modelMapper = new ModelMapper();
 
+    public FormBoardSettingDtoV3 updateBoardSettings(String nanoId,FormBoardSettingDtoV3 settingForm){
+        Board board = repository.findById(nanoId).orElseThrow(() -> new NoSuchElementException("Board id "+ nanoId + " not found"));
+        board.setEnableLimitsTask(settingForm.getEnableLimitsTask());
+        board.setLimitsTask(settingForm.getLimitsTask());
+        return modelMapper.map(repository.save(board),FormBoardSettingDtoV3.class);
+    }
+
+    public FormBoardSettingDtoV3 getBoardSettings(String nanoId){
+        Board board = repository.findById(nanoId).orElseThrow(() -> new NoSuchElementException("Board id "+ nanoId + " not found"));
+        return modelMapper.map(repository.save(board),FormBoardSettingDtoV3.class);
+    }
 
     public FullBoardDtoV3 getBoard(String nanoId){
         Board board = repository.findById(nanoId).orElseThrow(() -> new NoSuchElementException("Board id "+ nanoId + " not found"));

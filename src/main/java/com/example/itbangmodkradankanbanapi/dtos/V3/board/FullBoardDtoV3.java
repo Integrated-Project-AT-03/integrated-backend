@@ -37,4 +37,5 @@ public class FullBoardDtoV3 {
             private String oid;
             private String name;
         }
+
 }

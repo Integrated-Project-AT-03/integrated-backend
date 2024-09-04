@@ -4,6 +4,7 @@ package com.example.itbangmodkradankanbanapi.controllers.V3;
 import com.example.itbangmodkradankanbanapi.dtos.V1.FormTaskDto;
 import com.example.itbangmodkradankanbanapi.dtos.V1.TaskDto;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardDtoV3;
+import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardSettingDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.FormTaskDtoV3;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
@@ -41,6 +42,16 @@ private BoardService service;
     @GetMapping("{nanoId}/tasks")
     public ResponseEntity<Object> getAllTasksByBoard(@PathVariable String nanoId){
         return  ResponseEntity.ok(service.getAllTasksByBoard(nanoId));
+    }
+
+    @GetMapping("{nanoId}/settings")
+    public ResponseEntity<Object> getBoardSettings(@PathVariable String nanoId){
+        return  ResponseEntity.ok(service.getBoardSettings(nanoId));
+    }
+
+    @PutMapping("{nanoId}/settings")
+    public ResponseEntity<Object> updateBoardSettings(@PathVariable String nanoId,@Valid @RequestBody FormBoardSettingDtoV3 settingForm){
+        return  ResponseEntity.ok(service.updateBoardSettings(nanoId,settingForm));
     }
 
 
