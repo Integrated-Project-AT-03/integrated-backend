@@ -310,6 +310,6 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
     LOCK TABLES `share_board` WRITE;
 /*!40000 ALTER TABLE `share_board` DISABLE KEYS */;
-INSERT INTO share_board(oid_user_share,nano_id_board,role) VALUES ("51b67db4-0947-4bbd-895a-8ed9a7adffc0","1111111111","OWNER");
+INSERT INTO share_board(oid_user_share,nano_id_board,role) VALUES ("2b2f94fd-68be-4ff2-8c67-cb35e139f6fb","1111111111","OWNER");
 /*!40000 ALTER TABLE `share_board` ENABLE KEYS */;
 UNLOCK TABLES;
