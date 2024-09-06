@@ -92,6 +92,7 @@ public class TaskServiceV3 {
             if (!oldStatus.equals(status) && board.getEnableLimitsTask() && status.getTasks().size() >= board.getLimitsTask())
                 throw new InvalidFieldInputException("status", "status cannot be over the limit ");
         }
+        updateTask.setStatus(status);
 
       return  modelMapper.map( repository.save(updateTask),TaskDtoV3.class);
     }
