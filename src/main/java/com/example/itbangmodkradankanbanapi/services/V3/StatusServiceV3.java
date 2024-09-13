@@ -80,16 +80,17 @@ public class StatusServiceV3 {
             if (!targetStatus.getCenterStatus().getEnableConfig())
                 throw new NotAllowedException(targetStatus.getName().toLowerCase() + " cannot be modified.");
 
+
             statusForm.setBoardNanoId(board.getNanoIdBoard());
             closeEnableStatusCenterByStatus(board,targetStatus);
-
-
             StatusV3 newStatus = new StatusV3();
             newStatus.setName(statusForm.getName());
             newStatus.setColor(targetStatus.getColor());
             newStatus.setStatusDescription(statusForm.getStatusDescription());
             newStatus.setColor(colorRepository.findById(statusForm.getColorId()).orElseThrow(() -> new ItemNotFoundException("Color " + statusForm.getColorId() + " dose not exist !!!!")));
             newStatus.setBoard(board);
+            newStatus.setUpdatedOn(targetStatus.getUpdatedOn());
+            newStatus.setCreatedOn(targetStatus.getCreatedOn());
             StatusV3 cloneStatus = repository.save(newStatus);
 
           List<TasksV3> transferTask =  taskRepository.findByStatusAndBoard(targetStatus,board).stream().peek(task -> {
