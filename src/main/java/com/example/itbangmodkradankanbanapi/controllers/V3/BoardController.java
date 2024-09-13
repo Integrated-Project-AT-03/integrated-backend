@@ -34,15 +34,15 @@ private BoardService service;
     public ResponseEntity<Object> findTask(@PathVariable String nanoId){
         return ResponseEntity.ok(service.getBoard(nanoId));
     }
-    @GetMapping("")
-    public ResponseEntity<Object> getAllBoards(){
-        return  ResponseEntity.ok(service.getAllBoard());
-    }
+//    @GetMapping("")
+//    public ResponseEntity<Object> getAllBoards(){
+//        return  ResponseEntity.ok(service.getAllBoard());
+//    }
 
-    @GetMapping("{nanoId}/tasks")
-    public ResponseEntity<Object> getAllTasksByBoard(@PathVariable String nanoId){
-        return  ResponseEntity.ok(service.getAllTasksByBoard(nanoId));
-    }
+//    @GetMapping("{nanoId}/tasks")
+//    public ResponseEntity<Object> getAllTasksByBoard(@PathVariable String nanoId){
+//        return  ResponseEntity.ok(service.getAllTasksByBoard(nanoId));
+//    }
 
     @GetMapping("{nanoId}/settings")
     public ResponseEntity<Object> getBoardSettings(@PathVariable String nanoId){
@@ -54,7 +54,14 @@ private BoardService service;
         return  ResponseEntity.ok(service.updateBoardSettings(nanoId,settingForm));
     }
 
-
+    @GetMapping("{nanoId}/tasks")
+    public ResponseEntity<Object> getAllTaskByFilter(@PathVariable String nanoId,
+                                                     @RequestParam(defaultValue = "") String[] filterStatuses,
+                                                     @RequestParam(defaultValue = "") String[] sortBy,
+                                                     @RequestParam(defaultValue = "asc") String[] sortDirection)
+    {
+        return  ResponseEntity.ok(service.getAllTasksByBoardAndFilter(nanoId,filterStatuses,sortBy,sortDirection));
+    }
 
     @GetMapping("{nanoId}/statuses")
     public ResponseEntity<Object> getAllStatusesByBoard(@PathVariable String nanoId){

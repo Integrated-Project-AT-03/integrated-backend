@@ -1,9 +1,11 @@
 package com.example.itbangmodkradankanbanapi.services.V3;
 
+import com.example.itbangmodkradankanbanapi.dtos.V2.TaskDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.FormTaskDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.FullTaskDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.TaskDtoV3;
 import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
+import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
 import com.example.itbangmodkradankanbanapi.entities.V3.Board;
 import com.example.itbangmodkradankanbanapi.entities.V3.StatusV3;
 import com.example.itbangmodkradankanbanapi.entities.V3.TasksV3;
@@ -47,6 +49,22 @@ public class TaskServiceV3 {
     public FullTaskDtoV3 getTask(Integer id){
         return modelMapper.map(repository.findById(id).orElseThrow(() -> new ItemNotFoundException("Task "+ id + " dose not exist !!!!")),FullTaskDtoV3.class);
     }
+
+
+    public List<TaskDtoV3> getAllTaskByFilter(String[] filterStatuses, String[] sortBy, String[] direction) {
+        List<Sort.Order> orders = new ArrayList<>();
+        if((sortBy.length != 0 && !sortBy[0].equals("status.name"))|| sortBy.length > 1 ) throw new NotAllowedException("invalid filter parameter");
+        else if(sortBy.length !=0)
+            for (int i = 0; i < sortBy.length; i++) {
+                orders.add(new Sort.Order((direction[i].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC), sortBy[i]));
+            }
+        else orders.add(new Sort.Order(Sort.Direction.ASC ,"createdOn"));
+        if(filterStatuses.length == 0) return  listMapper.mapList(repository.findAll(Sort.by(orders)),TaskDtoV3.class);
+
+        List<StatusV3> statuses = Arrays.stream(filterStatuses).map((filterStatus) -> statusRepository.findByName(filterStatus.replace("_"," "))).toList();
+        return listMapper.mapList(repository.findByStatusIn(statuses,Sort.by(orders)),TaskDtoV3.class);
+    }
+
 
 
     @Transactional

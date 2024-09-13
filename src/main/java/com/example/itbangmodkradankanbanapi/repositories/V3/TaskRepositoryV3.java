@@ -11,6 +11,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TaskRepositoryV3 extends JpaRepository<TasksV3,Integer> {
+    List<TasksV3> findByBoardAndStatusIn(Board board,List<StatusV3> statusV3,Sort sort);
+    List<TasksV3> findByBoard(Board board);
+    List<TasksV3> findByBoard(Board board,Sort sort);
     List<TasksV3> findByStatusIn(List<StatusV3> statusV3, Sort sort);
 
     List<TasksV3> findByStatusAndBoard(StatusV3 statusV3 , Board board);

@@ -13,6 +13,7 @@ import com.example.itbangmodkradankanbanapi.dtos.V3.task.FormTaskDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.TaskDtoV3;
 import com.example.itbangmodkradankanbanapi.entities.V1.Task;
 import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
+import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
 import com.example.itbangmodkradankanbanapi.entities.V3.*;
 import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
 import com.example.itbangmodkradankanbanapi.exceptions.InvalidFieldInputException;
@@ -21,18 +22,19 @@ import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
 import com.example.itbangmodkradankanbanapi.models.SettingLockStatus;
 import com.example.itbangmodkradankanbanapi.repositories.V1.StatusRepository;
 import com.example.itbangmodkradankanbanapi.repositories.V1.TaskRepository;
-import com.example.itbangmodkradankanbanapi.repositories.V3.BoardRepositoryV3;
-import com.example.itbangmodkradankanbanapi.repositories.V3.CenterStatusRepositoryV3;
-import com.example.itbangmodkradankanbanapi.repositories.V3.ShareBoardRepositoryV3;
+import com.example.itbangmodkradankanbanapi.repositories.V3.*;
 import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
 import com.example.itbangmodkradankanbanapi.utils.CustomNanoId;
 import com.example.itbangmodkradankanbanapi.utils.ListMapper;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,6 +43,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BoardService {
     @Autowired
     private ShareBoardRepositoryV3 shareBoardRepository;
+
+    @Autowired
+    private TaskRepositoryV3 taskRepositoryV3;
+
+    @Autowired
+    private StatusRepositoryV3 statusRepositoryV3;
 
     @Autowired
     private BoardRepositoryV3 repository;
@@ -105,12 +113,30 @@ public class BoardService {
         return boardDto;
     }
 
-    public List<BoardDtoV3> getAllBoard(){
-        return listMapper.mapList(repository.findAll(), BoardDtoV3.class);
-    }
+//    public List<BoardDtoV3> getAllBoard(){
+//        return listMapper.mapList(repository.findAll(), BoardDtoV3.class);
+//    }
+//
+////    public List<TaskDtoV2> getAllTasksByBoard(String nanoId){
+////        return listMapper.mapList(repository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Board id "+ nanoId + " not found")).getTasks(), TaskDtoV2.class);
+////    }
 
-    public List<TaskDtoV2> getAllTasksByBoard(String nanoId){
-        return listMapper.mapList(repository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Board id "+ nanoId + " not found")).getTasks(), TaskDtoV2.class);
+    public List<TaskDtoV3> getAllTasksByBoardAndFilter(String nanoId,String[] filterStatuses, String[] sortBy,String[] direction) {
+      Board board =  repository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Board id "+ nanoId + " not found"));
+            List<Sort.Order> orders = new ArrayList<>();
+
+        if((sortBy.length != 0 && !sortBy[0].equals("status.name"))|| sortBy.length > 1 ) throw new NotAllowedException("invalid filter parameter");
+
+        else if(sortBy.length !=0) {
+            for (int i = 0; i < sortBy.length; i++) {
+                orders.add(new Sort.Order((direction[i].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC), sortBy[i]));
+            }
+    }
+        orders.add(new Sort.Order(Sort.Direction.ASC ,"createdOn"));
+        if(filterStatuses.length == 0) return  listMapper.mapList(taskRepositoryV3.findByBoard(board,Sort.by(orders)),TaskDtoV3.class);
+
+        List<StatusV3> statuses = Arrays.stream(filterStatuses).map((filterStatus) -> statusRepositoryV3.findByName(filterStatus.replace("_"," "))).toList();
+        return  listMapper.mapList(taskRepositoryV3.findByBoardAndStatusIn(board,statuses,Sort.by(orders)),TaskDtoV3.class);
     }
 
 

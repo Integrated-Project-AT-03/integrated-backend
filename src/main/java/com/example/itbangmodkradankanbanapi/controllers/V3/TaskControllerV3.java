@@ -23,21 +23,18 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 public class TaskControllerV3 {
     @Autowired
 private TaskServiceV3 service;
-
+    @GetMapping("")
+    public ResponseEntity<Object> getAllTaskByFilter(@RequestParam(defaultValue = "") String[] filterStatuses,
+                                             @RequestParam(defaultValue = "") String[] sortBy,
+                                             @RequestParam(defaultValue = "asc") String[] sortDirection)
+    {
+        return  ResponseEntity.ok(service.getAllTaskByStatusIdIn(filterStatuses,sortBy,sortDirection));
+    }
     @GetMapping("{id}")
     public ResponseEntity<Object> findTask(@PathVariable @NotNull Integer id){
         return ResponseEntity.ok(service.getTask(id));
     }
 
-
-
-    @GetMapping("")
-    public ResponseEntity<Object> getAllTask(@RequestParam(defaultValue = "") String[] filterStatuses,
-                                            @RequestParam(defaultValue = "") String[] sortBy,
-                                             @RequestParam(defaultValue = "asc") String[] sortDirection)
-    {
-        return  ResponseEntity.ok(service.getAllTaskByStatusIdIn(filterStatuses,sortBy,sortDirection));
-    }
     @DeleteMapping("{id}")
     public TaskDtoV3 deleteTask(@PathVariable  Integer id){
        return  service.deleteTask(id);
