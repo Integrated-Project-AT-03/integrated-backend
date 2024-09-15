@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 
 @RestControllerAdvice
-public class GlobalExceptionHandling {
+public class     GlobalExceptionHandling {
 
     @ExceptionHandler(InvalidFieldInputException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -45,5 +45,5 @@ public class GlobalExceptionHandling {
         ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.NOT_FOUND.value(),null, ex.getReason(), request.getDescription(false).substring(4));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er);
     }
-
 }
+
