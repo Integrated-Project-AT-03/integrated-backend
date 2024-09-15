@@ -1,8 +1,9 @@
 package com.example.itbangmodkradankanbanapi.Auth;
 
 
-import com.example.itbangmodkradankanbanapi.exceptions.UnauthorizedException;
-import com.example.itbangmodkradankanbanapi.exceptions.UnauthorizedLoginException;
+import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -21,6 +22,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.Instant;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -31,69 +34,64 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private void writeErrorResponse(HttpServletResponse response, ErrorResponse er) throws IOException {
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType("application/json");
+        String json = objectMapper.writeValueAsString(er);
+        response.getWriter().write(json);
+        response.getWriter().flush();
+    }
+
+
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        // ตรวจสอบให้แน่ใจว่าการตรวจสอบ Token จะไม่เกิดขึ้นสำหรับ /authentications/login หรือ /authentications/validate-token
         String requestURI = request.getRequestURI();
         if (requestURI.equals("/login") || requestURI.equals("/validate-token")) {
             chain.doFilter(request, response);
             return;
         }
-//       2) ตรวจสอบว่า access token ถูกส่งใน header ของ request
+
         final String requestTokenHeader = request.getHeader("Authorization");
         String username = null;
         String jwtToken = null;
-
-//       3) กรณีไม่มี token หรือ token ไม่เริ่มต้นด้วย "Bearer ":
-        if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-            jwtToken = requestTokenHeader.substring(7);
-
+        if (requestTokenHeader == null) {
+            ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "JWT Token must have to start with bearer", request.getRequestURI());
+            writeErrorResponse(response, er);
+            return;
+        }
+        jwtToken = requestTokenHeader.substring(7);
             try {
                 username = jwtTokenUtil.getUsernameFromToken(jwtToken);
             } catch (ExpiredJwtException e) {
-                throw new UnauthorizedException("Token is expired");
+                ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "Token is expired", request.getRequestURI());
+                writeErrorResponse(response, er);
+                return;
             } catch (IllegalArgumentException e) {
-                throw new UnauthorizedException("Unable to get JWT Token");
+                ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "Unable to get JWT Token", request.getRequestURI());
+                writeErrorResponse(response, er);
+                return;
             } catch (Exception e) {
-                throw new UnauthorizedException("Invalid JWT Token");
-//                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-////              6) เพื่อตรวจสอบความถูกต้องของ token
-//                response.getWriter().write("{\"error\": \"Invalid JWT Token\"}");
-//                response.getWriter().flush();
-//                return;
+                ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "Invalid JWT Token", request.getRequestURI());
+                writeErrorResponse(response, er);
+                return;
             }
 
-        } else if (requestTokenHeader == null || !requestTokenHeader.startsWith("Bearer ")) {
+
             UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
             if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()); usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-            }
+
             chain.doFilter(request, response);
-        }
-
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
-
-            if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                usernamePasswordAuthenticationToken
-                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-            } else {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("{\"error\": \"Invalid JWT Token\"}");
-                response.getWriter().flush();
-                return;
             }
-
         }
 
-        chain.doFilter(request, response);
 
-    }
 }

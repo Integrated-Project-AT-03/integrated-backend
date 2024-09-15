@@ -45,12 +45,5 @@ public class     GlobalExceptionHandling {
         ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.NOT_FOUND.value(),null, ex.getReason(), request.getDescription(false).substring(4));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er);
     }
-
-    @ExceptionHandler(UnauthorizedException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ResponseEntity<ErrorResponse> handleItemNotFound(UnauthorizedException ex, WebRequest request) {
-        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.UNAUTHORIZED.value(),null, ex.getReason(), request.getDescription(false).substring(4));
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(er);
-    }
 }
 
