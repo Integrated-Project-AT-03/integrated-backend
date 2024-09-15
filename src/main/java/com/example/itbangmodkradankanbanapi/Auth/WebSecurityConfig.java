@@ -14,38 +14,42 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
-    @Autowired
-    JwtAuthFilter jwtAuthFilter;
 
     @Autowired
-    JwtUserDetailsService jwtUserDetailsService;
+    private JwtAuthFilter jwtAuthFilter;
+
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf(csrf -> csrf.disable())
+        httpSecurity
+                .csrf(csrf -> csrf.disable())
                 .authorizeRequests(authorize -> authorize
-                        .requestMatchers("/authentications/login").permitAll()
-                        .requestMatchers("/authentications/validate-token").permitAll()
-//                                .hasAuthority("LECTURER")
-//                        .anyRequest().authenticated()
-                ).httpBasic(withDefaults());
+//                  1) WebSecurityConfig ที่กำหนดให้การเข้าถึงทุก endpoint นอกจาก /login และ /validate-token ต้องผ่านการยืนยันตัวตน
+                        .requestMatchers("/login", "/validate-token").permitAll()
+                        .anyRequest().authenticated()  // กำหนดให้ทุก request ที่ไม่ใช่ /authentications/login หรือ /authentications/validate-token ต้องการการตรวจสอบสิทธิ์
+                )
+                .httpBasic(withDefaults());
+
+        // เพิ่ม JwtAuthFilter ก่อน UsernamePasswordAuthenticationFilter
         httpSecurity.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
         return httpSecurity.build();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
     }
 
     @Bean
-    public AuthenticationProvider authecationProvider(){
+    public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(jwtUserDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder());
