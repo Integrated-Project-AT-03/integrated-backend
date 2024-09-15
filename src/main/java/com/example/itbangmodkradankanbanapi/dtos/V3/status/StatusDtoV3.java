@@ -22,12 +22,7 @@ public class StatusDtoV3 {
     private String colorHex;
     @JsonIgnore
     private List<TasksV3> tasks;
-    public Integer getNumOfTask(){
-        return tasks == null ? 0 : tasks.size();
-    }
     public String getColorHex(){
         return "#"+colorHex;
     }
-
-
 }

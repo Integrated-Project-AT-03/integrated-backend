@@ -88,7 +88,7 @@ public class BoardService {
     }
 
     @Transactional
-    public FullBoardDtoV3 createBoard(FormBoardDtoV3 newBoardForm){
+    public BoardDtoV3 createBoard(FormBoardDtoV3 newBoardForm){
       UserdataEntity user = userDataRepository.findById(newBoardForm.getOwnerOid()).orElseThrow(()-> new InvalidFieldInputException("owner","not found user id " + newBoardForm.getOwnerOid()));
         Board newBoard = new Board();
         String nanoId = CustomNanoId.generate(10);
@@ -106,10 +106,9 @@ public class BoardService {
         newShareBoard.setOidUserShare(newBoardForm.getOwnerOid());
         shareBoardRepository.save(newShareBoard);
         FullBoardDtoV3.Owner owner = new FullBoardDtoV3.Owner();
-        FullBoardDtoV3 boardDto = modelMapper.map(board,FullBoardDtoV3.class);
+        BoardDtoV3 boardDto = modelMapper.map(board,BoardDtoV3.class);
         owner.setOid(user.getOid());
         owner.setName(user.getName());
-        boardDto.setOwner(owner);
         return boardDto;
     }
 

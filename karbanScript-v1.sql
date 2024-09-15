@@ -194,7 +194,8 @@ CREATE TABLE IF NOT EXISTS `karban`.`boards` (
 
 LOCK TABLES `boards` WRITE;
 /*!40000 ALTER TABLE `boards` DISABLE KEYS */;
-INSERT INTO boards(nano_id_board,name) VALUES ('0000000000','default broad'),('1111111111','olarn broad');
+INSERT INTO boards(nano_id_board,name,enable_status_center) VALUES ('0000000000','default broad', b'0000');
+INSERT INTO boards(nano_id_board,name) VALUES ('1111111111','olarn broad');
 /*!40000 ALTER TABLE `boards` ENABLE KEYS */;
 UNLOCK TABLES;
 
