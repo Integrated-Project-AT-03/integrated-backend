@@ -28,7 +28,5 @@ public class FormStatusDtoV3 {
     @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)
     private String statusDescription;
     private Integer colorId = 1;
-    @NotNull
-    @NotBlank
     private String boardNanoId ;
 }

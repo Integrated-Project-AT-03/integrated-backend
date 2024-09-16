@@ -19,33 +19,33 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 
 @RestController
 @CrossOrigin(origins = "${value.url.cross.origin}")
-@RequestMapping("/v3/tasks")
+@RequestMapping("/v3/boards")
 public class TaskControllerV3 {
     @Autowired
 private TaskServiceV3 service;
-    @GetMapping("")
-    public ResponseEntity<Object> getAllTaskByFilter(@RequestParam(defaultValue = "") String[] filterStatuses,
-                                             @RequestParam(defaultValue = "") String[] sortBy,
-                                             @RequestParam(defaultValue = "asc") String[] sortDirection)
-    {
-        return  ResponseEntity.ok(service.getAllTaskByStatusIdIn(filterStatuses,sortBy,sortDirection));
-    }
-    @GetMapping("{id}")
+//    @GetMapping("")
+//    public ResponseEntity<Object> getAllTaskByFilter(@RequestParam(defaultValue = "") String[] filterStatuses,
+//                                             @RequestParam(defaultValue = "") String[] sortBy,
+//                                             @RequestParam(defaultValue = "asc") String[] sortDirection)
+//    {
+//        return  ResponseEntity.ok(service.getAllTaskByStatusIdIn(filterStatuses,sortBy,sortDirection));
+//    }
+    @GetMapping("{nanoId}/tasks/{id}")
     public ResponseEntity<Object> findTask(@PathVariable @NotNull Integer id){
         return ResponseEntity.ok(service.getTask(id));
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("{nanoId}/tasks/{id}")
     public TaskDtoV3 deleteTask(@PathVariable  Integer id){
        return  service.deleteTask(id);
     }
-    @PutMapping("{id}")
+    @PutMapping("{nanoId}/tasks/{id}")
     public  ResponseEntity<Object> updateTask(@PathVariable  Integer id ,@RequestBody @Valid FormTaskDtoV3 task){
        return ResponseEntity.ok( service.updateTask(id,task));
     }
-    @PostMapping("")
-    public ResponseEntity<Object> addTask(@RequestBody @Valid FormTaskDtoV3 task){
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.addTask(task));
+    @PostMapping("{nanoId}/tasks")
+    public ResponseEntity<Object> addTask(@RequestBody @Valid FormTaskDtoV3 task,@PathVariable @NotNull String nanoId){
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.addTask(task,nanoId));
     }
     @ExceptionHandler(HandlerMethodValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

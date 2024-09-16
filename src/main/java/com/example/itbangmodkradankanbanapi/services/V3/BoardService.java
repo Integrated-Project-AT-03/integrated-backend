@@ -1,27 +1,16 @@
 package com.example.itbangmodkradankanbanapi.services.V3;
 
-import com.example.itbangmodkradankanbanapi.dtos.V1.FormTaskDto;
-import com.example.itbangmodkradankanbanapi.dtos.V1.FullTaskDto;
-import com.example.itbangmodkradankanbanapi.dtos.V1.TaskDto;
-import com.example.itbangmodkradankanbanapi.dtos.V2.TaskDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.BoardDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardSettingDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.FullBoardDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.status.StatusDtoV3;
-import com.example.itbangmodkradankanbanapi.dtos.V3.task.FormTaskDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.TaskDtoV3;
-import com.example.itbangmodkradankanbanapi.entities.V1.Task;
-import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
-import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
 import com.example.itbangmodkradankanbanapi.entities.V3.*;
 import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
 import com.example.itbangmodkradankanbanapi.exceptions.InvalidFieldInputException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
-import com.example.itbangmodkradankanbanapi.models.SettingLockStatus;
-import com.example.itbangmodkradankanbanapi.repositories.V1.StatusRepository;
-import com.example.itbangmodkradankanbanapi.repositories.V1.TaskRepository;
 import com.example.itbangmodkradankanbanapi.repositories.V3.*;
 import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
 import com.example.itbangmodkradankanbanapi.utils.CustomNanoId;
@@ -31,7 +20,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -132,10 +120,10 @@ public class BoardService {
             }
     }
         orders.add(new Sort.Order(Sort.Direction.ASC ,"createdOn"));
-        if(filterStatuses.length == 0) return  listMapper.mapList(taskRepositoryV3.findByBoard(board,Sort.by(orders)),TaskDtoV3.class);
+        if(filterStatuses.length == 0) return  listMapper.mapList(taskRepositoryV3.findAllByBoard(board,Sort.by(orders)),TaskDtoV3.class);
 
         List<StatusV3> statuses = Arrays.stream(filterStatuses).map((filterStatus) -> statusRepositoryV3.findByName(filterStatus.replace("_"," "))).toList();
-        return  listMapper.mapList(taskRepositoryV3.findByBoardAndStatusIn(board,statuses,Sort.by(orders)),TaskDtoV3.class);
+        return  listMapper.mapList(taskRepositoryV3.findAllByBoardAndStatusIn(board,statuses,Sort.by(orders)),TaskDtoV3.class);
     }
 
 

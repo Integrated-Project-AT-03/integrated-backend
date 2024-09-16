@@ -4,14 +4,12 @@ package com.example.itbangmodkradankanbanapi.services.V3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.status.FormStatusDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.status.FullStatusDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.status.StatusDtoV3;
-import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
 import com.example.itbangmodkradankanbanapi.entities.V3.Board;
 import com.example.itbangmodkradankanbanapi.entities.V3.StatusV3;
 import com.example.itbangmodkradankanbanapi.entities.V3.TasksV3;
 import com.example.itbangmodkradankanbanapi.exceptions.InvalidFieldInputException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
-import com.example.itbangmodkradankanbanapi.models.SettingLockStatus;
 import com.example.itbangmodkradankanbanapi.repositories.V2.ColorRepository;
 import com.example.itbangmodkradankanbanapi.repositories.V3.BoardRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.V3.StatusRepositoryV3;
@@ -69,9 +67,9 @@ public class StatusServiceV3 {
 
 
     @Transactional
-    public StatusDtoV3 updateStatus(Integer id, FormStatusDtoV3 statusForm) {
+    public StatusDtoV3 updateStatus(Integer id, FormStatusDtoV3 statusForm,String nanoIdBoard) {
         StatusV3 targetStatus = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("Status " + id + " dose not exist !!!!"));
-        Board board = boardRepository.findById(statusForm.getBoardNanoId()).orElseThrow(() -> new ItemNotFoundException("board " + statusForm.getBoardNanoId() + " dose not exist !!!!"));
+        Board board = boardRepository.findById(nanoIdBoard).orElseThrow(() -> new ItemNotFoundException("board " + statusForm.getBoardNanoId() + " dose not exist !!!!"));
 
         if (repository.findByNameAndBoard(statusForm.getName(),board) != null && !statusForm.getName().equals(targetStatus.getName()))
             throw new InvalidFieldInputException("name", "must be unique");
@@ -93,7 +91,7 @@ public class StatusServiceV3 {
             newStatus.setCreatedOn(targetStatus.getCreatedOn());
             StatusV3 cloneStatus = repository.save(newStatus);
 
-          List<TasksV3> transferTask =  taskRepository.findByStatusAndBoard(targetStatus,board).stream().peek(task -> {
+          List<TasksV3> transferTask =  taskRepository.findAllByStatusAndBoard(targetStatus,board).stream().peek(task -> {
                 task.setStatus(cloneStatus);
             }).toList();
           taskRepository.saveAll(transferTask);
@@ -108,8 +106,8 @@ public class StatusServiceV3 {
     }
 
     @Transactional
-    public StatusDtoV3 addStatus(FormStatusDtoV3 statusForm) {
-        Board board = boardRepository.findById(statusForm.getBoardNanoId()).orElseThrow(() -> new ItemNotFoundException("board " + statusForm.getBoardNanoId() + " dose not exist !!!!"));
+    public StatusDtoV3 addStatus(FormStatusDtoV3 statusForm,String nanoIdBoard) {
+        Board board = boardRepository.findById(nanoIdBoard).orElseThrow(() -> new ItemNotFoundException("board " + statusForm.getBoardNanoId() + " dose not exist !!!!"));
 
         if (repository.findByNameAndBoard(statusForm.getName(), board) != null)
             throw new InvalidFieldInputException("name", "must be unique");
@@ -128,7 +126,7 @@ public class StatusServiceV3 {
         if (targetStatus.getCenterStatus() != null && !targetStatus.getCenterStatus().getEnableConfig() )
             throw new NotAllowedException(targetStatus.getName().toLowerCase() + " cannot be deleted.");
 
-        if (taskRepository.findByStatusAndBoard(targetStatus,board).size() != 0)
+        if (taskRepository.findAllByStatusAndBoard(targetStatus,board).size() != 0)
             throw new InvalidFieldInputException("status", "Cannot Delete a status that still have tasks");
 
         if (targetStatus.getCenterStatus() != null) {
@@ -154,7 +152,7 @@ public class StatusServiceV3 {
         if (deletedStatus.equals(changeStatus))
             throw new NotAllowedException("destination status for task transfer must be different from current status");
 
-        List<TasksV3> transferTask =  taskRepository.findByStatusAndBoard(deletedStatus,board).stream().peek(task -> {
+        List<TasksV3> transferTask =  taskRepository.findAllByStatusAndBoard(deletedStatus,board).stream().peek(task -> {
             task.setStatus(changeStatus);
         }).toList();
 

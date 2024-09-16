@@ -24,39 +24,34 @@ import java.time.Instant;
 
 @RestController
 @CrossOrigin(origins = "${value.url.cross.origin}")
-@RequestMapping("/v3/statuses")
+@RequestMapping("/v3/boards")
 public class StatusControllerV3 {
     @Autowired
 private StatusServiceV3 service;
 
-    @GetMapping("{id}")
+    @GetMapping("{nanoId}/statuses/{id}")
     public ResponseEntity<Object> findStatus(@PathVariable @NotNull  Integer id){
         return ResponseEntity.ok(service.getStatus(id));
     }
 
-    @GetMapping("")
-    public ResponseEntity<Object> getAllStatus(){
-        return  ResponseEntity.ok(service.getAllStatus());
-    }
-
-    @DeleteMapping("{id}/board/{nanoIdBoard}")
+    @DeleteMapping("{nanoId}/statuses/{id}")
     public StatusDtoV3 deleteTask(@PathVariable @NotNull  Integer id, @PathVariable @NotNull String nanoIdBoard)  {
       return   service.deleteStatus(id,nanoIdBoard);
     }
 
-    @PutMapping("{id}")
-    public  ResponseEntity<Object> updateStatus(@PathVariable  Integer id ,@RequestBody @Valid FormStatusDtoV3 status){
-        return ResponseEntity.ok( service.updateStatus(id,status));
+    @PutMapping("{nanoId}/statuses/{id}")
+    public  ResponseEntity<Object> updateStatus(@PathVariable  Integer id ,@RequestBody @Valid FormStatusDtoV3 status,@PathVariable String nanoId){
+        return ResponseEntity.ok( service.updateStatus(id,status,nanoId));
     }
 
-    @DeleteMapping("{deletedId}/{changeId}/board/{nanoIdBoard}")
-    public ResponseEntity<Object> changeTaskStatus(@PathVariable @NotNull Integer deletedId,@PathVariable @NotNull Integer changeId,@PathVariable @NotNull String nanoIdBoard){
-        return ResponseEntity.ok(service.ChangeTasksByStatusAndDelete(deletedId,changeId,nanoIdBoard));
+    @DeleteMapping("{nanoId}/statuses/{deletedId}/{changeId}")
+    public ResponseEntity<Object> changeTaskStatus(@PathVariable @NotNull Integer deletedId,@PathVariable @NotNull Integer changeId,@PathVariable @NotNull String nanoId){
+        return ResponseEntity.ok(service.ChangeTasksByStatusAndDelete(deletedId,changeId,nanoId));
     }
 
-    @PostMapping("")
-    public ResponseEntity<Object> addStatus(@RequestBody @Valid FormStatusDtoV3 status){
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.addStatus(status));
+    @PostMapping("{nanoId}/statuses")
+    public ResponseEntity<Object> addStatus(@RequestBody @Valid FormStatusDtoV3 status,@PathVariable String nanoId){
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.addStatus(status,nanoId));
     }
 
 

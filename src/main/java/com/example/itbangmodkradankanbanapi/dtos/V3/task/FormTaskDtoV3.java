@@ -20,7 +20,6 @@ public class FormTaskDtoV3 {
     @NotBlank
     @Size(max = 100)
     private String title;
-    @NotNull
     private String boardNanoId;
     @JsonDeserialize(using = EmptyToNullAndTrimDeserializer.class)
     @Size(max = 30)

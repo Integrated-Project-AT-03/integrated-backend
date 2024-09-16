@@ -1,18 +1,14 @@
 package com.example.itbangmodkradankanbanapi.services.V3;
 
-import com.example.itbangmodkradankanbanapi.dtos.V2.TaskDtoV2;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.FormTaskDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.FullTaskDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.TaskDtoV3;
-import com.example.itbangmodkradankanbanapi.entities.V2.Setting;
-import com.example.itbangmodkradankanbanapi.entities.V2.StatusV2;
 import com.example.itbangmodkradankanbanapi.entities.V3.Board;
 import com.example.itbangmodkradankanbanapi.entities.V3.StatusV3;
 import com.example.itbangmodkradankanbanapi.entities.V3.TasksV3;
 import com.example.itbangmodkradankanbanapi.exceptions.InvalidFieldInputException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
-import com.example.itbangmodkradankanbanapi.models.SettingLockStatus;
 import com.example.itbangmodkradankanbanapi.repositories.V3.BoardRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.V3.StatusRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.V3.TaskRepositoryV3;
@@ -62,7 +58,7 @@ public class TaskServiceV3 {
         if(filterStatuses.length == 0) return  listMapper.mapList(repository.findAll(Sort.by(orders)),TaskDtoV3.class);
 
         List<StatusV3> statuses = Arrays.stream(filterStatuses).map((filterStatus) -> statusRepository.findByName(filterStatus.replace("_"," "))).toList();
-        return listMapper.mapList(repository.findByStatusIn(statuses,Sort.by(orders)),TaskDtoV3.class);
+        return listMapper.mapList(repository.findAllByStatusIn(statuses,Sort.by(orders)),TaskDtoV3.class);
     }
 
 
@@ -88,7 +84,7 @@ public class TaskServiceV3 {
         if(filterStatuses.length == 0) return  listMapper.mapList(repository.findAll(Sort.by(orders)),TaskDtoV3.class);
 
         List<StatusV3> statuses = Arrays.stream(filterStatuses).map((filterStatus) -> statusRepository.findByName(filterStatus.replace("_"," "))).toList();
-        return listMapper.mapList(repository.findByStatusIn(statuses,Sort.by(orders)),TaskDtoV3.class);
+        return listMapper.mapList(repository.findAllByStatusIn(statuses,Sort.by(orders)),TaskDtoV3.class);
     }
 
 
@@ -116,12 +112,12 @@ public class TaskServiceV3 {
     }
 
     @Transactional
-    public TaskDtoV3 addTask(FormTaskDtoV3 formTask){
+    public TaskDtoV3 addTask(FormTaskDtoV3 formTask,String nanoId){
         TasksV3 newTask = new TasksV3();
         newTask.setTitle(formTask.getTitle());
         newTask.setAssignees(formTask.getAssignees());
         newTask.setDescription(formTask.getDescription());
-        Board board = boardRepository.findById(formTask.getBoardNanoId()).orElseThrow(() -> new InvalidFieldInputException("boardNanoId","does not exist"));
+        Board board = boardRepository.findById(nanoId).orElseThrow(() -> new InvalidFieldInputException("boardNanoId","does not exist"));
         newTask.setBoard(board);
         StatusV3 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new InvalidFieldInputException("status","does not exist"));
         if(status.getCenterStatus() != null) {
