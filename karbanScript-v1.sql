@@ -172,8 +172,6 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- -----------------------------------------------------
 -- Schema karban
 -- -----------------------------------------------------
-USE `karban` ;
-
 # test enable task
 # UPDATE `karban`.`boards` SET `enable_status_center` = b'0101' WHERE (`nano_id_board` = 'DBDG1CWE8r');
 -- -----------------------------------------------------

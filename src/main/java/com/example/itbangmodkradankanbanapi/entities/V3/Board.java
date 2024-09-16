@@ -11,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "Boards")
+@Table(name = "boards")
 public class Board {
     @Id
     @Column(name = "nano_id_board")
