@@ -1,5 +1,7 @@
 package com.example.itbangmodkradankanbanapi.entities.V3;
 
+import jakarta.persistence.Table;
+
 import java.io.Serializable;
 import java.util.Objects;
 
