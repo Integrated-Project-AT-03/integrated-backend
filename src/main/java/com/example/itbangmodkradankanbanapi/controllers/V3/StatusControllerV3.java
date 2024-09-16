@@ -35,8 +35,8 @@ private StatusServiceV3 service;
     }
 
     @DeleteMapping("{nanoId}/statuses/{id}")
-    public StatusDtoV3 deleteTask(@PathVariable @NotNull  Integer id, @PathVariable @NotNull String nanoIdBoard)  {
-      return   service.deleteStatus(id,nanoIdBoard);
+    public StatusDtoV3 deleteTask(@PathVariable @NotNull  Integer id, @PathVariable @NotNull String nanoId)  {
+      return   service.deleteStatus(id,nanoId);
     }
 
     @PutMapping("{nanoId}/statuses/{id}")
