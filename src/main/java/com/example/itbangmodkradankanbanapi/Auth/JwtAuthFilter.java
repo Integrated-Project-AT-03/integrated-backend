@@ -64,7 +64,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String username = null;
         String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
-        System.out.println(jwtToken);
 
 
         if (jwtToken == null) {
