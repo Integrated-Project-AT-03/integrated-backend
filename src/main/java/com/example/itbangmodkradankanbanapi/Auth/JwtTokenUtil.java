@@ -46,6 +46,15 @@ public class JwtTokenUtil implements Serializable {
                 .sameSite("None").build();
     }
 
+    public ResponseCookie removeCookie(String name) {
+        return  ResponseCookie
+                .from(name, "").path("/").
+                maxAge(0)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None").build();
+    }
+
 
 //    public String getUsernameFromToken(String token) {
 //        return getClaimFromToken(token, Claims::getSubject);

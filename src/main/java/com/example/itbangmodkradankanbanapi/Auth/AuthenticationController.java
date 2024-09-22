@@ -13,6 +13,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +96,12 @@ public class AuthenticationController {
 
 
         return ResponseEntity.ok(jwtTokenUtil.validateToken(jwtToken,userDetails));
+    }
+
+    @GetMapping("/clear-cookie")
+    public ResponseEntity<Object> logout(HttpServletResponse response) {
+  ResponseCookie jwtCookie = jwtTokenUtil.removeCookie("jwtToken");
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body("Logged out and cookie cleared");
     }
 
 
