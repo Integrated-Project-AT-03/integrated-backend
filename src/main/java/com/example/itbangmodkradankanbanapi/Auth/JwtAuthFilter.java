@@ -57,8 +57,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         String requestURI = request.getRequestURI();
-        if (requestURI.equals("/login") || requestURI.equals("/token") ||  requestURI.equals("/validate-token") || requestURI.equals("/v2/colors")) {
-            chain.doFilter(request, response);
+        if (requestURI.equals("/login")  ||  requestURI.equals("/validate-token") || requestURI.equals("/v2/colors") || requestURI.equals("/token")) {
+            chain.doFilter(request, response); // ปล่อย request ผ่านไปโดยไม่ต้องตรวจสอบ JWT
             return;
         }
 
@@ -91,7 +91,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 
             UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
-            if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
+            if (jwtTokenUtil.validateToken(jwtToken)) {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()); usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

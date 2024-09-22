@@ -1,10 +1,8 @@
 package com.example.itbangmodkradankanbanapi.Auth;
 
 import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.example.itbangmodkradankanbanapi.exceptions.UnauthorizedLoginException;
+import io.jsonwebtoken.*;
 import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
@@ -25,8 +23,12 @@ public class JwtTokenUtil implements Serializable {
     private String SECRET_KEY;
     @Value("#{${jwt.max-token-interval-hour}*60*60*1000}")
     private long JWT_TOKEN_VALIDITY;
+    @Value("#{${jwt.max-ref-token-interval-hour}*60*60*1000}")
+    private long JWT_REF_TOKEN_VALIDITY;
     @Value("${jwt.access.token.cookie.name}")
     private String jwtCookie;
+    @Value("${jwt.ref.access.token.cookie.name}")
+    private String jwtRefCookie;
     @Value("${jwt.access.token.cookie.expired}")
     private String jwtCookieExpired;
 
@@ -35,6 +37,11 @@ public class JwtTokenUtil implements Serializable {
     public ResponseCookie generateJwtCookie(UserdataEntity userPrincipal) {
         String jwt = generateToken(userPrincipal);
         return generateCookie(jwtCookie, jwt);
+    }
+
+    public ResponseCookie generateRefreshJwtCookie(UserdataEntity userPrincipal) {
+        String jwt = generateRefreshToken(userPrincipal);
+        return generateCookie(jwtRefCookie, jwt);
     }
 
     private ResponseCookie generateCookie(String name, String value) {
@@ -80,6 +87,7 @@ public class JwtTokenUtil implements Serializable {
         }
     }
 
+
     public String generateToken(UserdataEntity userdataEntity) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("oid",userdataEntity.getOid());
@@ -88,6 +96,11 @@ public class JwtTokenUtil implements Serializable {
         claims.put("name", userdataEntity.getName());
         return doGenerateToken(claims, userdataEntity.getUsername());
     }
+
+    public String generateRefreshToken(UserdataEntity userdataEntity) {
+        return doGenerateRefreshToken( userdataEntity.getUsername());
+    }
+
     private String doGenerateToken(Map<String, Object> claims, String subject) {
         return Jwts.builder().setHeaderParam("typ", "JWT").setClaims(claims).setSubject(subject)
                 .setIssuer("https://intproj23.sit.kmutt.ac.th/at3/")
@@ -95,24 +108,48 @@ public class JwtTokenUtil implements Serializable {
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
                 .signWith(signatureAlgorithm, SECRET_KEY).compact();
     }
-    public Boolean validateToken(String token, UserDetails userDetails) {
+
+    private String doGenerateRefreshToken(String subject) {
+        return Jwts.builder().setHeaderParam("typ", "JWT").setSubject(subject)
+                .setIssuer("https://intproj23.sit.kmutt.ac.th/at3/")
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + JWT_REF_TOKEN_VALIDITY))
+                .signWith(signatureAlgorithm, SECRET_KEY).compact();
+    }
+//    public Boolean validateToken(String token) {
+//        try {
+//            Claims claims = Jwts.parser()
+//                    .setSigningKey(SECRET_KEY)
+//                    .parseClaimsJws(token)
+//                    .getBody();
+//            return (!claims.getExpiration().before(new Date()));
+//
+//        } catch (JwtException e) {
+//            System.out.println("Invalid JWT token: " + e.getMessage());
+//            return false;
+//        } catch (Exception e) {
+//            System.out.println("Invalid JWT token");
+//            return false;
+//        }
+//    }
+
+    public boolean validateToken(String authToken) {
         try {
 
-            Claims claims = Jwts.parser()
-                    .setSigningKey(SECRET_KEY)
-                    .parseClaimsJws(token)
-                    .getBody();
-
-            final String username = claims.getSubject();
-            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-
-        } catch (JwtException e) {
-            System.out.println("Invalid JWT token: " + e.getMessage());
-            return false;
-        } catch (Exception e) {
-            System.out.println("Invalid JWT token");
-            return false;
+            Jwts.parserBuilder().setSigningKey(SECRET_KEY).build().parse(authToken);
+            return true;
+        } catch (MalformedJwtException e) {
+            throw  new UnauthorizedLoginException("Invalid JWT token: " + e.getMessage());
+        } catch (ExpiredJwtException e) {
+            throw  new UnauthorizedLoginException("JWT token is expired: "+ e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            throw  new UnauthorizedLoginException("JWT token is unsupported: "+ e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw  new UnauthorizedLoginException("JWT claims string is empty: "+ e.getMessage());
+        } catch (Exception e){
+            throw  new UnauthorizedLoginException("JWT claims string is Invalid: "+ e.getMessage());
         }
+
     }
 
     public String getTokenCookie(Cookie[] cookies){
@@ -126,6 +163,19 @@ public class JwtTokenUtil implements Serializable {
             }
         }
         return  jwtToken;
+    }
+
+    public String getRefTokenCookie(Cookie[] cookies){
+        String jwtRefToken = null;
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (jwtRefCookie.equals(cookie.getName())) {
+                    jwtRefToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        return  jwtRefToken;
     }
 
 

@@ -71,12 +71,31 @@ public class AuthenticationController {
             }
             UserdataEntity userdataEntity = userDataRepository.findByUsername(jwtRequestUser.getUserName());
             ResponseCookie jwtCookie = jwtTokenUtil.generateJwtCookie(userdataEntity);
+            ResponseCookie refJwtCookie = jwtTokenUtil.generateRefreshJwtCookie(userdataEntity);
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                    .header(HttpHeaders.SET_COOKIE, refJwtCookie.toString())
                     .body(jwtTokenUtil.getAllClaimsFromToken(jwtCookie.getValue()));
         }catch (BadCredentialsException ex){
             throw new UnauthorizedLoginException("Username or Password is Incorrect");
         }
+    }
+
+    @GetMapping("/token")
+    public ResponseEntity<Object> refreshToken(HttpServletRequest request) {
+        String jwtRefToken = jwtTokenUtil.getRefTokenCookie(request.getCookies());
+        if (jwtRefToken == null) throw  new UnauthorizedLoginException("Must have JWT refresh token") ;
+       if (!jwtTokenUtil.validateToken(jwtRefToken)) throw  new UnauthorizedLoginException("Invalid JWT refresh token") ;
+
+        String username = jwtTokenUtil.getAllClaimsFromToken(jwtRefToken).getSubject();
+        UserdataEntity userdataEntity = userDataRepository.findByUsername(username);
+        ResponseCookie jwtCookie = jwtTokenUtil.generateJwtCookie(userdataEntity);
+        ResponseCookie refJwtCookie = jwtTokenUtil.generateRefreshJwtCookie(userdataEntity);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refJwtCookie.toString())
+                .body(jwtTokenUtil.getAllClaimsFromToken(jwtCookie.getValue()));
     }
 
 
@@ -90,12 +109,7 @@ public class AuthenticationController {
     @GetMapping("/validate-token")
     public ResponseEntity<Object> validateToken(HttpServletRequest request) {
         String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
-        if(jwtToken == null) return ResponseEntity.ok(false);
-        String username = jwtTokenUtil.getAllClaimsFromToken(jwtToken).getSubject();
-        UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
-
-
-        return ResponseEntity.ok(jwtTokenUtil.validateToken(jwtToken,userDetails));
+        return ResponseEntity.ok(jwtTokenUtil.validateToken(jwtToken));
     }
 
     @GetMapping("/clear-cookie")
