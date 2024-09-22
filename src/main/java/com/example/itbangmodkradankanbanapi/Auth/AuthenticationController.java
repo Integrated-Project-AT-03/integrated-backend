@@ -1,23 +1,31 @@
-package com.example.itbangmodkradankanbanapi.controllers.V2;
+package com.example.itbangmodkradankanbanapi.Auth;
 
 import com.example.itbangmodkradankanbanapi.Auth.JwtRequestUser;
 import com.example.itbangmodkradankanbanapi.Auth.JwtTokenUtil;
 import com.example.itbangmodkradankanbanapi.Auth.JwtUserDetailsService;
 import com.example.itbangmodkradankanbanapi.dtos.V2.JwtDtoV2;
+import com.example.itbangmodkradankanbanapi.dtos.V3.user.InfoUserDto;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.UnauthorizedLoginException;
 import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
 import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,6 +35,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+
+
+
 
 @RestController
 @CrossOrigin(origins = "${value.url.cross.origin}")
@@ -39,10 +50,14 @@ public class AuthenticationController {
     JwtTokenUtil jwtTokenUtil;
 
     @Autowired
+    ModelMapper mapper;
+
+    @Autowired
     AuthenticationManager authenticationManager;
 
     @Autowired
     UserDataRepository userDataRepository;
+
 
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody @Valid JwtRequestUser jwtRequestUser) {
@@ -53,39 +68,33 @@ public class AuthenticationController {
             if(! authentication.isAuthenticated()){
                 throw new UsernameNotFoundException("Invalid user or password !!!");
             }
-//        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             UserdataEntity userdataEntity = userDataRepository.findByUsername(jwtRequestUser.getUserName());
-            String token = jwtTokenUtil.generateToken(userdataEntity);
-            JwtDtoV2 tokenResponse = new JwtDtoV2(token);
-            return ResponseEntity.ok(tokenResponse);
+            ResponseCookie jwtCookie = jwtTokenUtil.generateJwtCookie(userdataEntity);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                    .body(jwtTokenUtil.getAllClaimsFromToken(jwtCookie.getValue()));
         }catch (BadCredentialsException ex){
             throw new UnauthorizedLoginException("Username or Password is Incorrect");
         }
     }
 
-    @GetMapping ("/{name}")
-    public ResponseEntity<Object> login22(@PathVariable String name) {
-        return  ResponseEntity.ok(userDataRepository.findByUsername(name));
+
+
+    @GetMapping("/user-info")
+    public ResponseEntity<Object> getInfo(HttpServletRequest request) {
+        String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
+        return ResponseEntity.ok(jwtTokenUtil.getAllClaimsFromToken(jwtToken));
     }
 
     @GetMapping("/validate-token")
-    public ResponseEntity<Object> validateToken(@RequestHeader("Authorization") String requestTokenHeader) {
-        Claims claims = null;
-        String jwtToken = null;
-        if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-            jwtToken = requestTokenHeader.substring(7); try {
-                claims = jwtTokenUtil.getAllClaimsFromToken(jwtToken);
-            }
-            catch (IllegalArgumentException e) {
-                System.out.println("Unable to get JWT Token");
-            } catch (ExpiredJwtException e) {
-                System.out.println("JWT Token has expired");
-            }
-        }else{
-            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                    "JWT Token does not begin with Bearer String");
-        }
-        return ResponseEntity.ok(claims);
+    public ResponseEntity<Object> validateToken(HttpServletRequest request) {
+        String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
+        if(jwtToken == null) return ResponseEntity.ok(false);
+        String username = jwtTokenUtil.getAllClaimsFromToken(jwtToken).getSubject();
+        UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
+
+
+        return ResponseEntity.ok(jwtTokenUtil.validateToken(jwtToken,userDetails));
     }
 
 

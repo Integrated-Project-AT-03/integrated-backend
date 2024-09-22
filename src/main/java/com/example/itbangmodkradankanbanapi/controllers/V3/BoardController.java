@@ -35,13 +35,13 @@ private BoardService service;
         return ResponseEntity.ok(service.getBoard(nanoId));
     }
 //    @GetMapping("")
-//    public ResponseEntity<Object> getAllBoards(){
-//        return  ResponseEntity.ok(service.getAllBoard());
-//    }
-
-//    @GetMapping("{nanoId}/tasks")
-//    public ResponseEntity<Object> getAllTasksByBoard(@PathVariable String nanoId){
-//        return  ResponseEntity.ok(service.getAllTasksByBoard(nanoId));
+////    public ResponseEntity<Object> getAllBoards(){
+////        return  ResponseEntity.ok(service.getAllBoard());
+////    }
+//
+////    @GetMapping("{nanoId}/tasks")
+////    public ResponseEntity<Object> getAllTasksByBoard(@PathVariable String nanoId){
+////        return  ResponseEntity.ok(service.getAllTasksByBoard(nanoId));
 //    }
 
     @GetMapping("{nanoId}/settings")

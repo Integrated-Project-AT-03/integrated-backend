@@ -4,9 +4,11 @@ package com.example.itbangmodkradankanbanapi.Auth;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Date;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -36,6 +39,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+
+    private String cookieTokenName;
 
     private void writeErrorResponse(HttpServletResponse response, ErrorResponse er) throws IOException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -51,22 +57,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         String requestURI = request.getRequestURI();
-        if (requestURI.equals("/login") || requestURI.equals("/validate-token")) {
+        if (requestURI.equals("/login") || requestURI.equals("/token") ||  requestURI.equals("/validate-token") || requestURI.equals("/v2/colors")) {
             chain.doFilter(request, response);
             return;
         }
 
-        final String requestTokenHeader = request.getHeader("Authorization");
         String username = null;
-        String jwtToken = null;
-        if (requestTokenHeader == null) {
-            ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "JWT Token must have to start with bearer", request.getRequestURI());
+        String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
+        System.out.println(jwtToken);
+
+
+        if (jwtToken == null) {
+            ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "JWT Token must have", request.getRequestURI());
             writeErrorResponse(response, er);
             return;
         }
-        jwtToken = requestTokenHeader.substring(7);
+
             try {
-                username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+                Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtToken);
+                username = claims.getSubject();
             } catch (ExpiredJwtException e) {
                 ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "Token is expired", request.getRequestURI());
                 writeErrorResponse(response, er);

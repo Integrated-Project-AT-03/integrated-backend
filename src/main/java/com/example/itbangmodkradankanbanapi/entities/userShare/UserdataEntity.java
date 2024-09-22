@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "users", schema = "itbkk_shared", catalog = "")
+@Table(name = "users", schema = "itbkk_shared")
 public class UserdataEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
