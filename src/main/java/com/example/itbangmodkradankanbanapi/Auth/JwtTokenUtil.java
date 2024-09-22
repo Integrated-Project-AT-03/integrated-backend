@@ -134,8 +134,8 @@ public class JwtTokenUtil implements Serializable {
 //    }
 
     public boolean validateToken(String authToken) {
+        if (authToken == null) throw  new UnauthorizedLoginException("Must have JWT refresh token");
         try {
-
             Jwts.parserBuilder().setSigningKey(SECRET_KEY).build().parse(authToken);
             return true;
         } catch (MalformedJwtException e) {

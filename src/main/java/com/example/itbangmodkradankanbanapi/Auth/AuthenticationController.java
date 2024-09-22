@@ -84,9 +84,7 @@ public class AuthenticationController {
     @GetMapping("/token")
     public ResponseEntity<Object> refreshToken(HttpServletRequest request) {
         String jwtRefToken = jwtTokenUtil.getRefTokenCookie(request.getCookies());
-        if (jwtRefToken == null) throw  new UnauthorizedLoginException("Must have JWT refresh token") ;
-       if (!jwtTokenUtil.validateToken(jwtRefToken)) throw  new UnauthorizedLoginException("Invalid JWT refresh token") ;
-
+        jwtTokenUtil.validateToken(jwtRefToken);
         String username = jwtTokenUtil.getAllClaimsFromToken(jwtRefToken).getSubject();
         UserdataEntity userdataEntity = userDataRepository.findByUsername(username);
         ResponseCookie jwtCookie = jwtTokenUtil.generateJwtCookie(userdataEntity);
@@ -115,7 +113,8 @@ public class AuthenticationController {
     @GetMapping("/clear-cookie")
     public ResponseEntity<Object> logout(HttpServletResponse response) {
   ResponseCookie jwtCookie = jwtTokenUtil.removeCookie("jwtToken");
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body("Logged out and cookie cleared");
+        ResponseCookie jwtRefCookie = jwtTokenUtil.removeCookie("jwtRefToken");
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).header(HttpHeaders.SET_COOKIE, jwtRefCookie.toString()).body("Logged out and cookie cleared");
     }
 
 
