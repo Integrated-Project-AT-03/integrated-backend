@@ -181,6 +181,7 @@ CREATE TABLE IF NOT EXISTS `karban`.`boards` (
     `nano_id_board` VARCHAR(10) NOT NULL,
     `name` VARCHAR(120) NOT NULL,
     `enable_limits_task` BIT(1) NOT NULL DEFAULT 1,
+    `public` BIT(1) NOT NULL DEFAULT 0,
     `limits_task` INT NOT NULL DEFAULT 10,
     `enable_status_center` BIT(4) NOT NULL DEFAULT b'1111',
     PRIMARY KEY (`nano_id_board`))

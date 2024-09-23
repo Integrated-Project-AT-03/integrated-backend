@@ -27,15 +27,21 @@ import java.util.List;
 public class FullBoardDtoV3 {
     private String id;
     private String name;
+    private String visibility;
     private Owner owner = null;
+    @JsonIgnore
+    private Boolean isPublic;
 
-    private Boolean enableLimitsTask;
-    private Integer limitsTask;
-    private String enableStatusCenter;
-        @Data
-        public static class Owner{
-            private String oid;
-            private String name;
-        }
+
+    @Data
+    public static class Owner {
+        private String oid;
+        private String name;
+    }
+
+
+    public String getVisibility() {
+        return isPublic ? "PUBLIC" : "PRIVATE";
+    }
 
 }

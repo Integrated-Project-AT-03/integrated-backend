@@ -1,8 +1,14 @@
 package com.example.itbangmodkradankanbanapi.Auth;
 
 
+import com.example.itbangmodkradankanbanapi.entities.V3.Board;
+import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoardsRole;
+import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
-
+import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoard;
+import com.example.itbangmodkradankanbanapi.repositories.V3.BoardRepositoryV3;
+import com.example.itbangmodkradankanbanapi.repositories.V3.ShareBoardRepositoryV3;
+import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -40,11 +46,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private UserDataRepository userDataRepository;
 
-    private String cookieTokenName;
+    @Autowired
+    private ShareBoardRepositoryV3 shareBoardRepository;
+    @Autowired
+    private BoardRepositoryV3 boardRepository;
+
 
     private void writeErrorResponse(HttpServletResponse response, ErrorResponse er) throws IOException {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setStatus(er.getStatus());
         response.setContentType("application/json");
         String json = objectMapper.writeValueAsString(er);
         response.getWriter().write(json);
@@ -52,54 +64,84 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         String requestURI = request.getRequestURI();
-        if (requestURI.equals("/login")  ||  requestURI.equals("/validate-token") || requestURI.equals("/v2/colors") || requestURI.equals("/token")) {
-            chain.doFilter(request, response); // ปล่อย request ผ่านไปโดยไม่ต้องตรวจสอบ JWT
+        if (requestURI.equals("/login") || requestURI.equals("/validate-token") || requestURI.equals("/v2/colors") || requestURI.equals("/token")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        String[] uriParts = requestURI.split("/");
+        String nanoId = uriParts[3];
+        Board board = boardRepository.findById(nanoId).orElse(null);
+        if (requestURI.matches("/v3/boards/[^/]+") &&board == null && request.getMethod().equals("GET")) {
+            ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.NOT_FOUND.value(), null, "Board id " + nanoId + " not found", request.getRequestURI());
+            writeErrorResponse(response, er);
             return;
         }
 
         String username = null;
         String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
-
-
         if (jwtToken == null) {
             ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "JWT Token must have", request.getRequestURI());
             writeErrorResponse(response, er);
             return;
         }
+        try {
+            jwtTokenUtil.validateToken(jwtToken);
+            Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtToken);
+            username = claims.getSubject();
+        } catch (ExpiredJwtException e) {
+            ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "Token is expired", request.getRequestURI());
+            writeErrorResponse(response, er);
+            return;
+        } catch (IllegalArgumentException e) {
+            ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "Unable to get JWT Token", request.getRequestURI());
+            writeErrorResponse(response, er);
+            return;
+        } catch (Exception e) {
+            ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "Invalid JWT Token", request.getRequestURI());
+            writeErrorResponse(response, er);
+            return;
+        }
+        UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+        usernamePasswordAuthenticationToken
+                .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
-            try {
-                Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtToken);
-                username = claims.getSubject();
-            } catch (ExpiredJwtException e) {
-                ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "Token is expired", request.getRequestURI());
-                writeErrorResponse(response, er);
-                return;
-            } catch (IllegalArgumentException e) {
-                ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "Unable to get JWT Token", request.getRequestURI());
-                writeErrorResponse(response, er);
-                return;
-            } catch (Exception e) {
-                ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "Invalid JWT Token", request.getRequestURI());
-                writeErrorResponse(response, er);
-                return;
-            }
 
-
-            UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
-            if (jwtTokenUtil.validateToken(jwtToken)) {
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()); usernamePasswordAuthenticationToken
-                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-
+        if (requestURI.matches("/v3/user/[^/]+/boards") || requestURI.matches("/user-info")) {
             chain.doFilter(request, response);
-            }
+            return;
         }
 
+
+
+        UserdataEntity userdata = userDataRepository.findByUsername(username);
+
+
+        ShareBoard shareBoard = shareBoardRepository.findByOidUserShareAndBoard(userdata.getOid(), board);
+        if (board == null) {
+            ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.NOT_FOUND.value(), null, "Board id " + nanoId + " not found", request.getRequestURI());
+            writeErrorResponse(response, er);
+            return;
+        }
+        if (shareBoard != null && shareBoard.getRole().equals(ShareBoardsRole.OWNER)) {
+            chain.doFilter(request, response);
+            return;
+        } else if (request.getMethod().equals("GET") && board.getIsPublic()) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+
+        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.FORBIDDEN.value(), null, "no access for this action", request.getRequestURI());
+        writeErrorResponse(response, er);
+
+    }
 
 }

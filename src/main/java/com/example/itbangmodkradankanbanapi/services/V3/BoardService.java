@@ -1,9 +1,6 @@
 package com.example.itbangmodkradankanbanapi.services.V3;
 
-import com.example.itbangmodkradankanbanapi.dtos.V3.board.BoardDtoV3;
-import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardDtoV3;
-import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardSettingDtoV3;
-import com.example.itbangmodkradankanbanapi.dtos.V3.board.FullBoardDtoV3;
+import com.example.itbangmodkradankanbanapi.dtos.V3.board.*;
 import com.example.itbangmodkradankanbanapi.dtos.V3.status.StatusDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.TaskDtoV3;
 import com.example.itbangmodkradankanbanapi.entities.V3.*;
@@ -65,6 +62,21 @@ public class BoardService {
     public FullBoardDtoV3 getBoard(String nanoId){
         Board board = repository.findById(nanoId).orElseThrow(() -> new NoSuchElementException("Board id "+ nanoId + " not found"));
         FullBoardDtoV3 boardDto = modelMapper.map(board,FullBoardDtoV3.class);
+        String oidOwner = board.getShareBoards().stream().filter(shareBoard -> shareBoard.getRole() == ShareBoardsRole.OWNER).findFirst().orElseThrow(()-> new NotAllowedException("The default board is not allowed to access")).getOidUserShare();
+        UserdataEntity user = userDataRepository.findById(oidOwner).orElseThrow(()-> new ItemNotFoundException("Not found user oid "+ oidOwner ));
+        FullBoardDtoV3.Owner owner = new FullBoardDtoV3.Owner();
+        owner.setOid(user.getOid());
+        owner.setName(user.getName());
+        boardDto.setOwner(owner);
+        return boardDto;
+
+    }
+
+    public FullBoardDtoV3 updateVisibilityBoard(String nanoId, FormBoardVisibilityDtoV3 formBoard){
+        Board board = repository.findById(nanoId).orElseThrow(() -> new NoSuchElementException("Board id "+ nanoId + " not found"));
+        board.setIsPublic(formBoard.getIsPublic());
+        Board updateBoard = repository.save(board);
+        FullBoardDtoV3 boardDto = modelMapper.map(updateBoard,FullBoardDtoV3.class);
         String oidOwner = board.getShareBoards().stream().filter(shareBoard -> shareBoard.getRole() == ShareBoardsRole.OWNER).findFirst().orElseThrow(()-> new NotAllowedException("The default board is not allowed to access")).getOidUserShare();
         UserdataEntity user = userDataRepository.findById(oidOwner).orElseThrow(()-> new ItemNotFoundException("Not found user oid "+ oidOwner ));
         FullBoardDtoV3.Owner owner = new FullBoardDtoV3.Owner();

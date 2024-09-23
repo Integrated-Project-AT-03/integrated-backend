@@ -5,6 +5,7 @@ import com.example.itbangmodkradankanbanapi.dtos.V1.FormTaskDto;
 import com.example.itbangmodkradankanbanapi.dtos.V1.TaskDto;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardSettingDtoV3;
+import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardVisibilityDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.FormTaskDtoV3;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
@@ -71,6 +72,11 @@ private BoardService service;
     @PostMapping("")
     public ResponseEntity<Object> createBoard(@RequestBody @Valid FormBoardDtoV3 newBoard){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createBoard(newBoard));
+    }
+
+    @PatchMapping ("{nanoId}")
+    public ResponseEntity<Object> updateVisibility(@PathVariable String nanoId, @RequestBody @Valid FormBoardVisibilityDtoV3 updateBoard){
+        return ResponseEntity.ok(service.updateVisibilityBoard(nanoId,updateBoard));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

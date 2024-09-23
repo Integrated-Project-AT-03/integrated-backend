@@ -22,6 +22,11 @@ public class Board {
     @Basic
     @Column(name = "enable_limits_task")
     private Boolean enableLimitsTask = true;
+
+    @Basic
+    @Column(name = "public")
+    private Boolean isPublic = false;
+
     @Basic
     @Column(name = "limits_task")
     private Integer limitsTask = 10;

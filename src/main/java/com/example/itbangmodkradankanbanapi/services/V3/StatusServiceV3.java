@@ -126,7 +126,7 @@ public class StatusServiceV3 {
         if (targetStatus.getCenterStatus() != null && !targetStatus.getCenterStatus().getEnableConfig() )
             throw new NotAllowedException(targetStatus.getName().toLowerCase() + " cannot be deleted.");
 
-        if (taskRepository.findAllByStatusAndBoard(targetStatus,board).size() != 0)
+        if (!taskRepository.findAllByStatusAndBoard(targetStatus, board).isEmpty())
             throw new InvalidFieldInputException("status", "Cannot Delete a status that still have tasks");
 
         if (targetStatus.getCenterStatus() != null) {
