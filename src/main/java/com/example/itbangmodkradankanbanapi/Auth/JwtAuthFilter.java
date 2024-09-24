@@ -2,10 +2,10 @@ package com.example.itbangmodkradankanbanapi.Auth;
 
 
 import com.example.itbangmodkradankanbanapi.entities.V3.Board;
+import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoard;
 import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoardsRole;
 import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
-import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoard;
 import com.example.itbangmodkradankanbanapi.repositories.V3.BoardRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.V3.ShareBoardRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
@@ -14,25 +14,20 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Date;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -68,19 +63,37 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         String requestURI = request.getRequestURI();
+
         if (requestURI.equals("/login") || requestURI.equals("/validate-token") || requestURI.equals("/v2/colors") || requestURI.equals("/token")) {
             chain.doFilter(request, response);
             return;
         }
 
+
+
         String[] uriParts = requestURI.split("/");
-        String nanoId = uriParts[3];
-        Board board = boardRepository.findById(nanoId).orElse(null);
-        if (requestURI.matches("/v3/boards/[^/]+") &&board == null && request.getMethod().equals("GET")) {
-            ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.NOT_FOUND.value(), null, "Board id " + nanoId + " not found", request.getRequestURI());
-            writeErrorResponse(response, er);
-            return;
+        String nanoId = "";
+        Board board = null;
+        if(requestURI.contains("/v3/boards/")) {
+             nanoId = uriParts[3];
+             board = boardRepository.findById(nanoId).orElse(null);
+             if(board == null){
+                 ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.NOT_FOUND.value(), null, "Board id " + nanoId + " not found", request.getRequestURI());
+                 writeErrorResponse(response, er);
+                 return;
+             }
+            if (request.getMethod().equals("GET") && board.getIsPublic()) {
+                System.out.println("Before chain.doFilter");
+                chain.doFilter(request, response);
+                System.out.println("After chain.doFilter");
+                return;
+
+            }
         }
+        
+
+
+
 
         String username = null;
         String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
@@ -114,26 +127,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
 
-        if (requestURI.matches("/v3/user/[^/]+/boards") || requestURI.matches("/user-info")) {
+        if (requestURI.matches("/v3/user/[^/]+/boards") || requestURI.equals("/v3/boards") || requestURI.matches("/user-info")) {
+            System.out.println("help");
             chain.doFilter(request, response);
             return;
         }
-
 
 
         UserdataEntity userdata = userDataRepository.findByUsername(username);
-
-
         ShareBoard shareBoard = shareBoardRepository.findByOidUserShareAndBoard(userdata.getOid(), board);
-        if (board == null) {
-            ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.NOT_FOUND.value(), null, "Board id " + nanoId + " not found", request.getRequestURI());
-            writeErrorResponse(response, er);
-            return;
-        }
+
+
         if (shareBoard != null && shareBoard.getRole().equals(ShareBoardsRole.OWNER)) {
-            chain.doFilter(request, response);
-            return;
-        } else if (request.getMethod().equals("GET") && board.getIsPublic()) {
+            System.out.println("boss");
             chain.doFilter(request, response);
             return;
         }

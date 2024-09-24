@@ -3,7 +3,6 @@ package com.example.itbangmodkradankanbanapi.controllers.V3;
 
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
-import com.example.itbangmodkradankanbanapi.services.V3.BoardService;
 import com.example.itbangmodkradankanbanapi.services.V3.ShareBoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -1,16 +1,14 @@
 
 package com.example.itbangmodkradankanbanapi.controllers.V3;
 
-import com.example.itbangmodkradankanbanapi.dtos.V1.FormTaskDto;
-import com.example.itbangmodkradankanbanapi.dtos.V1.TaskDto;
+import com.example.itbangmodkradankanbanapi.Auth.JwtTokenUtil;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardSettingDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardVisibilityDtoV3;
-import com.example.itbangmodkradankanbanapi.dtos.V3.task.FormTaskDtoV3;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
-import com.example.itbangmodkradankanbanapi.services.V1.TaskService;
 import com.example.itbangmodkradankanbanapi.services.V3.BoardService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,6 +28,8 @@ import java.util.NoSuchElementException;
 public class BoardController {
     @Autowired
 private BoardService service;
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
     @GetMapping("{nanoId}")
     public ResponseEntity<Object> findTask(@PathVariable String nanoId){
@@ -47,6 +47,7 @@ private BoardService service;
 
     @GetMapping("{nanoId}/settings")
     public ResponseEntity<Object> getBoardSettings(@PathVariable String nanoId){
+        System.out.println("heyyyyyyyy");
         return  ResponseEntity.ok(service.getBoardSettings(nanoId));
     }
 
@@ -70,7 +71,11 @@ private BoardService service;
     }
 
     @PostMapping("")
-    public ResponseEntity<Object> createBoard(@RequestBody @Valid FormBoardDtoV3 newBoard){
+    public ResponseEntity<Object> createBoard(HttpServletRequest request, @RequestBody @Valid FormBoardDtoV3 newBoard){
+
+       String jwt = jwtTokenUtil.getTokenCookie(request.getCookies());
+       String oid = jwtTokenUtil.getAllClaimsFromToken(jwt).get("oid").toString();
+       newBoard.setOwnerOid(oid);
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createBoard(newBoard));
     }
 
