@@ -54,9 +54,9 @@ public class BoardService {
         return modelMapper.map(repository.save(board),FormBoardSettingDtoV3.class);
     }
 
-    public FormBoardSettingDtoV3 getBoardSettings(String nanoId){
+    public BoardSettingDtoV3 getBoardSettings(String nanoId){
         Board board = repository.findById(nanoId).orElseThrow(() -> new NoSuchElementException("Board id "+ nanoId + " not found"));
-        return modelMapper.map(repository.save(board),FormBoardSettingDtoV3.class);
+        return modelMapper.map(repository.save(board),BoardSettingDtoV3.class);
     }
 
     public FullBoardDtoV3 getBoard(String nanoId){
