@@ -66,25 +66,18 @@ public class BoardService {
         UserdataEntity user = userDataRepository.findById(oidOwner).orElseThrow(()-> new ItemNotFoundException("Not found user oid "+ oidOwner ));
         FullBoardDtoV3.Owner owner = new FullBoardDtoV3.Owner();
         owner.setOid(user.getOid());
-        owner.setName(user.getName());
+        owner.setUsername(user.getName());
         boardDto.setOwner(owner);
         return boardDto;
 
     }
 
-    public FullBoardDtoV3 updateVisibilityBoard(String nanoId, FormBoardVisibilityDtoV3 formBoard){
+    public FormBoardVisibilityDtoV3 updateVisibilityBoard(String nanoId, FormBoardVisibilityDtoV3 formBoard){
         Board board = repository.findById(nanoId).orElseThrow(() -> new NoSuchElementException("Board id "+ nanoId + " not found"));
         board.setIsPublic(formBoard.getIsPublic());
         Board updateBoard = repository.save(board);
-        FullBoardDtoV3 boardDto = modelMapper.map(updateBoard,FullBoardDtoV3.class);
-        String oidOwner = board.getShareBoards().stream().filter(shareBoard -> shareBoard.getRole() == ShareBoardsRole.OWNER).findFirst().orElseThrow(()-> new NotAllowedException("The default board is not allowed to access")).getOidUserShare();
-        UserdataEntity user = userDataRepository.findById(oidOwner).orElseThrow(()-> new ItemNotFoundException("Not found user oid "+ oidOwner ));
-        FullBoardDtoV3.Owner owner = new FullBoardDtoV3.Owner();
-        owner.setOid(user.getOid());
-        owner.setName(user.getName());
-        boardDto.setOwner(owner);
+        FormBoardVisibilityDtoV3 boardDto = modelMapper.map(updateBoard,FormBoardVisibilityDtoV3.class);
         return boardDto;
-
     }
 
     @Transactional
@@ -108,7 +101,7 @@ public class BoardService {
         FullBoardDtoV3.Owner owner = new FullBoardDtoV3.Owner();
         BoardDtoV3 boardDto = modelMapper.map(board,BoardDtoV3.class);
         owner.setOid(user.getOid());
-        owner.setName(user.getName());
+        owner.setUsername(user.getName());
         return boardDto;
     }
 

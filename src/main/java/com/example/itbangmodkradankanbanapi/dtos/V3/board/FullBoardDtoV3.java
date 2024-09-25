@@ -36,7 +36,7 @@ public class FullBoardDtoV3 {
     @Data
     public static class Owner {
         private String oid;
-        private String name;
+        private String username;
     }
 
 

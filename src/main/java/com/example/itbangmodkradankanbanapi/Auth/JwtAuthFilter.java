@@ -83,9 +83,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                  return;
              }
             if (request.getMethod().equals("GET") && board.getIsPublic()) {
-                System.out.println("Before chain.doFilter");
                 chain.doFilter(request, response);
-                System.out.println("After chain.doFilter");
                 return;
 
             }
@@ -128,7 +126,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 
         if (requestURI.matches("/v3/user/[^/]+/boards") || requestURI.equals("/v3/boards") || requestURI.matches("/user-info")) {
-            System.out.println("help");
             chain.doFilter(request, response);
             return;
         }
@@ -139,7 +136,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 
         if (shareBoard != null && shareBoard.getRole().equals(ShareBoardsRole.OWNER)) {
-            System.out.println("boss");
             chain.doFilter(request, response);
             return;
         }

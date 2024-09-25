@@ -47,7 +47,6 @@ private BoardService service;
 
     @GetMapping("{nanoId}/settings")
     public ResponseEntity<Object> getBoardSettings(@PathVariable String nanoId){
-        System.out.println("heyyyyyyyy");
         return  ResponseEntity.ok(service.getBoardSettings(nanoId));
     }
 
