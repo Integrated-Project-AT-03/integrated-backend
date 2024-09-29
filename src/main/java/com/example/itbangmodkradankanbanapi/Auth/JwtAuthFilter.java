@@ -28,6 +28,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Arrays;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -75,7 +76,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String nanoId = "";
         Board board = null;
         if(requestURI.contains("/v3/boards/")) {
-             nanoId = uriParts[3];
+             String[] findNanoId =  Arrays.stream(uriParts).filter((part)-> part.length() == 10).toArray(String[]::new);
+             nanoId = findNanoId.length != 0 ? findNanoId[0] : "404";
              board = boardRepository.findById(nanoId).orElse(null);
              if(board == null){
                  ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.NOT_FOUND.value(), null, "Board id " + nanoId + " not found", request.getRequestURI());
