@@ -1,5 +1,6 @@
 package com.example.itbangmodkradankanbanapi.services.V3;
 
+import com.example.itbangmodkradankanbanapi.Auth.JwtTokenUtil;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.*;
 import com.example.itbangmodkradankanbanapi.dtos.V3.status.StatusDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.TaskDtoV3;
@@ -12,6 +13,8 @@ import com.example.itbangmodkradankanbanapi.repositories.V3.*;
 import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
 import com.example.itbangmodkradankanbanapi.utils.CustomNanoId;
 import com.example.itbangmodkradankanbanapi.utils.ListMapper;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +48,9 @@ public class BoardService {
 
     @Autowired
     private ListMapper listMapper;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
     private final ModelMapper modelMapper = new ModelMapper();
 
     public FormBoardSettingDtoV3 updateBoardSettings(String nanoId,FormBoardSettingDtoV3 settingForm){
@@ -59,15 +65,25 @@ public class BoardService {
         return modelMapper.map(repository.save(board),BoardSettingDtoV3.class);
     }
 
-    public FullBoardDtoV3 getBoard(String nanoId){
+    public FullBoardDtoV3 getBoard(String nanoId,HttpServletRequest request){
         Board board = repository.findById(nanoId).orElseThrow(() -> new NoSuchElementException("Board id "+ nanoId + " not found"));
         FullBoardDtoV3 boardDto = modelMapper.map(board,FullBoardDtoV3.class);
         String oidOwner = board.getShareBoards().stream().filter(shareBoard -> shareBoard.getRole() == ShareBoardsRole.OWNER).findFirst().orElseThrow(()-> new NotAllowedException("The default board is not allowed to access")).getOidUserShare();
         UserdataEntity user = userDataRepository.findById(oidOwner).orElseThrow(()-> new ItemNotFoundException("Not found user oid "+ oidOwner ));
+
         FullBoardDtoV3.Owner owner = new FullBoardDtoV3.Owner();
         owner.setOid(user.getOid());
         owner.setUsername(user.getName());
         boardDto.setOwner(owner);
+
+        String token = jwtTokenUtil.getTokenCookie(request.getCookies());
+        if(token == null) boardDto.setAccess("GUEST");
+        else {
+            Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
+            ShareBoard shareBoard = shareBoardRepository.findByOidUserShareAndBoard(claims.get("oid").toString(),board);
+            boardDto.setAccess(shareBoard.getRole().toString());
+        }
+
         return boardDto;
 
     }

@@ -32,8 +32,8 @@ private BoardService service;
     private JwtTokenUtil jwtTokenUtil;
 
     @GetMapping("{nanoId}")
-    public ResponseEntity<Object> findTask(@PathVariable String nanoId){
-        return ResponseEntity.ok(service.getBoard(nanoId));
+    public ResponseEntity<Object> findTask(@PathVariable String nanoId,HttpServletRequest request){
+        return ResponseEntity.ok(service.getBoard(nanoId,request));
     }
 //    @GetMapping("")
 ////    public ResponseEntity<Object> getAllBoards(){

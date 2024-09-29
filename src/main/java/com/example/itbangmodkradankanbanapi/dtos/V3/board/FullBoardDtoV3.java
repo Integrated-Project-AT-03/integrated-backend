@@ -29,6 +29,8 @@ public class FullBoardDtoV3 {
     private String name;
     private String visibility;
     private Owner owner = null;
+
+    private String access = null;
     @JsonIgnore
     private Boolean isPublic;
 
