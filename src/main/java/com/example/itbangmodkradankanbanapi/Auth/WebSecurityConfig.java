@@ -33,7 +33,7 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())  // Disable CSRF protection
                 .authorizeRequests(authorize -> authorize
                         // Allow public access to the login and token validation endpoints
-                        .requestMatchers("/login", "/validate-token","/v2/colors","/token","v3/boards/**","/v3/user/**").permitAll()
+                        .requestMatchers("/login", "/validate-token","/v2/colors","/token","v3/boards/**","/v3/user/**","/clear-cookie").permitAll()
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )

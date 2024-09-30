@@ -64,7 +64,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String requestURI = request.getRequestURI();
 
-        if (requestURI.equals("/login") || requestURI.equals("/validate-token") || requestURI.equals("/v2/colors") || requestURI.equals("/token")) {
+        if (requestURI.equals("/login") || requestURI.equals("/validate-token") || requestURI.equals("/v2/colors") || requestURI.equals("/token") || requestURI.equals("/clear-cookie")) {
             chain.doFilter(request, response);
             return;
         }

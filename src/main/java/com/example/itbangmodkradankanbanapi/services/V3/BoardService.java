@@ -121,9 +121,9 @@ public class BoardService {
         return boardDto;
     }
 
-//    public List<BoardDtoV3> getAllBoard(){
-//        return listMapper.mapList(repository.findAll(), BoardDtoV3.class);
-//    }
+    public List<BoardDtoV3> getAllBoard(){
+        return listMapper.mapList(repository.findAll(), BoardDtoV3.class);
+    }
 //
 ////    public List<TaskDtoV2> getAllTasksByBoard(String nanoId){
 ////        return listMapper.mapList(repository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Board id "+ nanoId + " not found")).getTasks(), TaskDtoV2.class);

@@ -36,11 +36,11 @@ private BoardService service;
     public ResponseEntity<Object> findTask(@PathVariable String nanoId,HttpServletRequest request){
         return ResponseEntity.ok(service.getBoard(nanoId,request));
     }
-//    @GetMapping("")
-////    public ResponseEntity<Object> getAllBoards(){
-////        return  ResponseEntity.ok(service.getAllBoard());
-////    }
-//
+    @GetMapping("")
+    public ResponseEntity<Object> getAllBoards(){
+        return  ResponseEntity.ok(service.getAllBoard());
+    }
+
 ////    @GetMapping("{nanoId}/tasks")
 ////    public ResponseEntity<Object> getAllTasksByBoard(@PathVariable String nanoId){
 ////        return  ResponseEntity.ok(service.getAllTasksByBoard(nanoId));
