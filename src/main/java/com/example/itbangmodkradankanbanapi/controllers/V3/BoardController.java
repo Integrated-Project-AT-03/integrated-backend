@@ -10,6 +10,7 @@ import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.services.V3.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,7 +71,7 @@ private BoardService service;
     }
 
     @PostMapping("")
-    public ResponseEntity<Object> createBoard(HttpServletRequest request, @RequestBody @Valid FormBoardDtoV3 newBoard){
+    public ResponseEntity<Object> createBoard(HttpServletRequest request,@RequestBody @Valid FormBoardDtoV3 newBoard){
 
        String jwt = jwtTokenUtil.getTokenCookie(request.getCookies());
        String oid = jwtTokenUtil.getAllClaimsFromToken(jwt).get("oid").toString();

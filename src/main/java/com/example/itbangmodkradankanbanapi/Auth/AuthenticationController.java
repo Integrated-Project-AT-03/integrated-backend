@@ -3,6 +3,7 @@ package com.example.itbangmodkradankanbanapi.Auth;
 import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.UnauthorizedLoginException;
+import com.example.itbangmodkradankanbanapi.models.TokenResponse;
 import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,8 +26,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-
-
+import java.util.Map;
 
 
 @RestController
@@ -61,16 +61,22 @@ public class AuthenticationController {
             UserdataEntity userdataEntity = userDataRepository.findByUsername(jwtRequestUser.getUserName());
             ResponseCookie jwtCookie = jwtTokenUtil.generateJwtCookie(userdataEntity);
             ResponseCookie refJwtCookie = jwtTokenUtil.generateRefreshJwtCookie(userdataEntity);
+
+            Map<String, Object> claims = jwtTokenUtil.getAllClaimsFromToken(jwtCookie.getValue());
+
+            TokenResponse response = new TokenResponse(claims,"hidden", "hidden");
+
+
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                     .header(HttpHeaders.SET_COOKIE, refJwtCookie.toString())
-                    .body(jwtTokenUtil.getAllClaimsFromToken(jwtCookie.getValue()));
+                    .body(response);
         }catch (BadCredentialsException ex){
             throw new UnauthorizedLoginException("Username or Password is Incorrect");
         }
     }
 
-    @GetMapping("/token")
+    @PostMapping("/token")
     public ResponseEntity<Object> refreshToken(HttpServletRequest request) {
         String jwtRefToken = jwtTokenUtil.getRefTokenCookie(request.getCookies());
         jwtTokenUtil.validateToken(jwtRefToken);
@@ -79,10 +85,14 @@ public class AuthenticationController {
         ResponseCookie jwtCookie = jwtTokenUtil.generateJwtCookie(userdataEntity);
         ResponseCookie refJwtCookie = jwtTokenUtil.generateRefreshJwtCookie(userdataEntity);
 
+        Map<String, Object> claims = jwtTokenUtil.getAllClaimsFromToken(jwtCookie.getValue());
+
+        TokenResponse response = new TokenResponse(claims,"hidden", "hidden");
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refJwtCookie.toString())
-                .body(jwtTokenUtil.getAllClaimsFromToken(jwtCookie.getValue()));
+                .body(response);
     }
 
 

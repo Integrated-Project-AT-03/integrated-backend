@@ -9,6 +9,6 @@ import java.util.List;
 
 @Data
 public class BoardDtoV3 {
-    private String nanoIdBoard;
+    private String id;
     private String name;
 }

@@ -113,7 +113,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             writeErrorResponse(response, er);
             return;
         } catch (Exception e) {
-            ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "Invalid JWT Token", request.getRequestURI());
+            ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "no token OR token is invalid", request.getRequestURI());
             writeErrorResponse(response, er);
             return;
         }

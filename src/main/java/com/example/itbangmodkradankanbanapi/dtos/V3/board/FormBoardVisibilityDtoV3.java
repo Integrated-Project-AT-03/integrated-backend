@@ -1,11 +1,14 @@
 package com.example.itbangmodkradankanbanapi.dtos.V3.board;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class FormBoardVisibilityDtoV3 {
+    @NotNull
+    @NotBlank
     private String visibility ;
     @JsonIgnore
     private Boolean isPublic;
