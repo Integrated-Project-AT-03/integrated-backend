@@ -74,6 +74,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String[] uriParts = requestURI.split("/");
         String nanoId = "";
         Board board = null;
+        String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
         if(requestURI.contains("/v3/boards/")) {
              nanoId = uriParts[3];
              board = boardRepository.findById(nanoId).orElse(null);
@@ -86,6 +87,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 chain.doFilter(request, response);
                 return;
 
+            }else if(request.getMethod().equals("GET") && jwtToken == null){
+                ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.FORBIDDEN.value(), null, "no access for this action", request.getRequestURI());
+                writeErrorResponse(response, er);
+                return;
             }
         }
 
@@ -94,7 +99,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 
         String username = null;
-        String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
+
         if (jwtToken == null) {
             ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "JWT Token must have", request.getRequestURI());
             writeErrorResponse(response, er);
