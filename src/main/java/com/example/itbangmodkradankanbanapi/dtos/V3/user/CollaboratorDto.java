@@ -20,7 +20,7 @@ public class CollaboratorDto {
     private Timestamp addedOn;
 
     public String getAccessRight(){
-       return this.role.equals(ShareBoardsRole.OWNER) ? "owner" : this.role.equals(ShareBoardsRole.WRITER) ? "write" : "read" ;
+       return this.role.equals(ShareBoardsRole.OWNER) ? "OWNER" : this.role.equals(ShareBoardsRole.WRITER) ? "WRITE" : "READ" ;
     }
 }
 

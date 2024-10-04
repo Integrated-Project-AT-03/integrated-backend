@@ -8,6 +8,7 @@ import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.services.V3.CollaboratorService;
 import com.example.itbangmodkradankanbanapi.services.V3.ShareBoardService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,19 +35,19 @@ private CollaboratorService service;
     }
 
     @DeleteMapping("{nanoId}/collabs/{oid}")
-    public ResponseEntity<Object> removeCollaborator(@PathVariable String nanoId,@PathVariable String oid){
-        service.removeCollaborator(nanoId,oid);
+    public ResponseEntity<Object> removeCollaborator(HttpServletRequest request,@PathVariable String nanoId,@PathVariable String oid){
+        service.removeCollaborator(request,nanoId,oid);
         return ResponseEntity.ok("This collaborator is removed");
     }
 
     @PatchMapping ("{nanoId}/collabs/{oid}")
     public ResponseEntity<Object> updateAccessRight(@PathVariable String nanoId,@PathVariable String oid,@Valid @RequestBody UpdateAccessCollaboratorDto form){
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.updateVisibilityBoard(nanoId,oid,form));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.updateAccessBoard(nanoId,oid,form));
     }
 
     @PostMapping("{nanoId}/collabs")
-    public ResponseEntity<Object> addCollaborator(@PathVariable String nanoId, @Valid @RequestBody FormCollaboratorDto form){
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.addCollaborator(nanoId, form));
+    public ResponseEntity<Object> addCollaborator(HttpServletRequest request,@PathVariable String nanoId, @Valid @RequestBody FormCollaboratorDto form){
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.addCollaborator(request,nanoId, form));
     }
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)

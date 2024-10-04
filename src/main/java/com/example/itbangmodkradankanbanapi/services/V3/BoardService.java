@@ -120,13 +120,11 @@ public class BoardService {
         return boardDto;
     }
 
-    public List<BoardDtoV3> getAllBoard(){
-        return listMapper.mapList(repository.findAll(), BoardDtoV3.class);
+    public List<BoardDtoV3> getAllBoard(HttpServletRequest request){
+      String token = jwtTokenUtil.getTokenCookie(request.getCookies());
+      Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
+        return   listMapper.mapList( shareBoardRepository.findAllByOidUserShare(claims.get("oid").toString()).stream().map(ShareBoard::getBoard).toList(),BoardDtoV3.class);
     }
-//
-////    public List<TaskDtoV2> getAllTasksByBoard(String nanoId){
-////        return listMapper.mapList(repository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Board id "+ nanoId + " not found")).getTasks(), TaskDtoV2.class);
-////    }
 
     public List<TaskDtoV3> getAllTasksByBoardAndFilter(String nanoId,String[] filterStatuses, String[] sortBy,String[] direction) {
       Board board =  repository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Board id "+ nanoId + " not found"));

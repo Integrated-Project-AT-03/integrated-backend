@@ -37,8 +37,8 @@ private BoardService service;
         return ResponseEntity.ok(service.getBoard(nanoId,request));
     }
     @GetMapping("")
-    public ResponseEntity<Object> getAllBoards(){
-        return  ResponseEntity.ok(service.getAllBoard());
+    public ResponseEntity<Object> getAllBoards(HttpServletRequest request){
+        return  ResponseEntity.ok(service.getAllBoard(request));
     }
 
 ////    @GetMapping("{nanoId}/tasks")

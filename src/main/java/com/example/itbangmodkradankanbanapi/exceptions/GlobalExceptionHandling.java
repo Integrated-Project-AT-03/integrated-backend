@@ -24,6 +24,20 @@ public class     GlobalExceptionHandling {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(er);
     }
 
+    @ExceptionHandler(NoAccessException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public final ResponseEntity<Object> handleNoAccessException(NoAccessException ex,WebRequest request) {
+        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.BAD_REQUEST.value(), "Forbidden", ex.getReason(), request.getDescription(false).substring(4));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(er);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public final ResponseEntity<Object> handleConflictException(ConflictException ex,WebRequest request) {
+        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.CONFLICT.value(), "Conflict", ex.getReason(), request.getDescription(false).substring(4));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(er);
+    }
+
     @ExceptionHandler(InvalidFieldInputException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> itemLimitException(InvalidFieldInputException ex, WebRequest request) {

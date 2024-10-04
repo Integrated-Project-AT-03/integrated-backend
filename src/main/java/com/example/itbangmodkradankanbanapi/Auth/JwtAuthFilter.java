@@ -138,11 +138,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         UserdataEntity userdata = userDataRepository.findByUsername(username);
         ShareBoard shareBoard = shareBoardRepository.findByOidUserShareAndBoard(userdata.getOid(), board);
 
+        if(shareBoard != null) {
+            if (request.getMethod().equals("GET") || (requestURI.matches("/v3/boards/[^/]+/collabs/[^/]") && request.getMethod().equals("DELETE"))) {
+                chain.doFilter(request, response);
+                return;
+            }
 
-        if (shareBoard != null && shareBoard.getRole().equals(ShareBoardsRole.OWNER)) {
-            chain.doFilter(request, response);
-            return;
+            if (shareBoard.getRole().equals(ShareBoardsRole.WRITER)) {
+                chain.doFilter(request, response);
+                return;
+            }
+
+            if (shareBoard.getRole().equals(ShareBoardsRole.OWNER)) {
+                chain.doFilter(request, response);
+                return;
+            }
         }
+
+
+
+
+
+
 
 
         ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.FORBIDDEN.value(), null, "no access for this action", request.getRequestURI());

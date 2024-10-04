@@ -1,5 +1,6 @@
 package com.example.itbangmodkradankanbanapi.services.V3;
 
+import com.example.itbangmodkradankanbanapi.Auth.JwtTokenUtil;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.BoardDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardVisibilityDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.user.CollaboratorDto;
@@ -11,13 +12,13 @@ import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoard;
 import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoardId;
 import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoardsRole;
 import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
-import com.example.itbangmodkradankanbanapi.exceptions.InvalidFieldInputException;
-import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
-import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
+import com.example.itbangmodkradankanbanapi.exceptions.*;
 import com.example.itbangmodkradankanbanapi.repositories.V3.BoardRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.V3.ShareBoardRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
 import com.example.itbangmodkradankanbanapi.utils.ListMapper;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,8 @@ public class CollaboratorService {
     private BoardRepositoryV3 boardRepository;
     @Autowired
     private ModelMapper mapper;
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
 
 
@@ -57,7 +60,7 @@ public class CollaboratorService {
        }).toList();
     }
     @Transactional
-    public Map<String,String> updateVisibilityBoard(String nanoId,String oid, UpdateAccessCollaboratorDto form){
+    public Map<String,String> updateAccessBoard(String nanoId,String oid, UpdateAccessCollaboratorDto form){
         Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards"));
         ShareBoard shareBoard = repository.findById(new ShareBoardId(oid,board)).orElseThrow(() -> new NoSuchElementException("not found this collaborator"));
         if(!form.getAccessRight().equals("WRITE") && !form.getAccessRight().equals("READ")  )  throw new NotAllowedException("Only Add Read or Write");
@@ -69,24 +72,36 @@ public class CollaboratorService {
         return result;
     }
     @Transactional
-    public void removeCollaborator(String nanoId,String oid){
+    public void removeCollaborator(HttpServletRequest request,String nanoId,String oid){
         Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Board"));
-        ShareBoard shareBoard = repository.findById(new ShareBoardId(oid,board)).orElseThrow(()-> new ItemNotFoundException("Not Found this user in board"));
+        String token = jwtTokenUtil.getTokenCookie(request.getCookies());
+        Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
+        ShareBoard shareBoardByToken = repository.findById(new ShareBoardId(claims.get("oid").toString(),board)).orElseThrow(()-> new ItemNotFoundException("Not Found this user in board by Token"));
+        ShareBoard shareBoard = repository.findById(new ShareBoardId(oid,board)).orElseThrow(()-> new ItemNotFoundException("Not Found this user in this board"));
+        if(!shareBoardByToken.getRole().equals(ShareBoardsRole.OWNER) && !shareBoard.getOidUserShare().equals(claims.get("oid").toString())) throw new NoAccessException("No access to delete role another if you are not the owner!!");
+        if(shareBoardByToken.getRole().equals(ShareBoardsRole.OWNER) && shareBoard.getOidUserShare().equals(claims.get("oid").toString())) throw new ConflictException("You are the owner can't remove yourself!!");
         repository.delete(shareBoard);
-
     }
     @Transactional
-    public ResultCollaboratorDto addCollaborator(String nanoId, FormCollaboratorDto form){
-        Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards"));
+    public ResultCollaboratorDto addCollaborator(HttpServletRequest request, String nanoId, FormCollaboratorDto form){
+      Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards"));
+       String token = jwtTokenUtil.getTokenCookie(request.getCookies());
+       Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
+       ShareBoard shareBoard = repository.findById(new ShareBoardId(claims.get("oid").toString(),board)).orElseThrow(()-> new ItemNotFoundException("Not Found this user in board by Token"));
+        if(!shareBoard.getRole().equals(ShareBoardsRole.OWNER)) throw new NoAccessException("The owner only is allow for this action!!");
+
         UserdataEntity userdata = userDataRepository.findByEmail(form.getEmail());
         if(userdata == null) throw new ItemNotFoundException("Not Found User");
-        if(!form.getAccessRight().equals("WRITE") && !form.getAccessRight().equals("READ")  )  throw new NotAllowedException("Only Add Read or Write");
-        ShareBoard shareBoard = new ShareBoard();
+
+        ShareBoard shareBoardCollab = repository.findById(new ShareBoardId(userdata.getOid(),board)).orElse(null);
+        if(shareBoardCollab != null && shareBoardCollab.getRole().equals(ShareBoardsRole.OWNER)) throw new ConflictException("The owner can't be collaborator!!");
+
+        ShareBoard newShareBoard = new ShareBoard();
         ShareBoardsRole role = form.getAccessRight().equals("WRITE") ? ShareBoardsRole.WRITER : ShareBoardsRole.READER;
-        shareBoard.setRole(role);
-        shareBoard.setBoard(board);
-        shareBoard.setOidUserShare(userdata.getOid());
-        ResultCollaboratorDto result =  mapper.map(repository.save(shareBoard),ResultCollaboratorDto.class);
+        newShareBoard.setRole(role);
+        newShareBoard.setBoard(board);
+        newShareBoard.setOidUserShare(userdata.getOid());
+        ResultCollaboratorDto result =  mapper.map(repository.save(newShareBoard),ResultCollaboratorDto.class);
         result.setName(userdata.getName());
         result.setCollaboratorEmail(userdata.getEmail());
         return  result;
