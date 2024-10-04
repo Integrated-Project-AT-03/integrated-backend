@@ -129,7 +129,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
 
-        if (requestURI.matches("/v3/user/[^/]+/boards") || requestURI.equals("/v3/boards") || requestURI.matches("/user-info")) {
+        if (requestURI.equals("/v3/boards") || requestURI.matches("/user-info")) {
             chain.doFilter(request, response);
             return;
         }
@@ -137,14 +137,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         UserdataEntity userdata = userDataRepository.findByUsername(username);
         ShareBoard shareBoard = shareBoardRepository.findByOidUserShareAndBoard(userdata.getOid(), board);
-
         if(shareBoard != null) {
             if (request.getMethod().equals("GET") || (requestURI.matches("/v3/boards/[^/]+/collabs/[^/]") && request.getMethod().equals("DELETE"))) {
                 chain.doFilter(request, response);
                 return;
             }
 
-            if (shareBoard.getRole().equals(ShareBoardsRole.WRITER)) {
+            if (shareBoard.getRole().equals(ShareBoardsRole.WRITER) && !request.getMethod().equals("PATCH")) {
                 chain.doFilter(request, response);
                 return;
             }
@@ -156,13 +155,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
 
-
-
-
-
-
-
-        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.FORBIDDEN.value(), null, "no access for this action", request.getRequestURI());
+        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.FORBIDDEN.value(), null, "No access for this action", request.getRequestURI());
         writeErrorResponse(response, er);
 
     }

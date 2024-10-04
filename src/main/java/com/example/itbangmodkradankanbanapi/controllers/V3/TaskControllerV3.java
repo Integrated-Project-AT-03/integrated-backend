@@ -44,7 +44,7 @@ private TaskServiceV3 service;
        return ResponseEntity.ok( service.updateTask(id,task));
     }
     @PostMapping("{nanoId}/tasks")
-    public ResponseEntity<Object> addTask(@RequestBody @Valid FormTaskDtoV3 task,@PathVariable @NotNull String nanoId){
+    public ResponseEntity<Object> addTask(@RequestBody @Valid FormTaskDtoV3 task,@PathVariable String nanoId){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.addTask(task,nanoId));
     }
     @ExceptionHandler(HandlerMethodValidationException.class)
