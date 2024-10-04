@@ -8,5 +8,7 @@ import java.util.List;
 public interface ShareBoardRepositoryV3 extends JpaRepository<ShareBoard, ShareBoardId> {
     List<ShareBoard> findAllByOidUserShare(String oid);
 
+    List<ShareBoard> findAllByBoard(Board board);
+
     ShareBoard findByOidUserShareAndBoard(String oid, Board board);
 }

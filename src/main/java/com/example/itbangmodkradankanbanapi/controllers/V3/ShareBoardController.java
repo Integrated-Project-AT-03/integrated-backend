@@ -32,6 +32,7 @@ private ShareBoardService service;
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er);
     }
 
+
     @ExceptionHandler(ItemNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorResponse> handleItemNotFound(ItemNotFoundException ex, WebRequest request) {

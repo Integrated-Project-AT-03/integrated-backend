@@ -99,7 +99,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 
         String username = null;
-
         if (jwtToken == null) {
             ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "JWT Token must have", request.getRequestURI());
             writeErrorResponse(response, er);

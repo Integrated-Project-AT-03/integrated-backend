@@ -17,7 +17,7 @@
 
 --
 -- Table structure for table `status`
-# create database karban;
+create database karban;
 use karban;
 DROP TABLE IF EXISTS `status`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -293,6 +293,7 @@ CREATE TABLE IF NOT EXISTS `karban`.`share_board` (
                                                       `oid_user_share` VARCHAR(36) NOT NULL,
     `nano_id_board` VARCHAR(10) NOT NULL,
     `role` ENUM("OWNER", "WRITER", "READER") NOT NULL,
+    `added_on` datetime DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`oid_user_share`, `nano_id_board`),
     INDEX `fk_share_board_boards1_idx` (`nano_id_board` ASC) VISIBLE,
     CONSTRAINT `fk_share_board_boards1`
