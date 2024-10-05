@@ -1,4 +1,4 @@
-package com.example.itbangmodkradankanbanapi.dtos.V3.user;
+package com.example.itbangmodkradankanbanapi.dtos.V3.collaborator;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

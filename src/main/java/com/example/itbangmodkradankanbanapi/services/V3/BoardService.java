@@ -123,7 +123,7 @@ public class BoardService {
     public List<BoardDtoV3> getAllBoard(HttpServletRequest request){
       String token = jwtTokenUtil.getTokenCookie(request.getCookies());
       Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
-        return   listMapper.mapList( shareBoardRepository.findAllByOidUserShare(claims.get("oid").toString()).stream().map(ShareBoard::getBoard).toList(),BoardDtoV3.class);
+        return   listMapper.mapList( shareBoardRepository.findAllByOidUserShareAndRole(claims.get("oid").toString(),ShareBoardsRole.OWNER).stream().map(ShareBoard::getBoard).toList(),BoardDtoV3.class);
     }
 
     public List<TaskDtoV3> getAllTasksByBoardAndFilter(String nanoId,String[] filterStatuses, String[] sortBy,String[] direction) {

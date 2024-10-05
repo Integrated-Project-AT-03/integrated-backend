@@ -1,13 +1,11 @@
 
 package com.example.itbangmodkradankanbanapi.controllers.V3;
 
-import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardVisibilityDtoV3;
-import com.example.itbangmodkradankanbanapi.dtos.V3.user.FormCollaboratorDto;
-import com.example.itbangmodkradankanbanapi.dtos.V3.user.UpdateAccessCollaboratorDto;
+import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.FormCollaboratorDto;
+import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.UpdateAccessCollaboratorDto;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.services.V3.CollaboratorService;
-import com.example.itbangmodkradankanbanapi.services.V3.ShareBoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,28 +22,33 @@ import java.util.NoSuchElementException;
 
 @RestController
 @CrossOrigin(origins = "${value.url.cross.origin}")
-@RequestMapping("/v3/boards")
+@RequestMapping("/v3")
 
 public class CollaboratorController {
     @Autowired
 private CollaboratorService service;
-    @GetMapping("{nanoId}/collabs")
+    @GetMapping("boards/{nanoId}/collabs")
     public ResponseEntity<Object> getAllCollaboratorByNanoId(@PathVariable String nanoId){
         return ResponseEntity.ok(service.getAllCollaboratorByNanoId(nanoId));
     }
 
-    @DeleteMapping("{nanoId}/collabs/{oid}")
+    @GetMapping("collabs")
+    public ResponseEntity<Object> getAllCollaboratorByNanoId(HttpServletRequest request){
+        return ResponseEntity.ok(service.getAllCollaborator(request));
+    }
+
+    @DeleteMapping("boards/{nanoId}/collabs/{oid}")
     public ResponseEntity<Object> removeCollaborator(HttpServletRequest request,@PathVariable String nanoId,@PathVariable String oid){
         service.removeCollaborator(request,nanoId,oid);
         return ResponseEntity.ok("This collaborator is removed");
     }
 
-    @PatchMapping ("{nanoId}/collabs/{oid}")
+    @PatchMapping ("boards/{nanoId}/collabs/{oid}")
     public ResponseEntity<Object> updateAccessRight(@PathVariable String nanoId,@PathVariable String oid,@Valid @RequestBody UpdateAccessCollaboratorDto form){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.updateAccessBoard(nanoId,oid,form));
     }
 
-    @PostMapping("{nanoId}/collabs")
+    @PostMapping("boards/{nanoId}/collabs")
     public ResponseEntity<Object> addCollaborator(HttpServletRequest request,@PathVariable String nanoId, @Valid @RequestBody FormCollaboratorDto form){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.addCollaborator(request,nanoId, form));
     }

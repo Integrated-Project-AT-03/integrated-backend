@@ -1,12 +1,10 @@
 package com.example.itbangmodkradankanbanapi.services.V3;
 
 import com.example.itbangmodkradankanbanapi.Auth.JwtTokenUtil;
-import com.example.itbangmodkradankanbanapi.dtos.V3.board.BoardDtoV3;
-import com.example.itbangmodkradankanbanapi.dtos.V3.board.FormBoardVisibilityDtoV3;
-import com.example.itbangmodkradankanbanapi.dtos.V3.user.CollaboratorDto;
-import com.example.itbangmodkradankanbanapi.dtos.V3.user.FormCollaboratorDto;
-import com.example.itbangmodkradankanbanapi.dtos.V3.user.ResultCollaboratorDto;
-import com.example.itbangmodkradankanbanapi.dtos.V3.user.UpdateAccessCollaboratorDto;
+import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.CollaboratorDto;
+import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.FormCollaboratorDto;
+import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.ResultCollaboratorDto;
+import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.UpdateAccessCollaboratorDto;
 import com.example.itbangmodkradankanbanapi.entities.V3.Board;
 import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoard;
 import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoardId;
@@ -82,6 +80,19 @@ public class CollaboratorService {
         if(shareBoardByToken.getRole().equals(ShareBoardsRole.OWNER) && shareBoard.getOidUserShare().equals(claims.get("oid").toString())) throw new ConflictException("You are the owner can't remove yourself!!");
         repository.delete(shareBoard);
     }
+
+
+    public List<CollaboratorDto> getAllCollaborator(HttpServletRequest request){
+        String token = jwtTokenUtil.getTokenCookie(request.getCookies());
+        Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
+        List<ShareBoard> shareBoards = repository.findAllByOidUserShare(claims.get("oid").toString());
+        return listMapper.mapList(shareBoards,CollaboratorDto.class).stream().peek((shareBoard)-> {
+            UserdataEntity userdata = userDataRepository.findById(shareBoard.getOid()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
+            shareBoard.setName(userdata.getName());
+            shareBoard.setEmail(userdata.getEmail());
+        }).toList();
+    }
+
     @Transactional
     public ResultCollaboratorDto addCollaborator(HttpServletRequest request, String nanoId, FormCollaboratorDto form){
       Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards"));

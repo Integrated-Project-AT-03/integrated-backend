@@ -18,15 +18,6 @@ public class JwtUserDetailsService implements UserDetailsService {
         UserdataEntity user = userDataRepository.findByUsername(userName);
         if(user == null) {
             throw new UnauthorizedLoginException("Username or Password is incorrect"); }
-//        List<GrantedAuthority> roles = new ArrayList<>();
-//        GrantedAuthority grantedAuthority = new GrantedAuthority() {
-//            @Override
-//            public String getAuthority() {
-//                return user.getRole();
-//            }
-//        };
-//        roles.add(grantedAuthority);
-
         UserDetails userDetails = new AuthUser(userName, user.getPassword());
         return userDetails;
     }

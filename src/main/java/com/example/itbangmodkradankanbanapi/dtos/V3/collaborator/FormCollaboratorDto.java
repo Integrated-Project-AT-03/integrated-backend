@@ -1,4 +1,4 @@
-package com.example.itbangmodkradankanbanapi.dtos.V3.user;
+package com.example.itbangmodkradankanbanapi.dtos.V3.collaborator;
 
 import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoardsRole;
 import com.fasterxml.jackson.annotation.JsonFormat;
