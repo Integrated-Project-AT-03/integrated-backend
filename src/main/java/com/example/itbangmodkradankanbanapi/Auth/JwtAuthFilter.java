@@ -143,7 +143,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
 
-            if (shareBoard.getRole().equals(ShareBoardsRole.WRITER) && !request.getMethod().equals("PATCH")) {
+            if (shareBoard.getRole().equals(ShareBoardsRole.WRITER) && !(requestURI.matches("/v3/boards/[^/]+/collabs") && request.getMethod().equals("POST")) && !request.getMethod().equals("PATCH")) {
                 chain.doFilter(request, response);
                 return;
             }

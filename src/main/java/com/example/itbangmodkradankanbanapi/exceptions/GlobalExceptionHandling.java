@@ -27,7 +27,7 @@ public class     GlobalExceptionHandling {
     @ExceptionHandler(NoAccessException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public final ResponseEntity<Object> handleNoAccessException(NoAccessException ex,WebRequest request) {
-        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.BAD_REQUEST.value(), "Forbidden", ex.getReason(), request.getDescription(false).substring(4));
+        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.FORBIDDEN.value(), "Forbidden", ex.getReason(), request.getDescription(false).substring(4));
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(er);
     }
 
