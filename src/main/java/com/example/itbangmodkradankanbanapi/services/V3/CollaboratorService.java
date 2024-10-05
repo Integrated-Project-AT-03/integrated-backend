@@ -1,10 +1,7 @@
 package com.example.itbangmodkradankanbanapi.services.V3;
 
 import com.example.itbangmodkradankanbanapi.Auth.JwtTokenUtil;
-import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.CollaboratorDto;
-import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.FormCollaboratorDto;
-import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.ResultCollaboratorDto;
-import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.UpdateAccessCollaboratorDto;
+import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.*;
 import com.example.itbangmodkradankanbanapi.entities.V3.Board;
 import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoard;
 import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoardId;
@@ -82,11 +79,13 @@ public class CollaboratorService {
     }
 
 
-    public List<CollaboratorDto> getAllCollaborator(HttpServletRequest request){
+    public List<CollaboratorBoardDto> getAllCollaborator(HttpServletRequest request){
         String token = jwtTokenUtil.getTokenCookie(request.getCookies());
         Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
-        List<ShareBoard> shareBoards = repository.findAllByOidUserShare(claims.get("oid").toString());
-        return listMapper.mapList(shareBoards,CollaboratorDto.class).stream().peek((shareBoard)-> {
+        String oid = claims.get("oid").toString();
+        List<ShareBoard> shareBoards = repository.findAllByOidUserShareAndRoleNot(oid,ShareBoardsRole.OWNER);
+
+        return listMapper.mapList(shareBoards,CollaboratorBoardDto.class).stream().peek((shareBoard)-> {
             UserdataEntity userdata = userDataRepository.findById(shareBoard.getOid()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
             shareBoard.setName(userdata.getName());
             shareBoard.setEmail(userdata.getEmail());
