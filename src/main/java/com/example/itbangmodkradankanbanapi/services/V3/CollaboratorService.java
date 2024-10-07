@@ -93,7 +93,7 @@ public class CollaboratorService {
     }
 
     @Transactional
-    public ResultCollaboratorDto addCollaborator(HttpServletRequest request, String nanoId, FormCollaboratorDto form){
+    public CollaboratorDto addCollaborator(HttpServletRequest request, String nanoId, FormCollaboratorDto form){
       Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards"));
        String token = jwtTokenUtil.getTokenCookie(request.getCookies());
        Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
@@ -111,9 +111,9 @@ public class CollaboratorService {
         newShareBoard.setRole(role);
         newShareBoard.setBoard(board);
         newShareBoard.setOidUserShare(userdata.getOid());
-        ResultCollaboratorDto result =  mapper.map(repository.save(newShareBoard),ResultCollaboratorDto.class);
+        CollaboratorDto result =  mapper.map(repository.save(newShareBoard),CollaboratorDto.class);
         result.setName(userdata.getName());
-        result.setCollaboratorEmail(userdata.getEmail());
+        result.setEmail(userdata.getEmail());
         return  result;
     }
 }
