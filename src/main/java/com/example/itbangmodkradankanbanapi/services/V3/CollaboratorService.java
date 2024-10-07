@@ -45,7 +45,7 @@ public class CollaboratorService {
     private ListMapper listMapper;
     public List<CollaboratorDto> getAllCollaboratorByNanoId(String nanoId){
         Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards"));
-       List<ShareBoard> shareBoards = repository.findAllByBoard(board);
+       List<ShareBoard> shareBoards = repository.findAllByBoardAndRoleNot(board,ShareBoardsRole.OWNER);
 
         return listMapper.mapList(shareBoards,CollaboratorDto.class).stream().peek((shareBoard)-> {
            UserdataEntity userdata = userDataRepository.findById(shareBoard.getOid()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
