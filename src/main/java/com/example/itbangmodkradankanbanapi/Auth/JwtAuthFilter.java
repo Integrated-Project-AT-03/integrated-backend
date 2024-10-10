@@ -138,7 +138,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         UserdataEntity userdata = userDataRepository.findByUsername(username);
         ShareBoard shareBoard = shareBoardRepository.findByOidUserShareAndBoard(userdata.getOid(), board);
         if(shareBoard != null) {
-            if (request.getMethod().equals("GET") || (requestURI.matches("/v3/boards/[^/]+/collabs/[^/]") && request.getMethod().equals("DELETE"))) {
+            if (request.getMethod().equals("GET") || (requestURI.matches("/v3/boards/[^/]+/collabs/[^/]+") && request.getMethod().equals("DELETE"))) {
                 chain.doFilter(request, response);
                 return;
             }

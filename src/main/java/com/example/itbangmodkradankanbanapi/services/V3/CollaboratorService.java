@@ -104,7 +104,7 @@ public class CollaboratorService {
 
         if(repository.findById(new ShareBoardId(userdata.getOid(),board)).orElse(null) != null) throw new ConflictException("The collaborator is already in this board");
         if(!shareBoard.getRole().equals(ShareBoardsRole.OWNER)) throw new NoAccessException("The owner only is allow for this action!!");
-        
+
         ShareBoard shareBoardCollab = repository.findById(new ShareBoardId(userdata.getOid(),board)).orElse(null);
         if(shareBoardCollab != null && shareBoardCollab.getRole().equals(ShareBoardsRole.OWNER)) throw new ConflictException("The owner can't be collaborator!!");
 
