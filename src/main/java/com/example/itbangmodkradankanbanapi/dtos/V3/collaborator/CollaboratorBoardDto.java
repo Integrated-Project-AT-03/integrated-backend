@@ -16,6 +16,7 @@ public class CollaboratorBoardDto {
     private ShareBoardsRole role;
     private String boardNanoId;
     private String boardName;
+
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX")
     private Timestamp addedOn;
 
