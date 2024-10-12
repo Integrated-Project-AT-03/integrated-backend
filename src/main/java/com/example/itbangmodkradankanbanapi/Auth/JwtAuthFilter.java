@@ -93,11 +93,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
         }
-
-
-
-
-
         String username = null;
         if (jwtToken == null) {
             ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "JWT Token must have", request.getRequestURI());
@@ -133,8 +128,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
             return;
         }
-
-
         UserdataEntity userdata = userDataRepository.findByUsername(username);
         ShareBoard shareBoard = shareBoardRepository.findByOidUserShareAndBoard(userdata.getOid(), board);
         if(shareBoard != null) {

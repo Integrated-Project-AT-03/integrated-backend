@@ -18,6 +18,8 @@ public interface ShareBoardRepositoryV3 extends JpaRepository<ShareBoard, ShareB
 
     List<ShareBoard> findAllByBoardAndRoleNot(Board board,ShareBoardsRole shareBoardsRole);
 
+    ShareBoard findByBoardAndRole(Board board, ShareBoardsRole role);
+
 
     ShareBoard findByOidUserShareAndBoard(String oid, Board board);
 }

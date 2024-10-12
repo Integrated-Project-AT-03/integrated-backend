@@ -76,12 +76,12 @@ public class BoardService {
         owner.setUsername(user.getName());
         boardDto.setOwner(owner);
         String token = jwtTokenUtil.getTokenCookie(request.getCookies());
-        Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
-        ShareBoard shareBoard = shareBoardRepository.findByOidUserShareAndBoard(claims.get("oid").toString(),board);
-        if(token == null || shareBoard == null) boardDto.setAccess("GUEST");
-        else {
-            boardDto.setAccess(shareBoard.getRole().toString());
-        }
+        if(token != null){
+            Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
+            ShareBoard shareBoard = shareBoardRepository.findByOidUserShareAndBoard(claims.get("oid").toString(),board);
+            boardDto.setAccess( shareBoard != null ? shareBoard.getRole().toString() : "GUEST");
+        }else  boardDto.setAccess("GUEST");
+
 
         return boardDto;
 

@@ -17,7 +17,7 @@
 
 --
 -- Table structure for table `status`
-create database karban;
+# create database karban;
 use karban;
 DROP TABLE IF EXISTS `status`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

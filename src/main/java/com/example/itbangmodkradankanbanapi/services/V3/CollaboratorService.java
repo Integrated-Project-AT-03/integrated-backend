@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class CollaboratorService {
@@ -84,10 +85,10 @@ public class CollaboratorService {
         Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
         String oid = claims.get("oid").toString();
         List<ShareBoard> shareBoards = repository.findAllByOidUserShareAndRoleNot(oid,ShareBoardsRole.OWNER);
-
-
+        AtomicInteger atomicInteger = new AtomicInteger(0);
         return listMapper.mapList(shareBoards,CollaboratorBoardDto.class).stream().peek((shareBoard)-> {
-            UserdataEntity userdata = userDataRepository.findById(shareBoard.getOid()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
+            ShareBoard shareBoardOwner = repository.findByBoardAndRole(shareBoards.get(  atomicInteger.getAndIncrement()).getBoard(),ShareBoardsRole.OWNER);
+            UserdataEntity userdata = userDataRepository.findById(shareBoardOwner.getOidUserShare()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
             shareBoard.setName(userdata.getName());
             shareBoard.setEmail(userdata.getEmail());
         }).toList();
@@ -101,12 +102,13 @@ public class CollaboratorService {
        ShareBoard shareBoard = repository.findById(new ShareBoardId(claims.get("oid").toString(),board)).orElseThrow(()-> new ItemNotFoundException("Not Found this user in board by Token"));
         UserdataEntity userdata = userDataRepository.findByEmail(form.getEmail());
         if(userdata == null) throw new ItemNotFoundException("Not Found User");
-
-        if(repository.findById(new ShareBoardId(userdata.getOid(),board)).orElse(null) != null) throw new ConflictException("The collaborator is already in this board");
+        ShareBoard shareBoardCollab = repository.findById(new ShareBoardId(userdata.getOid(),board)).orElse(null);
+        if(shareBoardCollab != null && shareBoardCollab.getRole().equals(ShareBoardsRole.OWNER)) throw new ConflictException("Board owner cannot be collaborator of his/her own board.");
+        if(repository.findById(new ShareBoardId(userdata.getOid(),board)).orElse(null) != null) throw new ConflictException("The user is already the collaborator of this board.");
         if(!shareBoard.getRole().equals(ShareBoardsRole.OWNER)) throw new NoAccessException("The owner only is allow for this action!!");
 
-        ShareBoard shareBoardCollab = repository.findById(new ShareBoardId(userdata.getOid(),board)).orElse(null);
-        if(shareBoardCollab != null && shareBoardCollab.getRole().equals(ShareBoardsRole.OWNER)) throw new ConflictException("The owner can't be collaborator!!");
+
+
 
         ShareBoard newShareBoard = new ShareBoard();
         ShareBoardsRole role = form.getAccessRight().equals("WRITE") ? ShareBoardsRole.WRITER : ShareBoardsRole.READER;
