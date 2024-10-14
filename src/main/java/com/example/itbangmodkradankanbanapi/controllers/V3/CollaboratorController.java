@@ -32,6 +32,11 @@ private CollaboratorService service;
         return ResponseEntity.ok(service.getAllCollaboratorByNanoId(nanoId));
     }
 
+    @GetMapping("boards/{nanoId}/collabs/{oid}")
+    public ResponseEntity<Object> getAllCollaboratorByNanoId(@PathVariable String nanoId,@PathVariable String oid){
+        return ResponseEntity.ok(service.getCollaboratorByNanoIdAndOid(nanoId, oid));
+    }
+
     @GetMapping("collabs")
     public ResponseEntity<Object> getAllCollaboratorByNanoId(HttpServletRequest request){
         return ResponseEntity.ok(service.getAllCollaborator(request));

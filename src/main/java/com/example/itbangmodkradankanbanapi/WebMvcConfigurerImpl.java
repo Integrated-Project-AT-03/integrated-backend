@@ -19,7 +19,7 @@ public class WebMvcConfigurerImpl implements WebMvcConfigurer {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(CORS_ORIGIN)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+                        .allowedMethods("GET","PATCH", "POST", "PUT", "DELETE")
                         .allowedHeaders("*")
                         .exposedHeaders("Set-Cookie")
                         .allowCredentials(true);

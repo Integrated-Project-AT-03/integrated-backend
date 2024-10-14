@@ -17,12 +17,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -46,7 +44,9 @@ public class CollaboratorService {
     private ListMapper listMapper;
     public List<CollaboratorDto> getAllCollaboratorByNanoId(String nanoId){
         Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards"));
-       List<ShareBoard> shareBoards = repository.findAllByBoardAndRoleNot(board,ShareBoardsRole.OWNER);
+        List<Sort.Order> orders = new ArrayList<>();
+        orders.add(new Sort.Order(Sort.Direction.ASC ,"addedOn"));
+       List<ShareBoard> shareBoards = repository.findAllByBoardAndRoleNot(board,ShareBoardsRole.OWNER,Sort.by(orders));
 
         return listMapper.mapList(shareBoards,CollaboratorDto.class).stream().peek((shareBoard)-> {
            UserdataEntity userdata = userDataRepository.findById(shareBoard.getOid()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
@@ -55,6 +55,19 @@ public class CollaboratorService {
            shareBoard.setEmail(userdata.getEmail());
        }).toList();
     }
+
+    public CollaboratorDto getCollaboratorByNanoIdAndOid(String nanoId,String oid){
+        System.out.println(oid);
+        Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards"));
+        ShareBoard shareBoard = repository.findByBoardAndOidUserShareAndRoleNot(board,oid,ShareBoardsRole.OWNER);
+        if(shareBoard == null) throw  new ItemNotFoundException("Not found this collaborator");
+        CollaboratorDto collaborator = mapper.map(shareBoard,CollaboratorDto.class);
+        UserdataEntity userdata = userDataRepository.findById(collaborator.getOid()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
+        collaborator.setName(userdata.getName());
+        collaborator.setEmail(userdata.getEmail());
+        return  collaborator;
+    }
+
     @Transactional
     public Map<String,String> updateAccessBoard(String nanoId,String oid, UpdateAccessCollaboratorDto form){
         Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards"));
@@ -84,7 +97,9 @@ public class CollaboratorService {
         String token = jwtTokenUtil.getTokenCookie(request.getCookies());
         Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
         String oid = claims.get("oid").toString();
-        List<ShareBoard> shareBoards = repository.findAllByOidUserShareAndRoleNot(oid,ShareBoardsRole.OWNER);
+        List<Sort.Order> orders = new ArrayList<>();
+        orders.add(new Sort.Order(Sort.Direction.ASC ,"addedOn"));
+        List<ShareBoard> shareBoards = repository.findAllByOidUserShareAndRoleNot(oid,ShareBoardsRole.OWNER,Sort.by(orders));
         AtomicInteger atomicInteger = new AtomicInteger(0);
         return listMapper.mapList(shareBoards,CollaboratorBoardDto.class).stream().peek((shareBoard)-> {
             ShareBoard shareBoardOwner = repository.findByBoardAndRole(shareBoards.get(  atomicInteger.getAndIncrement()).getBoard(),ShareBoardsRole.OWNER);
