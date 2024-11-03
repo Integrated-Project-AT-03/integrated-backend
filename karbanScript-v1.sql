@@ -313,3 +313,34 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 INSERT INTO share_board(oid_user_share,nano_id_board,role) VALUES ("2b2f94fd-68be-4ff2-8c67-cb35e139f6fb","1111111111","OWNER");
 /*!40000 ALTER TABLE `share_board` ENABLE KEYS */;
 UNLOCK TABLES;
+
+
+CREATE TABLE IF NOT EXISTS `karban`.`request_collab` (
+                                                      `oid_user_share` VARCHAR(36) NOT NULL,
+                                                      `nano_id_board` VARCHAR(10) NOT NULL,
+                                                      `role` ENUM("OWNER", "WRITER", "READER") NOT NULL,
+                                                      `added_on` datetime DEFAULT CURRENT_TIMESTAMP,
+                                                      PRIMARY KEY (`oid_user_share`, `nano_id_board`),
+                                                      INDEX `fk_request_collab_boards1_idx` (`nano_id_board` ASC) VISIBLE,
+                                                      CONSTRAINT `fk_request_collab_boards1`
+                                                          FOREIGN KEY (`nano_id_board`)
+                                                              REFERENCES `karban`.`boards` (`nano_id_board`)
+                                                              ON DELETE NO ACTION
+                                                              ON UPDATE NO ACTION)
+    ENGINE = InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS `karban`.`task_attachment` (
+                                                         `id` VARCHAR(16) NOT NULL,
+                                                         `id_task` INT NOT NULL,
+                                                         `name` VARCHAR(100),
+                                                         `type` VARCHAR(10),
+                                                         `added_on` datetime DEFAULT CURRENT_TIMESTAMP,
+                                                         PRIMARY KEY (`id`),
+                                                         INDEX `fk_task_attachment_task_idx` (`id_task` ASC) VISIBLE,
+                                                         CONSTRAINT `fk_task_attachment_tasks`
+                                                             FOREIGN KEY (`id_task`)
+                                                                 REFERENCES `karban`.`tasks` (`id_task`)
+                                                                 ON DELETE NO ACTION
+                                                                 ON UPDATE NO ACTION)
+    ENGINE = InnoDB;

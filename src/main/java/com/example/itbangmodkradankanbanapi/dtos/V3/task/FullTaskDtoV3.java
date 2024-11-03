@@ -1,10 +1,10 @@
 package com.example.itbangmodkradankanbanapi.dtos.V3.task;
 
-import com.example.itbangmodkradankanbanapi.entities.V3.Board;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Data
 public class FullTaskDtoV3 {
@@ -18,5 +18,7 @@ public class FullTaskDtoV3 {
     private Timestamp createdOn;
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX")
     private Timestamp updatedOn;
+
+    private List<TaskAttachmentDto> tasks;
 
 }

@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.method.ParameterValidationResult;
@@ -16,6 +17,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "${value.url.cross.origin}")
@@ -23,13 +28,8 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 public class TaskControllerV3 {
     @Autowired
 private TaskServiceV3 service;
-//    @GetMapping("")
-//    public ResponseEntity<Object> getAllTaskByFilter(@RequestParam(defaultValue = "") String[] filterStatuses,
-//                                             @RequestParam(defaultValue = "") String[] sortBy,
-//                                             @RequestParam(defaultValue = "asc") String[] sortDirection)
-//    {
-//        return  ResponseEntity.ok(service.getAllTaskByStatusIdIn(filterStatuses,sortBy,sortDirection));
-//    }
+
+
     @GetMapping("{nanoId}/tasks/{id}")
     public ResponseEntity<Object> findTask(@PathVariable @NotNull Integer id){
         return ResponseEntity.ok(service.getTask(id));
@@ -47,6 +47,17 @@ private TaskServiceV3 service;
     public ResponseEntity<Object> addTask(@RequestBody @Valid FormTaskDtoV3 task,@PathVariable String nanoId){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.addTask(task,nanoId));
     }
+
+    @PutMapping("{nanoId}/tasks/{taskId}/attachment")
+    public ResponseEntity<Object> uploadAttachment(@RequestParam("files")List<MultipartFile> files, @PathVariable int taskId) throws IOException {
+        return ResponseEntity.ok(service.uploadAttachment(files,taskId));
+    }
+
+    @GetMapping("{nanoId}/tasks-attachment/{fileName}")
+    public ResponseEntity<Object> uploadAttachment(@PathVariable String fileName) throws IOException {
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(service.getAttachment(fileName));
+    }
+
     @ExceptionHandler(HandlerMethodValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handlerMethodValidationException(

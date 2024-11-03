@@ -48,7 +48,7 @@ public class     GlobalExceptionHandling {
 
     @ExceptionHandler(NotAllowedException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponse> handleItemNotFound(NotAllowedException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> NotAllowedException(NotAllowedException ex, WebRequest request) {
         ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.BAD_REQUEST.value(),"Bad Request", ex.getReason(), request.getDescription(false).substring(4));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(er);
     }

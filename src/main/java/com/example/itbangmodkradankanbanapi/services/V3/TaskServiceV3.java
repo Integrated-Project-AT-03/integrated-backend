@@ -5,21 +5,35 @@ import com.example.itbangmodkradankanbanapi.dtos.V3.task.FullTaskDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.TaskDtoV3;
 import com.example.itbangmodkradankanbanapi.entities.V3.Board;
 import com.example.itbangmodkradankanbanapi.entities.V3.StatusV3;
+import com.example.itbangmodkradankanbanapi.entities.V3.TaskAttachment;
 import com.example.itbangmodkradankanbanapi.entities.V3.TasksV3;
+import com.example.itbangmodkradankanbanapi.exceptions.ConflictException;
 import com.example.itbangmodkradankanbanapi.exceptions.InvalidFieldInputException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
 import com.example.itbangmodkradankanbanapi.repositories.V3.BoardRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.V3.StatusRepositoryV3;
+import com.example.itbangmodkradankanbanapi.repositories.V3.TaskAttachmentRepository;
 import com.example.itbangmodkradankanbanapi.repositories.V3.TaskRepositoryV3;
 import com.example.itbangmodkradankanbanapi.services.V2.SettingService;
 import com.example.itbangmodkradankanbanapi.utils.ListMapper;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,13 +48,20 @@ public class TaskServiceV3 {
     @Autowired
     private BoardRepositoryV3 boardRepository;
 
-    @Autowired
-    private SettingService settingService;
+//    @Autowired
+//    private TaskAttachmentRepository taskAttachmentRepository;
+//
+//    @Autowired
+//    private SettingService settingService;
     @Autowired
     ModelMapper modelMapper;
     @Autowired
     ListMapper listMapper;
+    @Autowired
+    private RestTemplate restTemplate;
 
+    @Value("${value.server.local.cloud}")
+    private String localCloudServer ;
 
     public FullTaskDtoV3 getTask(Integer id){
         return modelMapper.map(repository.findById(id).orElseThrow(() -> new ItemNotFoundException("Task "+ id + " dose not exist !!!!")),FullTaskDtoV3.class);
@@ -60,6 +81,59 @@ public class TaskServiceV3 {
         List<StatusV3> statuses = Arrays.stream(filterStatuses).map((filterStatus) -> statusRepository.findByName(filterStatus.replace("_"," "))).toList();
         return listMapper.mapList(repository.findAllByStatusIn(statuses,Sort.by(orders)),TaskDtoV3.class);
     }
+
+    @Transactional
+    public List<TaskAttachment> uploadAttachment(List<MultipartFile> multipartFiles, int taskId) throws IOException {
+        String url = localCloudServer+"/task-attachment/" + taskId;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        for (MultipartFile file : multipartFiles) {
+            ByteArrayResource resource = new ByteArrayResource(file.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return file.getOriginalFilename();
+                }
+            };
+            body.add("files", resource);
+        }
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+        try {
+            ResponseEntity<TaskAttachment[]> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    requestEntity,
+                    TaskAttachment[].class
+            );
+            return response.getBody() != null ? List.of(response.getBody()) : List.of();
+        } catch (HttpClientErrorException.Conflict e) {
+            throw new ConflictException("file name must be unique within the task");
+        }catch (HttpClientErrorException.NotFound e) {
+            throw new ItemNotFoundException("Task " + taskId + " does not exist !!!!");
+        }
+    }
+
+    @Transactional
+    public Resource getAttachment(String fileName) {
+        String url = localCloudServer+"/task-attachment/" + fileName;
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(null, headers);
+        try {
+            ResponseEntity<Resource> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    Resource.class
+            );
+            return response.getBody() != null ? response.getBody() : null;
+        }catch (HttpClientErrorException.NotFound e) {
+            throw new ItemNotFoundException("File not found " + fileName);
+        }
+    }
+
+
+
+
 
 
 

@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -31,6 +33,8 @@ public class TasksV3 {
     @Column(name = "updated_on")
     private Timestamp updatedOn;
 
+    @OneToMany(mappedBy = "task")
+    private List<TaskAttachment> tasks = new ArrayList<>();;
 
     @Basic
     @Column(name = "assignees")
