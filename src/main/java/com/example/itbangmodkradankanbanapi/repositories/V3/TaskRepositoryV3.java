@@ -10,7 +10,6 @@ import java.util.List;
 
 public interface TaskRepositoryV3 extends JpaRepository<TasksV3,Integer> {
     List<TasksV3> findAllByBoardAndStatusIn(Board board, List<StatusV3> statusV3, Sort sort);
-    List<TasksV3> findAllByBoard(Board board);
     List<TasksV3> findAllByBoard(Board board, Sort sort);
     List<TasksV3> findAllByStatusIn(List<StatusV3> statusV3, Sort sort);
 

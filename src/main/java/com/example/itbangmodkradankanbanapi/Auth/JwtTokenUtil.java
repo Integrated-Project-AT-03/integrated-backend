@@ -63,19 +63,6 @@ public class JwtTokenUtil implements Serializable {
     }
 
 
-//    public String getUsernameFromToken(String token) {
-//        return getClaimFromToken(token, Claims::getSubject);
-//    }
-
-//    public Date getExpirationDateFromToken(String token) {
-//        return getClaimFromToken(token, Claims::getExpiration);
-//    }
-
-//    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-//        final Claims claims = getAllClaimsFromToken(token);
-//        return claimsResolver.apply(claims);
-//    }
-
     public Claims getAllClaimsFromToken(String token) {
         try {
             return Jwts.parser()
@@ -116,22 +103,7 @@ public class JwtTokenUtil implements Serializable {
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_REF_TOKEN_VALIDITY))
                 .signWith(signatureAlgorithm, SECRET_KEY).compact();
     }
-//    public Boolean validateToken(String token) {
-//        try {
-//            Claims claims = Jwts.parser()
-//                    .setSigningKey(SECRET_KEY)
-//                    .parseClaimsJws(token)
-//                    .getBody();
-//            return (!claims.getExpiration().before(new Date()));
-//
-//        } catch (JwtException e) {
-//            System.out.println("Invalid JWT token: " + e.getMessage());
-//            return false;
-//        } catch (Exception e) {
-//            System.out.println("Invalid JWT token");
-//            return false;
-//        }
-//    }
+
 
     public boolean validateToken(String authToken) {
         if (authToken == null) throw  new UnauthorizedLoginException("Must have JWT refresh token");

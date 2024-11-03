@@ -32,14 +32,11 @@ public class WebSecurityConfig {
         httpSecurity
                 .csrf(csrf -> csrf.disable())  // Disable CSRF protection
                 .authorizeRequests(authorize -> authorize
-                        // Allow public access to the login and token validation endpoints
-                        .requestMatchers("/login", "/validate-token","/v2/colors","/token","v3/boards/**","/v3/user/**","/clear-cookie").permitAll()
-                        // All other endpoints require authentication
+                        .requestMatchers("/login","/swagger-ui/**","v3/api-docs/**", "/validate-token","/v2/**","/v1/**","/token","v3/boards/**","/v3/user/**","/clear-cookie").permitAll()
+
                         .anyRequest().authenticated()
                 )
-                // Make the session stateless, we rely on JWT
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Add the JWT authentication filter
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();

@@ -19,6 +19,6 @@ public class FullTaskDtoV3 {
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX")
     private Timestamp updatedOn;
 
-    private List<TaskAttachmentDto> tasks;
+    private List<TaskAttachmentDto> tasksAttachment;
 
 }

@@ -70,20 +70,6 @@ public class TaskServiceV3 {
     }
 
 
-//    public List<TaskDtoV3> getAllTaskByFilter(String[] filterStatuses, String[] sortBy, String[] direction) {
-//        List<Sort.Order> orders = new ArrayList<>();
-//        if((sortBy.length != 0 && !sortBy[0].equals("status.name"))|| sortBy.length > 1 ) throw new NotAllowedException("invalid filter parameter");
-//        else if(sortBy.length !=0)
-//            for (int i = 0; i < sortBy.length; i++) {
-//                orders.add(new Sort.Order((direction[i].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC), sortBy[i]));
-//            }
-//        else orders.add(new Sort.Order(Sort.Direction.ASC ,"createdOn"));
-//        if(filterStatuses.length == 0) return  listMapper.mapList(repository.findAll(Sort.by(orders)),TaskDtoV3.class);
-//
-//        List<StatusV3> statuses = Arrays.stream(filterStatuses).map((filterStatus) -> statusRepository.findByName(filterStatus.replace("_"," "))).toList();
-//        return listMapper.mapList(repository.findAllByStatusIn(statuses,Sort.by(orders)),TaskDtoV3.class);
-//    }
-
     @Transactional
     public List<TaskAttachment> uploadAttachment(List<MultipartFile> multipartFiles, int taskId) throws IOException {
         String url = localCloudServer+"/task-attachment/" + taskId;

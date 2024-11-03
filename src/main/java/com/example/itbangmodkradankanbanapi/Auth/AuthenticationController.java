@@ -5,6 +5,11 @@ import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.UnauthorizedLoginException;
 import com.example.itbangmodkradankanbanapi.models.TokenResponse;
 import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -49,13 +54,21 @@ public class AuthenticationController {
     UserDataRepository userDataRepository;
 
 
+    @Operation(summary = "User Login", description = "Authenticates the user and returns JWT and Refresh cookies.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully authenticated",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TokenResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid credentials"),
+            @ApiResponse(responseCode = "400", description = "Bad request - validation failed")
+    })
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody @Valid JwtRequestUser jwtRequestUser) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(jwtRequestUser.getUserName(), jwtRequestUser.getPassword())
             );
-            if(! authentication.isAuthenticated()){
+            if (!authentication.isAuthenticated()) {
                 throw new UsernameNotFoundException("Invalid user or password !!!");
             }
             UserdataEntity userdataEntity = userDataRepository.findByUsername(jwtRequestUser.getUserName());
@@ -63,19 +76,24 @@ public class AuthenticationController {
             ResponseCookie refJwtCookie = jwtTokenUtil.generateRefreshJwtCookie(userdataEntity);
 
             Map<String, Object> claims = jwtTokenUtil.getAllClaimsFromToken(jwtCookie.getValue());
-
-            TokenResponse response = new TokenResponse(claims,"hidden", "hidden");
-
+            TokenResponse response = new TokenResponse(claims, "hidden", "hidden");
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                     .header(HttpHeaders.SET_COOKIE, refJwtCookie.toString())
                     .body(response);
-        }catch (BadCredentialsException ex){
+        } catch (BadCredentialsException ex) {
             throw new UnauthorizedLoginException("Username or Password is Incorrect");
         }
     }
 
+    @Operation(summary = "Refresh Token", description = "Generates new JWT and Refresh tokens using an existing Refresh token.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Token refreshed successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TokenResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or expired refresh token")
+    })
     @PostMapping("/token")
     public ResponseEntity<Object> refreshToken(HttpServletRequest request) {
         String jwtRefToken = jwtTokenUtil.getRefTokenCookie(request.getCookies());
@@ -86,8 +104,7 @@ public class AuthenticationController {
         ResponseCookie refJwtCookie = jwtTokenUtil.generateRefreshJwtCookie(userdataEntity);
 
         Map<String, Object> claims = jwtTokenUtil.getAllClaimsFromToken(jwtCookie.getValue());
-
-        TokenResponse response = new TokenResponse(claims,"hidden", "hidden");
+        TokenResponse response = new TokenResponse(claims, "hidden", "hidden");
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
@@ -95,25 +112,44 @@ public class AuthenticationController {
                 .body(response);
     }
 
-
-
+    @Operation(summary = "Get User Information", description = "Retrieves user information from the JWT token in the cookies.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved user information",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Map.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing JWT token")
+    })
     @GetMapping("/user-info")
     public ResponseEntity<Object> getInfo(HttpServletRequest request) {
         String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
         return ResponseEntity.ok(jwtTokenUtil.getAllClaimsFromToken(jwtToken));
     }
 
+    @Operation(summary = "Validate Token", description = "Validates the JWT token provided in the cookies.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Token is valid",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or expired JWT token")
+    })
     @GetMapping("/validate-token")
     public ResponseEntity<Object> validateToken(HttpServletRequest request) {
         String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
         return ResponseEntity.ok(jwtTokenUtil.validateToken(jwtToken));
     }
 
+    @Operation(summary = "Logout", description = "Logs out the user by clearing JWT and Refresh cookies.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully logged out and cookies cleared",
+                    content = @Content(mediaType = "application/json"))
+    })
     @GetMapping("/clear-cookie")
     public ResponseEntity<Object> logout(HttpServletResponse response) {
-  ResponseCookie jwtCookie = jwtTokenUtil.removeCookie("jwtToken");
+        ResponseCookie jwtCookie = jwtTokenUtil.removeCookie("jwtToken");
         ResponseCookie jwtRefCookie = jwtTokenUtil.removeCookie("jwtRefToken");
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).header(HttpHeaders.SET_COOKIE, jwtRefCookie.toString()).body("Logged out and cookie cleared");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, jwtRefCookie.toString())
+                .body("Logged out and cookie cleared");
     }
 
 

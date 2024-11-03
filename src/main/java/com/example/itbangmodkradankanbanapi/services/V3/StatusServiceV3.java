@@ -52,10 +52,6 @@ public class StatusServiceV3 {
     }
 
 
-    public List<StatusDtoV3> getAllStatus() {
-        return listMapper.mapList(repository.findAll(), StatusDtoV3.class);
-    }
-
 
     private void closeEnableStatusCenterByStatus(Board board, StatusV3 targetStatus){
         AtomicInteger index = new AtomicInteger(1);
