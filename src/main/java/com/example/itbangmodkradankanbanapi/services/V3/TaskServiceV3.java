@@ -2,6 +2,7 @@ package com.example.itbangmodkradankanbanapi.services.V3;
 
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.FormTaskDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.FullTaskDtoV3;
+import com.example.itbangmodkradankanbanapi.dtos.V3.task.RequestRemoveFilesDto;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.TaskDtoV3;
 import com.example.itbangmodkradankanbanapi.entities.V3.Board;
 import com.example.itbangmodkradankanbanapi.entities.V3.StatusV3;
@@ -21,6 +22,7 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
@@ -48,8 +50,8 @@ public class TaskServiceV3 {
     @Autowired
     private BoardRepositoryV3 boardRepository;
 
-//    @Autowired
-//    private TaskAttachmentRepository taskAttachmentRepository;
+    @Autowired
+    private TaskAttachmentRepository taskAttachmentRepository;
 //
 //    @Autowired
 //    private SettingService settingService;
@@ -68,19 +70,19 @@ public class TaskServiceV3 {
     }
 
 
-    public List<TaskDtoV3> getAllTaskByFilter(String[] filterStatuses, String[] sortBy, String[] direction) {
-        List<Sort.Order> orders = new ArrayList<>();
-        if((sortBy.length != 0 && !sortBy[0].equals("status.name"))|| sortBy.length > 1 ) throw new NotAllowedException("invalid filter parameter");
-        else if(sortBy.length !=0)
-            for (int i = 0; i < sortBy.length; i++) {
-                orders.add(new Sort.Order((direction[i].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC), sortBy[i]));
-            }
-        else orders.add(new Sort.Order(Sort.Direction.ASC ,"createdOn"));
-        if(filterStatuses.length == 0) return  listMapper.mapList(repository.findAll(Sort.by(orders)),TaskDtoV3.class);
-
-        List<StatusV3> statuses = Arrays.stream(filterStatuses).map((filterStatus) -> statusRepository.findByName(filterStatus.replace("_"," "))).toList();
-        return listMapper.mapList(repository.findAllByStatusIn(statuses,Sort.by(orders)),TaskDtoV3.class);
-    }
+//    public List<TaskDtoV3> getAllTaskByFilter(String[] filterStatuses, String[] sortBy, String[] direction) {
+//        List<Sort.Order> orders = new ArrayList<>();
+//        if((sortBy.length != 0 && !sortBy[0].equals("status.name"))|| sortBy.length > 1 ) throw new NotAllowedException("invalid filter parameter");
+//        else if(sortBy.length !=0)
+//            for (int i = 0; i < sortBy.length; i++) {
+//                orders.add(new Sort.Order((direction[i].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC), sortBy[i]));
+//            }
+//        else orders.add(new Sort.Order(Sort.Direction.ASC ,"createdOn"));
+//        if(filterStatuses.length == 0) return  listMapper.mapList(repository.findAll(Sort.by(orders)),TaskDtoV3.class);
+//
+//        List<StatusV3> statuses = Arrays.stream(filterStatuses).map((filterStatus) -> statusRepository.findByName(filterStatus.replace("_"," "))).toList();
+//        return listMapper.mapList(repository.findAllByStatusIn(statuses,Sort.by(orders)),TaskDtoV3.class);
+//    }
 
     @Transactional
     public List<TaskAttachment> uploadAttachment(List<MultipartFile> multipartFiles, int taskId) throws IOException {
@@ -101,7 +103,7 @@ public class TaskServiceV3 {
         try {
             ResponseEntity<TaskAttachment[]> response = restTemplate.exchange(
                     url,
-                    HttpMethod.POST,
+                    HttpMethod.PUT,
                     requestEntity,
                     TaskAttachment[].class
             );
@@ -114,10 +116,18 @@ public class TaskServiceV3 {
     }
 
     @Transactional
-    public Resource getAttachment(String fileName) {
-        String url = localCloudServer+"/task-attachment/" + fileName;
+    public ResponseEntity<Resource> getAttachment(Integer taskId, String fileId) {
+        TasksV3 task = repository.findById(taskId)
+                .orElseThrow(() -> new ItemNotFoundException("Not Found"));
+        TaskAttachment taskAttachment = taskAttachmentRepository.findByIdAndTask(fileId, task);
+        if (taskAttachment == null) throw new ItemNotFoundException("Not Found file id: " + fileId + " of task id:" + taskId);
+
+        String filename = taskAttachment.getId() + '-' + taskAttachment.getTask().getIdTask() + '-' + taskAttachment.getName() + '.' + taskAttachment.getType();
+        String url = localCloudServer + "/task-attachment/" + filename;
+
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(null, headers);
+
         try {
             ResponseEntity<Resource> response = restTemplate.exchange(
                     url,
@@ -125,9 +135,41 @@ public class TaskServiceV3 {
                     requestEntity,
                     Resource.class
             );
+
+            // ดึง Content-Disposition header เพื่อเก็บชื่อไฟล์ต้นฉบับ
+            String contentDisposition = response.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION);
+            String originalFilename = filename; // ค่า default เผื่อไม่เจอใน Content-Disposition
+            if (contentDisposition != null && contentDisposition.contains("filename=\"")) {
+                originalFilename = contentDisposition.split("filename=\"")[1].split("\"")[0];
+            }
+
+            // ส่ง Response กลับพร้อม Content-Disposition header
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + originalFilename + "\"")
+                    .contentType(response.getHeaders().getContentType())
+                    .body(response.getBody());
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new ItemNotFoundException("File not found id " + fileId);
+        }
+    }
+
+
+
+    @Transactional
+    public List<TaskAttachment> deleteAttachments(RequestRemoveFilesDto requestRemoveFilesDto) {
+        String url = localCloudServer+"/task-attachment";
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<RequestRemoveFilesDto> requestEntity = new HttpEntity<>(requestRemoveFilesDto, headers);
+        try {
+            ResponseEntity<List<TaskAttachment>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.DELETE,
+                    requestEntity,
+                    new ParameterizedTypeReference<List<TaskAttachment>>() {}
+            );
             return response.getBody() != null ? response.getBody() : null;
         }catch (HttpClientErrorException.NotFound e) {
-            throw new ItemNotFoundException("File not found " + fileName);
+            throw new ItemNotFoundException("File not found ");
         }
     }
 

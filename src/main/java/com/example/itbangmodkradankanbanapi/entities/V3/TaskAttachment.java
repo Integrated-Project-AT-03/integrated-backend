@@ -21,6 +21,10 @@ public class TaskAttachment {
     private String name;
 
     @Basic
+    @Column(name = "type")
+    private String type;
+
+    @Basic
     @CreationTimestamp
     @Column(name = "added_on")
     private Timestamp createdOn;

@@ -2,12 +2,15 @@
 package com.example.itbangmodkradankanbanapi.controllers.V3;
 
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.FormTaskDtoV3;
+import com.example.itbangmodkradankanbanapi.dtos.V3.task.RequestRemoveFilesDto;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.TaskDtoV3;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.services.V3.TaskServiceV3;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +23,9 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -53,9 +59,25 @@ private TaskServiceV3 service;
         return ResponseEntity.ok(service.uploadAttachment(files,taskId));
     }
 
-    @GetMapping("{nanoId}/tasks-attachment/{fileName}")
-    public ResponseEntity<Object> uploadAttachment(@PathVariable String fileName) throws IOException {
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(service.getAttachment(fileName));
+    @DeleteMapping("{nanoId}/tasks/{taskId}/attachment")
+    public ResponseEntity<Object> DeleteAttachments(@RequestBody RequestRemoveFilesDto requestRemoveFilesDto) throws IOException {
+        return ResponseEntity.ok(service.deleteAttachments(requestRemoveFilesDto));
+    }
+
+    @GetMapping("{nanoId}/tasks/{tasksId}/attachment/{fileId}")
+    public ResponseEntity<Resource> downloadAttachment(@PathVariable Integer tasksId, @PathVariable String fileId) throws IOException {
+        ResponseEntity<Resource> fileResource = service.getAttachment(tasksId, fileId);
+
+        String contentDisposition = fileResource.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION);
+        String contentType = fileResource.getHeaders().getContentType() != null ?
+                fileResource.getHeaders().getContentType().toString() :
+                MediaType.APPLICATION_OCTET_STREAM_VALUE;
+
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
+                .body(fileResource.getBody());
     }
 
     @ExceptionHandler(HandlerMethodValidationException.class)
