@@ -102,8 +102,8 @@ private TaskServiceV3 service;
             @ApiResponse(responseCode = "404", description = "Task not found"),
             @ApiResponse(responseCode = "409", description = "File name conflict")
     })
-    @PutMapping("{nanoId}/tasks/{taskId}/attachment")
-    public ResponseEntity<Object> uploadAttachment(@PathVariable String nanoId, @RequestParam("files") List<MultipartFile> files, @PathVariable int taskId) throws IOException {
+    @PutMapping("{nanoId}/tasks/{id}/attachment")
+    public ResponseEntity<Object> uploadAttachment(@PathVariable Integer id,@PathVariable String nanoId, @RequestParam("files") List<MultipartFile> files, @PathVariable int taskId) throws IOException {
         return ResponseEntity.ok(service.uploadAttachment(files, taskId));
     }
 
@@ -114,8 +114,8 @@ private TaskServiceV3 service;
                             array = @ArraySchema(schema = @Schema(implementation = TaskAttachment.class)))),
             @ApiResponse(responseCode = "404", description = "Task or attachment not found")
     })
-    @DeleteMapping("{nanoId}/tasks/{taskId}/attachment")
-    public ResponseEntity<Object> deleteAttachments(@PathVariable String nanoId, @RequestBody RequestRemoveFilesDto requestRemoveFilesDto) throws IOException {
+    @DeleteMapping("{nanoId}/tasks/{id}/attachment")
+    public ResponseEntity<Object> deleteAttachments(@PathVariable Integer id,@PathVariable String nanoId, @RequestBody RequestRemoveFilesDto requestRemoveFilesDto) throws IOException {
         return ResponseEntity.ok(service.deleteAttachments(requestRemoveFilesDto));
     }
 
