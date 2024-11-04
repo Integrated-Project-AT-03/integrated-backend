@@ -24,6 +24,8 @@ public class CollaboratorBoardDto {
 
 
 
+
+
     public String getAccessRight(){
        return this.role.equals(ShareBoardsRole.OWNER) ? "OWNER" : this.role.equals(ShareBoardsRole.WRITER) ? "WRITE" : "READ" ;
     }

@@ -104,7 +104,7 @@ private TaskServiceV3 service;
     })
     @PutMapping("{nanoId}/tasks/{id}/attachment")
     public ResponseEntity<Object> uploadAttachment(@PathVariable Integer id,@PathVariable String nanoId, @RequestParam("files") List<MultipartFile> files, @PathVariable int taskId) throws IOException {
-        return ResponseEntity.ok(service.uploadAttachment(files, taskId));
+        return ResponseEntity.ok(service.uploadAttachment(files, id));
     }
 
     @Operation(summary = "Delete attachments from a task", description = "Deletes specified attachments from a task.")

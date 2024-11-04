@@ -8,5 +8,4 @@ import lombok.Data;
 public class FormBoardDtoV3 {
     @NotNull @Size(max = 120)
     private String name;
-    private String ownerOid;
 }

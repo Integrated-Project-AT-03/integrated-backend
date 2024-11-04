@@ -124,7 +124,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
 
-        if (requestURI.equals("/v3/boards") || requestURI.matches("/user-info") || requestURI.equals("/v3/collabs")  ) {
+        if (requestURI.equals("/v3/boards") || requestURI.equals("/v3/collabs/receive-invite")   || requestURI.matches("/user-info") || requestURI.equals("/v3/collabs")  ) {
             chain.doFilter(request, response);
             return;
         }
@@ -136,7 +136,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
 
-            if (shareBoard.getRole().equals(ShareBoardsRole.WRITER) && !(requestURI.matches("/v3/boards/[^/]+/collabs") && request.getMethod().equals("POST")) && !request.getMethod().equals("PATCH")) {
+            if (shareBoard.getRole().equals(ShareBoardsRole.WRITER) && !requestURI.matches("boards/[^/]+/invite/[^/]+") && !(requestURI.matches("/v3/boards/[^/]+/collabs") && request.getMethod().equals("POST")) && !request.getMethod().equals("PATCH")) {
                 chain.doFilter(request, response);
                 return;
             }

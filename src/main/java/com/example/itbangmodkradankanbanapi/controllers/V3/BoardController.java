@@ -27,7 +27,6 @@ import java.util.NoSuchElementException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -130,13 +129,9 @@ public class BoardController {
     @ApiResponse(responseCode = "201", description = "Board created successfully",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = BoardDtoV3.class)))
-    @PostMapping("")
-    public ResponseEntity<Object> createBoard(HttpServletRequest request,
-                                              @Valid @RequestBody FormBoardDtoV3 newBoard) {
-        String jwt = jwtTokenUtil.getTokenCookie(request.getCookies());
-        String oid = jwtTokenUtil.getAllClaimsFromToken(jwt).get("oid").toString();
-        newBoard.setOwnerOid(oid);
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.createBoard(newBoard));
+        @PostMapping("")
+    public ResponseEntity<Object> createBoard(@RequestBody FormBoardDtoV3 newBoard, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createBoard(request,newBoard));
     }
 
     @Operation(summary = "Update board visibility", description = "Updates the visibility of a specific board by nanoId.")

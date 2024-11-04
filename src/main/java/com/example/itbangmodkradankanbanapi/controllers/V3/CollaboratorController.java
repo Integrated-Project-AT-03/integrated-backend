@@ -1,10 +1,7 @@
 
 package com.example.itbangmodkradankanbanapi.controllers.V3;
 
-import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.CollaboratorBoardDto;
-import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.CollaboratorDto;
-import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.FormCollaboratorDto;
-import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.UpdateAccessCollaboratorDto;
+import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.*;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.services.V3.CollaboratorService;
@@ -59,16 +56,22 @@ private CollaboratorService service;
         return ResponseEntity.ok(service.getCollaboratorByNanoIdAndOid(nanoId, oid));
     }
 
-    @Operation(summary = "Get all collaborators for the authenticated user", description = "Fetches all collaborators for the authenticated user.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved collaborators",
-                    content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = CollaboratorBoardDto.class))))
-    })
+//    @Operation(summary = "Get all collaborators for the authenticated user", description = "Fetches all collaborators for the authenticated user.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Successfully retrieved collaborators",
+//                    content = @Content(mediaType = "application/json",
+//                            array = @ArraySchema(schema = @Schema(implementation = CollaboratorBoardDto.class))))
+//    })
     @GetMapping("collabs")
     public ResponseEntity<Object> getAllCollaborator(HttpServletRequest request) {
         return ResponseEntity.ok(service.getAllCollaborator(request));
     }
+
+
+//    @GetMapping("collabs/invite")
+//    public ResponseEntity<Object> getAllInvite(HttpServletRequest request) {
+//        return ResponseEntity.ok(service.(request));
+//    }
 
     @Operation(summary = "Remove a collaborator from a board", description = "Removes a specific collaborator from a board.")
     @ApiResponses(value = {
@@ -95,18 +98,47 @@ private CollaboratorService service;
         return ResponseEntity.status(HttpStatus.OK).body(service.updateAccessBoard(nanoId, oid, form));
     }
 
-    @Operation(summary = "Add a new collaborator to a board", description = "Adds a new collaborator to a specific board.")
+    @Operation(summary = "Invite a new collaborator to a board", description = "Invite a new collaborator to a specific board.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Collaborator added successfully",
+            @ApiResponse(responseCode = "201", description = "Collaborator Invited successfully",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CollaboratorDto.class))),
+                            schema = @Schema(implementation = RequestCollaboratorDto.class))),
             @ApiResponse(responseCode = "404", description = "Board not found"),
             @ApiResponse(responseCode = "409", description = "Conflict - collaborator already exists or is the board owner"),
             @ApiResponse(responseCode = "403", description = "No access to add collaborator")
     })
     @PostMapping("boards/{nanoId}/collabs")
-    public ResponseEntity<Object> addCollaborator(HttpServletRequest request, @PathVariable String nanoId, @Valid @RequestBody FormCollaboratorDto form) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.addCollaborator(request, nanoId, form));
+    public ResponseEntity<Object> InviteCollaborator(HttpServletRequest request, @PathVariable String nanoId, @Valid @RequestBody FormCollaboratorDto form) {
+        return ResponseEntity.ok(service.inviteCollaborator(request, nanoId, form));
+    }
+    @Operation(summary = "Cancel invite (Owner)", description = "Cancel invite from request collaborator.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Collaborator cancel invite successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = RequestCollaboratorDto.class))),
+            @ApiResponse(responseCode = "404", description = "invite not found"),
+            @ApiResponse(responseCode = "409", description = "Conflict - collaborator already exists or is the board owner"),
+            @ApiResponse(responseCode = "403", description = "No access to cancel invite collaborator")
+    })
+    @DeleteMapping("boards/{nanoId}/invite/{oid}")
+    public ResponseEntity<Object> cancelCollaborator(@PathVariable String nanoId, @PathVariable String oid) {
+        return ResponseEntity.ok(service.cancelInviteCollaborator(nanoId, oid));
+    }
+
+    @Operation(summary = "Receive invite", description = "Receive invite from request collaborator.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Collaborator receive successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = RequestCollaboratorDto.class))),
+            @ApiResponse(responseCode = "404", description = "Board or User not found"),
+            @ApiResponse(responseCode = "409", description = "Conflict - collaborator already exists or is the board owner"),
+            @ApiResponse(responseCode = "403", description = "No access to add collaborator")
+    })
+
+
+    @PostMapping("collabs/receive-invite")
+    public ResponseEntity<Object> receiveCollaborator(HttpServletRequest request,  @RequestBody FormReceiveCollaboratorDto form) {
+        return ResponseEntity.ok(service.receiveCollaborator(request,form));
     }
 
 
