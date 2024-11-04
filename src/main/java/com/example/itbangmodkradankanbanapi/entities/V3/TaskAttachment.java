@@ -27,7 +27,7 @@ public class TaskAttachment {
     @Basic
     @CreationTimestamp
     @Column(name = "added_on")
-    private Timestamp createdOn;
+    private Timestamp addedOn;
 
     @JsonIgnore
     @ManyToOne

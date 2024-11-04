@@ -20,6 +20,8 @@ public class CollaboratorBoardDto {
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX")
     private Timestamp addedOn;
 
+    private String status;
+
 
 
 

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface RequestCollabRepositoryV3 extends JpaRepository<RequestCollab, RequestCollabId> {
-
+    List<RequestCollab> findAllByOidUserShare(String oid,Sort sort);
     List<RequestCollab> findAllByBoard(Board board);
 //    List<ShareBoard> findAllByOidUserShare(String oid);
 //

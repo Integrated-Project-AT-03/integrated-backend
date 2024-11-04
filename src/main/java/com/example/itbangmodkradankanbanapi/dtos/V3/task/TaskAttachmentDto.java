@@ -10,10 +10,7 @@ public class TaskAttachmentDto {
 
 
     private Integer id;
-
-
     private String name;
-
-
-    private Timestamp createdOn;
+    private String type;
+    private Timestamp addedOn;
 }

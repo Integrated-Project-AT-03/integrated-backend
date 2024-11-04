@@ -56,12 +56,25 @@ private CollaboratorService service;
         return ResponseEntity.ok(service.getCollaboratorByNanoIdAndOid(nanoId, oid));
     }
 
-//    @Operation(summary = "Get all collaborators for the authenticated user", description = "Fetches all collaborators for the authenticated user.")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "Successfully retrieved collaborators",
-//                    content = @Content(mediaType = "application/json",
-//                            array = @ArraySchema(schema = @Schema(implementation = CollaboratorBoardDto.class))))
-//    })
+    @Operation(summary = "Update invite access rights", description = "Updates the access rights for a specific invite.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Access rights updated successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UpdateInviteCollaboratorDto.class))),
+            @ApiResponse(responseCode = "404", description = "Collaborator or board not found"),
+            @ApiResponse(responseCode = "403", description = "No access to update invite")
+    })
+    @PutMapping("boards/{nanoId}/invite/{oid}")
+    public ResponseEntity<Object> updateInviteCollab(@PathVariable String nanoId, @PathVariable String oid,@RequestBody UpdateInviteCollaboratorDto form) {
+        return ResponseEntity.ok(service.updateInviteCollab(nanoId, oid,form));
+    }
+
+    @Operation(summary = "Get all collaborators for the authenticated user", description = "Fetches all collaborators for the authenticated user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved collaborators",
+                    content = @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = CollaboratorBoardDto.class))))
+    })
     @GetMapping("collabs")
     public ResponseEntity<Object> getAllCollaborator(HttpServletRequest request) {
         return ResponseEntity.ok(service.getAllCollaborator(request));
@@ -70,7 +83,7 @@ private CollaboratorService service;
 
 //    @GetMapping("collabs/invite")
 //    public ResponseEntity<Object> getAllInvite(HttpServletRequest request) {
-//        return ResponseEntity.ok(service.(request));
+//        return ResponseEntity.ok(service.getAllInviteBoard(request));
 //    }
 
     @Operation(summary = "Remove a collaborator from a board", description = "Removes a specific collaborator from a board.")

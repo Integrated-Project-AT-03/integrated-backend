@@ -90,6 +90,21 @@ public class CollaboratorService {
         result.put("accessRight",form.getAccessRight());
         return result;
     }
+
+    @Transactional
+    public Map<String,String> updateInviteCollab(String nanoId,String oid, UpdateInviteCollaboratorDto form){
+        Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards"));
+        RequestCollab inviteBoard = requestCollabRepository.findById(new RequestCollabId(oid,board)).orElseThrow(() -> new NoSuchElementException("not found invite for this board"));
+        if(!form.getAccessRight().equals("WRITE") && !form.getAccessRight().equals("READ")  )  throw new NotAllowedException("Only Add Read or Write");
+        ShareBoardsRole role = form.getAccessRight().equals("WRITE") ? ShareBoardsRole.WRITER : ShareBoardsRole.READER;
+        inviteBoard.setRole(role);
+        requestCollabRepository.save(inviteBoard);
+        Map<String,String> result = new HashMap<>();
+        result.put("accessRight",form.getAccessRight());
+        return result;
+    }
+
+
     @Transactional
     public void removeCollaborator(HttpServletRequest request,String nanoId,String oid){
         Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Board"));
@@ -110,25 +125,43 @@ public class CollaboratorService {
         List<Sort.Order> orders = new ArrayList<>();
         orders.add(new Sort.Order(Sort.Direction.ASC ,"addedOn"));
         List<ShareBoard> shareBoards = repository.findAllByOidUserShareAndRoleNot(oid,ShareBoardsRole.OWNER,Sort.by(orders));
-        AtomicInteger atomicInteger = new AtomicInteger(0);
-        return listMapper.mapList(shareBoards,CollaboratorBoardDto.class).stream().peek((shareBoard)-> {
-            ShareBoard shareBoardOwner = repository.findByBoardAndRole(shareBoards.get(  atomicInteger.getAndIncrement()).getBoard(),ShareBoardsRole.OWNER);
+
+        List<RequestCollab> inviteBoards = requestCollabRepository.findAllByOidUserShare(oid,Sort.by(orders));
+
+        AtomicInteger atomicIntegerShareBoards = new AtomicInteger(0);
+        AtomicInteger atomicInviteBoards = new AtomicInteger(0);
+        List<CollaboratorBoardDto> tempCollaboratorBoardDtos  =new ArrayList<>() ;
+
+        tempCollaboratorBoardDtos.addAll(
+         listMapper.mapList(inviteBoards,CollaboratorBoardDto.class).stream().peek((inviteBoard)-> {
+            ShareBoard shareBoardOwner = repository.findByBoardAndRole(inviteBoards.get(  atomicInviteBoards.getAndIncrement()).getBoard(),ShareBoardsRole.OWNER);
             UserdataEntity userdata = userDataRepository.findById(shareBoardOwner.getOidUserShare()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
-            shareBoard.setName(userdata.getName());
-            shareBoard.setEmail(userdata.getEmail());
-        }).toList();
+             inviteBoard.setName(userdata.getName());
+             inviteBoard.setEmail(userdata.getEmail());
+             inviteBoard.setStatus("PADDING");
+        }).toList());
+
+        tempCollaboratorBoardDtos.addAll(
+                listMapper.mapList(shareBoards,CollaboratorBoardDto.class).stream().peek((shareBoard)-> {
+                    ShareBoard shareBoardOwner = repository.findByBoardAndRole(shareBoards.get( atomicIntegerShareBoards.getAndIncrement()).getBoard(),ShareBoardsRole.OWNER);
+                    UserdataEntity userdata = userDataRepository.findById(shareBoardOwner.getOidUserShare()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
+                    shareBoard.setName(userdata.getName());
+                    shareBoard.setEmail(userdata.getEmail());
+                    shareBoard.setStatus("ACTIVE");
+                }).toList());
+        return tempCollaboratorBoardDtos;
     }
 
 
-//    public List<InviteBoardDto> getAllColllllaborator(HttpServletRequest request){
+//    public List<InviteBoardDto> getAllInviteBoard(HttpServletRequest request){
 //        String token = jwtTokenUtil.getTokenCookie(request.getCookies());
 //        Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
 //        String oid = claims.get("oid").toString();
 //        List<Sort.Order> orders = new ArrayList<>();
 //        orders.add(new Sort.Order(Sort.Direction.ASC ,"addedOn"));
-//        List<ShareBoard> shareBoards = requestCollabRepository.findAllByOidUserShareAndRoleNot(oid,ShareBoardsRole.OWNER,Sort.by(orders));
+//        List<RequestCollab> shareBoards = requestCollabRepository.findAllByOidUserShare(oid,Sort.by(orders));
 //        AtomicInteger atomicInteger = new AtomicInteger(0);
-//        return listMapper.mapList(shareBoards,CollaboratorBoardDto.class).stream().peek((shareBoard)-> {
+//        return listMapper.mapList(shareBoards,InviteBoardDto.class).stream().peek((shareBoard)-> {
 //            ShareBoard shareBoardOwner = repository.findByBoardAndRole(shareBoards.get(  atomicInteger.getAndIncrement()).getBoard(),ShareBoardsRole.OWNER);
 //            UserdataEntity userdata = userDataRepository.findById(shareBoardOwner.getOidUserShare()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
 //            shareBoard.setName(userdata.getName());
