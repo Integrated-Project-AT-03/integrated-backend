@@ -78,7 +78,7 @@ public class TaskServiceV3 {
         if(multipartFiles.size() > MAX_FILES) throw new InvalidFieldInputException("multipartFiles","You can only upload up to " + MAX_FILES + " files at once.");
         TasksV3 tasks =  repository.findById(taskId).orElseThrow(() -> new ItemNotFoundException("Task "+ taskId + " dose not exist !!!!"));
         int countTasks = taskAttachmentRepository.countByTask(tasks);
-        if(countTasks >= 10) throw new ConflictException("The task is already "+ MAX_FILES + " files!!");
+        if(countTasks >= 10) throw new InvalidFieldInputException("files","Each task can have at most "+ MAX_FILES + " files.");
 
         List<MultipartFile> filterMultipartFiles;
         if(multipartFiles.size() + countTasks > MAX_FILES )
@@ -107,7 +107,7 @@ public class TaskServiceV3 {
             );
             return response.getBody() != null ? List.of(response.getBody()) : List.of();
         } catch (HttpClientErrorException.Conflict e) {
-            throw new ConflictException("file name must be unique within the task");
+            throw new ConflictException("File with the same filename cannot be added or updated to the attachments. Please delete the attachment and add again to update the file.");
         }catch (HttpClientErrorException.NotFound e) {
             throw new ItemNotFoundException("Task " + taskId + " does not exist !!!!");
         }

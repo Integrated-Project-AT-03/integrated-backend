@@ -1,5 +1,6 @@
 package com.example.itbangmodkradankanbanapi.exceptions;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -10,12 +11,23 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 
 @RestControllerAdvice
-public class     GlobalExceptionHandling {
+public class GlobalExceptionHandling {
+
+    @Value("${spring.servlet.multipart.max-file-size}")
+    String MAX_FILE_SIZE;
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public final ResponseEntity<Object> handleHttpMessageNotReadableException(MaxUploadSizeExceededException ex,WebRequest request) {
+        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.BAD_REQUEST.value(),"Bad Request","Each file cannot be larger than "+ MAX_FILE_SIZE, request.getDescription(false).substring(4));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(er);
+    }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
