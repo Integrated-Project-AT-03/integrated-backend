@@ -103,7 +103,7 @@ private TaskServiceV3 service;
             @ApiResponse(responseCode = "409", description = "File name conflict")
     })
     @PutMapping("{nanoId}/tasks/{id}/attachment")
-    public ResponseEntity<Object> uploadAttachment(@PathVariable Integer id,@PathVariable String nanoId, @RequestParam("files") List<MultipartFile> files, @PathVariable int taskId) throws IOException {
+    public ResponseEntity<Object> uploadAttachment(@PathVariable Integer id,@PathVariable String nanoId, @RequestParam("files") List<MultipartFile> files) throws IOException {
         return ResponseEntity.ok(service.uploadAttachment(files, id));
     }
 
