@@ -19,6 +19,8 @@ public class OpenApiConfig {
                         .version("v1.0"));
     }
 
+
+
     @Bean
     public GroupedOpenApi karbanV3() {
         return GroupedOpenApi.builder()
@@ -26,6 +28,17 @@ public class OpenApiConfig {
                 .pathsToMatch("/v3/**","/login","/token","/v2/colors","/clear-cookie","/validate-token","/user-info") // กำหนด path ที่ต้องการให้แสดงใน Swagger
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi endpointForSprint5() {
+        return GroupedOpenApi.builder()
+                .group("Karban Api for Sprint 5")
+                .pathsToMatch("/v3/boards/**/tasks/**/attachment","/v3/boards/**/tasks/**/attachment/**","/v3/collabs/receive-invite","/v3/boards/**/invite/**") // กำหนด path ที่ต้องการให้แสดงใน Swagger
+                .build();
+    }
+
+
+
 
     @Bean
     public GroupedOpenApi karbanV2() {
