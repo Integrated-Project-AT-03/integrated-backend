@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TaskAttachmentRepository extends JpaRepository<TaskAttachment,Integer> {
     public TaskAttachment findByIdAndTask(String fileId, TasksV3 tasks);
+
+    public Integer countByTask(TasksV3 tasks);
 }

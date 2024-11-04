@@ -61,7 +61,7 @@ public class CollaboratorService {
             UserdataEntity userdata = userDataRepository.findById(requestCollab.getOid()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
             requestCollab.setName(userdata.getName());
             requestCollab.setEmail(userdata.getEmail());
-            requestCollab.setStatus("PADDING");
+            requestCollab.setStatus("PENDING");
         }).toList());
 
         return  tempCollaboratorsDto;
@@ -138,7 +138,7 @@ public class CollaboratorService {
             UserdataEntity userdata = userDataRepository.findById(shareBoardOwner.getOidUserShare()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
              inviteBoard.setName(userdata.getName());
              inviteBoard.setEmail(userdata.getEmail());
-             inviteBoard.setStatus("PADDING");
+             inviteBoard.setStatus("PENDING");
         }).toList());
 
         tempCollaboratorBoardDtos.addAll(

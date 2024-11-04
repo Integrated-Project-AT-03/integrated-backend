@@ -62,6 +62,9 @@ public class TaskServiceV3 {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Value("${value.max-file-per-request}")
+    private Integer MAX_FILES;
+
     @Value("${value.server.local.cloud}")
     private String localCloudServer ;
 
@@ -72,11 +75,20 @@ public class TaskServiceV3 {
 
     @Transactional
     public List<TaskAttachment> uploadAttachment(List<MultipartFile> multipartFiles, int taskId) throws IOException {
+        if(multipartFiles.size() > MAX_FILES) throw new InvalidFieldInputException("multipartFiles","You can only upload up to " + MAX_FILES + " files at once.");
+        TasksV3 tasks =  repository.findById(taskId).orElseThrow(() -> new ItemNotFoundException("Task "+ taskId + " dose not exist !!!!"));
+        int countTasks = taskAttachmentRepository.countByTask(tasks);
+        if(countTasks >= 10) throw new ConflictException("The task is already "+ MAX_FILES + " files!!");
+
+        List<MultipartFile> filterMultipartFiles;
+        if(multipartFiles.size() + countTasks > MAX_FILES )
+        filterMultipartFiles = multipartFiles.subList(0,MAX_FILES-countTasks);
+        else filterMultipartFiles = multipartFiles;
         String url = localCloudServer+"/task-attachment/" + taskId;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        for (MultipartFile file : multipartFiles) {
+        for (MultipartFile file : filterMultipartFiles) {
             ByteArrayResource resource = new ByteArrayResource(file.getBytes()) {
                 @Override
                 public String getFilename() {
