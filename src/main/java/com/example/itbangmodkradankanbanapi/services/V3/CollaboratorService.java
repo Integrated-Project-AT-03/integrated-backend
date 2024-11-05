@@ -2,6 +2,7 @@ package com.example.itbangmodkradankanbanapi.services.V3;
 
 import com.example.itbangmodkradankanbanapi.Auth.JwtTokenUtil;
 import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.*;
+import com.example.itbangmodkradankanbanapi.dtos.V3.mail.FormMailDto;
 import com.example.itbangmodkradankanbanapi.entities.V3.*;
 import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
 import com.example.itbangmodkradankanbanapi.exceptions.*;
@@ -36,6 +37,8 @@ public class CollaboratorService {
     private ModelMapper mapper;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+    @Autowired
+    private MailService mailService;
 
 
 
@@ -231,6 +234,7 @@ public class CollaboratorService {
         if(!shareBoard.getRole().equals(ShareBoardsRole.OWNER)) throw new NoAccessException("The owner only is allow for this action!!");
 
 
+
         RequestCollab newRequestCollab = new RequestCollab();
         ShareBoardsRole role = form.getAccessRight().equals("WRITE") ? ShareBoardsRole.WRITER : ShareBoardsRole.READER;
         newRequestCollab.setRole(role);
@@ -240,6 +244,12 @@ public class CollaboratorService {
         result.setName(userdata.getName());
         result.setEmail(userdata.getEmail());
         result.setStatus("PADDING");
+        UserdataEntity userSender = userDataRepository.findById(claims.get("oid").toString()).get();
+        FormMailDto formMailDto = mapper.map(newRequestCollab,FormMailDto.class);
+        formMailDto.setRecipientEmail(form.getEmail());
+        formMailDto.setTo(userdata.getName());
+        formMailDto.setFrom(userSender.getName());
+        mailService.sendInvitationEmail(formMailDto);
         return  result;
     }
 }

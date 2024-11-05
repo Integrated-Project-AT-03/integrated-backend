@@ -138,7 +138,7 @@ public class TaskServiceV3 {
             String contentDisposition = response.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION);
             String originalFilename = filename; // ค่า default เผื่อไม่เจอใน Content-Disposition
             if (contentDisposition != null && contentDisposition.contains("filename=\"")) {
-                originalFilename = contentDisposition.split("filename=\"")[1].split("\"")[0];
+                originalFilename = taskAttachment.getName()+"."+taskAttachment.getType();
             }
 
             // ส่ง Response กลับพร้อม Content-Disposition header
