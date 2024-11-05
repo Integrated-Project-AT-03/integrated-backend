@@ -230,7 +230,7 @@ public class CollaboratorService {
         if(shareBoardCollab != null && shareBoardCollab.getRole().equals(ShareBoardsRole.OWNER)) throw new ConflictException("Board owner cannot be collaborator of his/her own board.");
         ShareBoard userAdded = repository.findById(new ShareBoardId(userdata.getOid(),board)).orElse(null);
         RequestCollab userInvited = requestCollabRepository.findById(new RequestCollabId(userdata.getOid(),board)).orElse(null);
-        if(userAdded != null || userInvited != null) throw new ConflictException("The user is already the collaborator or Invited of this board.");
+        if(userAdded != null || userInvited != null) throw new ConflictException("The user is already the collaborator or pending collaborator of this board.");
         if(!shareBoard.getRole().equals(ShareBoardsRole.OWNER)) throw new NoAccessException("The owner only is allow for this action!!");
 
 
@@ -243,13 +243,14 @@ public class CollaboratorService {
         RequestCollaboratorDto result =  mapper.map(requestCollabRepository.save(newRequestCollab),RequestCollaboratorDto.class);
         result.setName(userdata.getName());
         result.setEmail(userdata.getEmail());
-        result.setStatus("PADDING");
+        result.setStatus("PENDING");
         UserdataEntity userSender = userDataRepository.findById(claims.get("oid").toString()).get();
         FormMailDto formMailDto = mapper.map(newRequestCollab,FormMailDto.class);
         formMailDto.setRecipientEmail(form.getEmail());
         formMailDto.setTo(userdata.getName());
         formMailDto.setFrom(userSender.getName());
-        mailService.sendInvitationEmail(formMailDto);
+        Boolean isSendEmail =  mailService.sendInvitationEmail(formMailDto);
+        result.setIsSendEmail(isSendEmail);
         return  result;
     }
 }

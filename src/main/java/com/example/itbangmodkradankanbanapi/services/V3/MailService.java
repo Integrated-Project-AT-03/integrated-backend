@@ -13,6 +13,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
+
 @Service
 public class MailService {
     @Value("${spring.mail.username}")
@@ -21,14 +23,14 @@ public class MailService {
     @Value("${value.url.cross.origin}")
     private String URL;
 
-    @Value("value.mail.from")
+    @Value("${value.mail.from}")
     private String TEAM;
     @Autowired
     private JavaMailSender mailSender;
 
 
 
-    public void sendInvitationEmail(FormMailDto formMailDto) {
+    public Boolean sendInvitationEmail(FormMailDto formMailDto) {
         String inviteLink = URL+"/board/"+formMailDto.getBoardId()+"/collab/invitations";
         String subject = formMailDto.getFrom() +" has invited you to collaborate with " +formMailDto.getRole().toString()+" access right on "+ formMailDto.getBoardName()+" board";
         String message = "<p>You have been invited to collaborate on the board. Click the link below to accept or decline the invitation:</p>"
@@ -36,14 +38,17 @@ public class MailService {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
-            helper.setFrom(TEAM);
             helper.setText(message, true);
             helper.setTo(formMailDto.getRecipientEmail());
             helper.setSubject(subject);
-            helper.setFrom(EMAIL);
+            helper.setFrom("noreply@intproj23.sit.kmutt.ac.th",TEAM);
             mailSender.send(mimeMessage);
+
+            return true;
         } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send email", e);
+            return false;
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
         }
     }
 }

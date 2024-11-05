@@ -23,6 +23,8 @@ public class RequestCollab {
     @JoinColumn(name = "nano_id_board", referencedColumnName = "nano_id_board", nullable = false)
     private Board board;
 
+
+
     @CreationTimestamp
     @Column(name = "added_on")
     private Timestamp addedOn;
