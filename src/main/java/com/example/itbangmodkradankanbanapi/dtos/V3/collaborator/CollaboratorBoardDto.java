@@ -22,8 +22,12 @@ public class CollaboratorBoardDto {
 
     private String status;
 
+@JsonIgnore
+    private Boolean boardIsPublic;
 
-
+    public String getVisibility() {
+        return boardIsPublic ? "PUBLIC" : "PRIVATE";
+    }
 
 
 
