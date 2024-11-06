@@ -17,10 +17,8 @@ import java.io.UnsupportedEncodingException;
 
 @Service
 public class MailService {
-    @Value("${spring.mail.username}")
-    private String EMAIL;
 
-    @Value("${value.url.cross.origin}")
+    @Value("${value.mail.invite}")
     private String URL;
 
     @Value("${value.mail.from}")
