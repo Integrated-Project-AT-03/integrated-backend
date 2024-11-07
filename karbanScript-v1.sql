@@ -338,9 +338,9 @@ CREATE TABLE IF NOT EXISTS `karban`.`task_attachment` (
                                                          `added_on` datetime DEFAULT CURRENT_TIMESTAMP,
                                                          PRIMARY KEY (`id`),
                                                          INDEX `fk_task_attachment_task_idx` (`id_task` ASC) VISIBLE,
-                                                         CONSTRAINT `fk_task_attachment_tasks`
+                                                         CONSTRAINT `fk_task_attachment_tasksV3`
                                                              FOREIGN KEY (`id_task`)
-                                                                 REFERENCES `karban`.`tasks` (`id_task`)
+                                                                 REFERENCES `karban`.`tasksV3` (`id_task`)
                                                                  ON DELETE NO ACTION
                                                                  ON UPDATE NO ACTION)
     ENGINE = InnoDB;
