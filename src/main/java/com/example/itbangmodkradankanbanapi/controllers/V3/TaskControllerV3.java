@@ -128,14 +128,24 @@ private TaskServiceV3 service;
     @GetMapping("{nanoId}/tasks/{tasksId}/attachment/{fileId}")
     public ResponseEntity<Resource> downloadAttachment(@PathVariable String nanoId, @PathVariable Integer tasksId, @PathVariable String fileId) throws IOException {
         ResponseEntity<Resource> fileResource = service.getAttachment(tasksId, fileId);
-
         String contentDisposition = fileResource.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION);
-        String contentType = fileResource.getHeaders().getContentType() != null ?
-                fileResource.getHeaders().getContentType().toString() :
+
+        String fileType = fileResource.getHeaders().getContentType() != null ?
+                fileResource.getHeaders().getContentType().toString().toLowerCase() :
                 MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
+        MediaType contentType;
+        if (fileType.endsWith("png")) {
+            contentType = MediaType.IMAGE_PNG;
+        } else if (fileType.endsWith("jpg") || fileType.endsWith("jpeg")) {
+            contentType = MediaType.IMAGE_JPEG;
+        } else {
+            contentType = MediaType.APPLICATION_OCTET_STREAM;
+        }
+
+
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
+                .contentType(contentType)
                 .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
                 .body(fileResource.getBody());
     }
