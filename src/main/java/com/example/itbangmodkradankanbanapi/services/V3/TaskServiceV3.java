@@ -181,6 +181,7 @@ public class TaskServiceV3 {
     public TaskDtoV3 deleteTask(Integer id){
 
       TasksV3 task =  repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+      taskAttachmentRepository.deleteAll(task.getTasksAttachment());
           repository.delete(task);
         return modelMapper.map(task,TaskDtoV3.class);
     }
