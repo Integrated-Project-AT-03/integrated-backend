@@ -9,6 +9,8 @@ import java.util.List;
 public interface RequestCollabRepositoryV3 extends JpaRepository<RequestCollab, RequestCollabId> {
     List<RequestCollab> findAllByOidUserShare(String oid,Sort sort);
     List<RequestCollab> findAllByBoard(Board board);
+
+    RequestCollab findFirstByBoardAndOidUserShare(Board board, String oid);
 //    List<ShareBoard> findAllByOidUserShare(String oid);
 //
 //    List<ShareBoard> findAllByOidUserShareAndRole(String oid, ShareBoardsRole role);

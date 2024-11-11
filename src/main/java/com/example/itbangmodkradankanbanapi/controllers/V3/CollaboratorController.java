@@ -56,6 +56,8 @@ private CollaboratorService service;
         return ResponseEntity.ok(service.getCollaboratorByNanoIdAndOid(nanoId, oid));
     }
 
+
+
     @Operation(summary = "Update invite access rights", description = "Updates the access rights for a specific invite.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Access rights updated successfully",
@@ -67,6 +69,11 @@ private CollaboratorService service;
     @PatchMapping("boards/{nanoId}/invite/{oid}")
     public ResponseEntity<Object> updateInviteCollab(@PathVariable String nanoId, @PathVariable String oid,@RequestBody UpdateInviteCollaboratorDto form) {
         return ResponseEntity.ok(service.updateInviteCollab(nanoId, oid,form));
+    }
+
+    @GetMapping("boards/{nanoId}/invite/{oid}")
+    public ResponseEntity<Object> getInviteCollab(@PathVariable String nanoId, @PathVariable String oid) {
+        return ResponseEntity.ok(service.getInviteById(nanoId, oid));
     }
 
     @Operation(summary = "Get all collaborators for the authenticated user", description = "Fetches all collaborators for the authenticated user.")

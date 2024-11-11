@@ -124,7 +124,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
 
-        if (requestURI.equals("/v3/boards") || requestURI.equals("/v3/collabs/receive-invite")   || requestURI.matches("/user-info") || requestURI.equals("/v3/collabs")  ) {
+        if (requestURI.equals("/v3/boards") || requestURI.equals("/v3/collabs/receive-invite") || (requestURI.matches("/v3/boards/[^/]+/invite/[^/]+") && request.getMethod().equals("GET"))   || requestURI.matches("/user-info") || requestURI.equals("/v3/collabs")  ) {
             chain.doFilter(request, response);
             return;
         }

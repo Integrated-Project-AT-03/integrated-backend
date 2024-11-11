@@ -29,8 +29,9 @@ public class MailService {
 
 
     public Boolean sendInvitationEmail(FormMailDto formMailDto) {
+        String roleInvite = formMailDto.getRole().toString().equals("READER") ? "READ" : "WRITE";
         String inviteLink = URL+"/board/"+formMailDto.getBoardId()+"/collab/invitations";
-        String subject = formMailDto.getFrom() +" has invited you to collaborate with " +formMailDto.getRole().toString()+" access right on "+ formMailDto.getBoardName()+" board";
+        String subject = formMailDto.getFrom() +" has invited you to collaborate with " + roleInvite +" access right on "+ formMailDto.getBoardName()+" board";
         String message = "<p>You have been invited to collaborate on the board. Click the link below to accept or decline the invitation:</p>"
                 + "<p><a href=\"" + inviteLink + "\">Accept Invitation</a></p>";
         try {

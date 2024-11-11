@@ -81,6 +81,17 @@ public class CollaboratorService {
         return  collaborator;
     }
 
+    public RequestCollaboratorDto getInviteById(String nanoId,String oid){
+        Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards"));
+        RequestCollab requestCollab = requestCollabRepository.findFirstByBoardAndOidUserShare(board,oid);
+        if(requestCollab == null) throw  new ItemNotFoundException("Not found this request");
+        RequestCollaboratorDto requestCollaboratorDto = mapper.map(requestCollab,RequestCollaboratorDto.class);
+        UserdataEntity userdata = userDataRepository.findById(requestCollaboratorDto.getOid()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
+        requestCollaboratorDto.setName(userdata.getName());
+        requestCollaboratorDto.setEmail(userdata.getEmail());
+        return  requestCollaboratorDto;
+    }
+
     @Transactional
     public Map<String,String> updateAccessBoard(String nanoId,String oid, UpdateAccessCollaboratorDto form){
         Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards"));

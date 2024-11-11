@@ -120,7 +120,10 @@ public class TaskServiceV3 {
         TaskAttachment taskAttachment = taskAttachmentRepository.findByIdAndTask(fileId, task);
         if (taskAttachment == null) throw new ItemNotFoundException("Not Found file id: " + fileId + " of task id:" + taskId);
 
-        String filename = taskAttachment.getId() + '-' + taskAttachment.getTask().getIdTask() + '-' + taskAttachment.getName() + '.' + taskAttachment.getType();
+        String filename;
+        if (taskAttachment.getType() != null)
+        filename = taskAttachment.getId() + '-' + taskAttachment.getTask().getIdTask() + '-' + taskAttachment.getName() + '.' + taskAttachment.getType();
+        else filename = taskAttachment.getId() + '-' + taskAttachment.getTask().getIdTask() + '-' + taskAttachment.getName();
         String url = localCloudServer + "/task-attachment/" + filename;
 
         HttpHeaders headers = new HttpHeaders();
@@ -138,7 +141,9 @@ public class TaskServiceV3 {
             String contentDisposition = response.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION);
             String originalFilename = filename; // ค่า default เผื่อไม่เจอใน Content-Disposition
             if (contentDisposition != null && contentDisposition.contains("filename=\"")) {
+                if(taskAttachment.getType() != null)
                 originalFilename = taskAttachment.getName()+"."+taskAttachment.getType();
+                else  originalFilename = taskAttachment.getName();
             }
 
             // ส่ง Response กลับพร้อม Content-Disposition header
