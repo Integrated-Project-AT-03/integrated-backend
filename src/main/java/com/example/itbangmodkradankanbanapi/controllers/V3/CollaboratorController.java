@@ -64,7 +64,7 @@ private CollaboratorService service;
             @ApiResponse(responseCode = "404", description = "Collaborator or board not found"),
             @ApiResponse(responseCode = "403", description = "No access to update invite")
     })
-    @PutMapping("boards/{nanoId}/invite/{oid}")
+    @PatchMapping("boards/{nanoId}/invite/{oid}")
     public ResponseEntity<Object> updateInviteCollab(@PathVariable String nanoId, @PathVariable String oid,@RequestBody UpdateInviteCollaboratorDto form) {
         return ResponseEntity.ok(service.updateInviteCollab(nanoId, oid,form));
     }
