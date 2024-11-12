@@ -12,7 +12,7 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "statusV3")
+@Table(name = "statusV3" , schema = "karban")
 public class StatusV3 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
