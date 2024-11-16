@@ -32,7 +32,7 @@ public class WebSecurityConfig {
         httpSecurity
                 .csrf(csrf -> csrf.disable())  // Disable CSRF protection
                 .authorizeRequests(authorize -> authorize
-                        .requestMatchers("/login","/swagger-ui/**","v3/api-docs/**", "/validate-token","/v2/**","/v1/**","/token","v3/boards/**","/v3/user/**","/clear-cookie").permitAll()
+                        .requestMatchers("/login","/auth/**","/swagger-ui/**","v3/api-docs/**", "/validate-token","/v2/**","/v1/**","/token","v3/boards/**","/v3/user/**","/clear-cookie").permitAll()
 
                         .anyRequest().authenticated()
                 )
