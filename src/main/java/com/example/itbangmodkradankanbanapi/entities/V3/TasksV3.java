@@ -34,7 +34,7 @@ public class TasksV3 {
     private Timestamp updatedOn;
 
     @OneToMany(mappedBy = "task")
-    private List<TaskAttachment> tasksAttachment ;
+    private List<TaskAttachment> tasksAttachment = new ArrayList<>() ;
 
     @Basic
     @Column(name = "assignees")
