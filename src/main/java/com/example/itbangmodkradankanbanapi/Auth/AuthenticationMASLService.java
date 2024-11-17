@@ -92,14 +92,12 @@ public class AuthenticationMASLService {
             UserThirdParty userThirdParty = getInfo(jsonResponse.get("access_token").asText());
 
             ResponseCookie accessTokenCookie = jwtTokenUtil.generateCookieThirdParty(userThirdParty);
-            System.out.println(accessTokenCookie.toString());
             ResponseCookie refreshTokenCookie = jwtTokenUtil.generateRefreshCookieThirdParty(userThirdParty);
 
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
                     .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-//                    .body(userThirdParty);
                      .body("Tokens generated successfully");
         } else {
             throw new Exception("Failed to exchange authorization code. Response: " + response.getBody());
