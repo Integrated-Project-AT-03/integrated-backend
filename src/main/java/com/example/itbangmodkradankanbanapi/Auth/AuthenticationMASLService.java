@@ -59,7 +59,7 @@ public class AuthenticationMASLService {
            .queryParam("client_id", clientId)
            .queryParam("response_type", "code")
            .queryParam("redirect_uri", redirectUri)
-           .queryParam("scope", "offline_access openid profile email User.Read")
+           .queryParam("scope", "openid profile email User.Read")
            .queryParam("response_mode", "query")
            .toUriString();
     }
