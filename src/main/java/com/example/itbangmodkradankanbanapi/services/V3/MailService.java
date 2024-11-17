@@ -1,9 +1,6 @@
 package com.example.itbangmodkradankanbanapi.services.V3;
 
 import com.example.itbangmodkradankanbanapi.dtos.V3.mail.FormMailDto;
-import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoard;
-import com.example.itbangmodkradankanbanapi.repositories.V3.ShareBoardRepositoryV3;
-import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;

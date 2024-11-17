@@ -5,12 +5,12 @@ import com.example.itbangmodkradankanbanapi.dtos.V3.board.*;
 import com.example.itbangmodkradankanbanapi.dtos.V3.status.StatusDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.TaskDtoV3;
 import com.example.itbangmodkradankanbanapi.entities.V3.*;
-import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
+import com.example.itbangmodkradankanbanapi.entities.user.UserdataEntity;
 import com.example.itbangmodkradankanbanapi.exceptions.InvalidFieldInputException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
 import com.example.itbangmodkradankanbanapi.repositories.V3.*;
-import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
+import com.example.itbangmodkradankanbanapi.repositories.user.UserDataCenterRepository;
 import com.example.itbangmodkradankanbanapi.utils.CustomNanoId;
 import com.example.itbangmodkradankanbanapi.utils.ListMapper;
 import io.jsonwebtoken.Claims;
@@ -41,7 +41,7 @@ public class BoardService {
     @Autowired
     private BoardRepositoryV3 repository;
     @Autowired
-    private UserDataRepository userDataRepository;
+    private UserDataCenterRepository userDataCenterRepository;
 
     @Autowired
     private CenterStatusRepositoryV3 centerStatusRepository;
@@ -69,7 +69,7 @@ public class BoardService {
         Board board = repository.findById(nanoId).orElseThrow(() -> new NoSuchElementException("Board id "+ nanoId + " not found"));
         FullBoardDtoV3 boardDto = modelMapper.map(board,FullBoardDtoV3.class);
         String oidOwner = board.getShareBoards().stream().filter(shareBoard -> shareBoard.getRole() == ShareBoardsRole.OWNER).findFirst().orElseThrow(()-> new NotAllowedException("The default board is not allowed to access")).getOidUserShare();
-        UserdataEntity user = userDataRepository.findById(oidOwner).orElseThrow(()-> new ItemNotFoundException("Not found user oid "+ oidOwner ));
+        UserdataEntity user = userDataCenterRepository.findById(oidOwner).orElseThrow(()-> new ItemNotFoundException("Not found user oid "+ oidOwner ));
 
         FullBoardDtoV3.Owner owner = new FullBoardDtoV3.Owner();
         owner.setOid(user.getOid());
@@ -100,7 +100,7 @@ public class BoardService {
         String jwt = jwtTokenUtil.getTokenCookie(request.getCookies());
         String oid = jwtTokenUtil.getAllClaimsFromToken(jwt).get("oid").toString();
 
-      UserdataEntity user = userDataRepository.findById(oid).orElseThrow(()-> new InvalidFieldInputException("owner","not found user id " + oid));
+      UserdataEntity user = userDataCenterRepository.findById(oid).orElseThrow(()-> new InvalidFieldInputException("owner","not found user id " + oid));
         Board newBoard = new Board();
         String nanoId = CustomNanoId.generate(10);
         AtomicInteger time = new AtomicInteger(0);

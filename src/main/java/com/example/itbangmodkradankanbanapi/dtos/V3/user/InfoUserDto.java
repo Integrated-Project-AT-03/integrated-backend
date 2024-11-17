@@ -1,6 +1,6 @@
 package com.example.itbangmodkradankanbanapi.dtos.V3.user;
 
-import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
+import com.example.itbangmodkradankanbanapi.entities.user.UserdataEntity;
 import lombok.Data;
 
 @Data

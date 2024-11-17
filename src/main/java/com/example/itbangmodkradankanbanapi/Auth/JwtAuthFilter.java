@@ -4,11 +4,13 @@ package com.example.itbangmodkradankanbanapi.Auth;
 import com.example.itbangmodkradankanbanapi.entities.V3.Board;
 import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoard;
 import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoardsRole;
-import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
+import com.example.itbangmodkradankanbanapi.entities.user.UserdataEntity;
+import com.example.itbangmodkradankanbanapi.entities.userThirdParty.UserThirdParty;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
 import com.example.itbangmodkradankanbanapi.repositories.V3.BoardRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.V3.ShareBoardRepositoryV3;
-import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
+import com.example.itbangmodkradankanbanapi.repositories.user.UserDataCenterRepository;
+import com.example.itbangmodkradankanbanapi.repositories.userThirdParty.UserThirdPartyRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -18,7 +20,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -42,12 +46,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private UserDataRepository userDataRepository;
+    private UserDataCenterRepository userDataCenterRepository;
 
     @Autowired
     private ShareBoardRepositoryV3 shareBoardRepository;
     @Autowired
     private BoardRepositoryV3 boardRepository;
+
+    @Autowired
+    UserThirdPartyRepository userThirdPartyRepository;
 
 
     private void writeErrorResponse(HttpServletResponse response, ErrorResponse er) throws IOException {
@@ -75,6 +82,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String nanoId = "";
         Board board = null;
         String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
+        System.out.println("request uri: " +requestURI);
+        System.out.println(jwtToken);
         if(requestURI.contains("/v3/boards/")) {
              nanoId = uriParts[3];
              board = boardRepository.findById(nanoId).orElse(null);
@@ -93,16 +102,58 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
         }
+
         String username = null;
         if (jwtToken == null) {
-            ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "JWT Token must have", request.getRequestURI());
+            ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "JWT Token is null", request.getRequestURI());
             writeErrorResponse(response, er);
             return;
         }
+        String oid = jwtTokenUtil.getAllClaimsFromToken(jwtToken).get("oid").toString();
+        Claims claims ;
         try {
+            claims = jwtTokenUtil.getAllClaimsFromToken(jwtToken);
             jwtTokenUtil.validateToken(jwtToken);
-            Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtToken);
             username = claims.getSubject();
+        if(claims.containsKey("platform"))
+        {
+            oid = claims.get("oid").toString();
+           UserThirdParty userThirdParty = userThirdPartyRepository.findById(oid).orElse(null);
+            if(userThirdParty.equals(null)) {
+                ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.NOT_FOUND.value(), null, "User id " + oid + " not found", request.getRequestURI());
+                writeErrorResponse(response, er);
+                return;
+            }
+            Authentication thirdPartyAuth = new AbstractAuthenticationToken(null) {
+                @Override
+                public boolean isAuthenticated() {
+                    return true;
+                }
+
+                @Override
+                public Object getPrincipal() {
+                    return userThirdParty;
+                }
+
+                @Override
+                public Object getCredentials() {
+                    return null;
+                }
+            };
+
+            SecurityContextHolder.getContext().setAuthentication(thirdPartyAuth);
+
+
+        }else {
+            UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
+
+            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
+            usernamePasswordAuthenticationToken
+                    .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+        }
+
         } catch (ExpiredJwtException e) {
             ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()), HttpStatus.UNAUTHORIZED.value(), null, "Token is expired", request.getRequestURI());
             writeErrorResponse(response, er);
@@ -116,20 +167,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             writeErrorResponse(response, er);
             return;
         }
-        UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
-        usernamePasswordAuthenticationToken
-                .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
 
-        if (requestURI.equals("/v3/boards") || requestURI.equals("/v3/collabs/receive-invite") || (requestURI.matches("/v3/boards/[^/]+/invite/[^/]+") && request.getMethod().equals("GET"))   || requestURI.matches("/user-info") || requestURI.equals("/v3/collabs")  ) {
+
+        if (requestURI.equals("/v3/boards") || requestURI.equals("/v3/collabs/receive-invite") || requestURI.equals("/auth/misl/callback") || (requestURI.matches("/v3/boards/[^/]+/invite/[^/]+") && request.getMethod().equals("GET"))   || requestURI.matches("/user-info") || requestURI.equals("/v3/collabs")  ) {
             chain.doFilter(request, response);
             return;
         }
-        UserdataEntity userdata = userDataRepository.findByUsername(username);
-        ShareBoard shareBoard = shareBoardRepository.findByOidUserShareAndBoard(userdata.getOid(), board);
+
+
+        ShareBoard shareBoard = shareBoardRepository.findByOidUserShareAndBoard(oid, board);
         if(shareBoard != null) {
             if (request.getMethod().equals("GET") || (requestURI.matches("/v3/boards/[^/]+/collabs/[^/]+") && request.getMethod().equals("DELETE"))) {
                 chain.doFilter(request, response);

@@ -1,10 +1,15 @@
 package com.example.itbangmodkradankanbanapi.Auth;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.io.IOException;
 
 
 @RestController
@@ -19,13 +24,30 @@ public class AuthenticationMASLController {
         return authenticationMASLService.login();
     }
 
+    @Value("${value.web.redirect}")
+    private String webRedirectUri;
+
     @GetMapping("/callback")
-    public ResponseEntity<Object> handleCallback(@RequestParam("code") String authorizationCode) {
+    public void handleCallback(@RequestParam("code") String authorizationCode, HttpServletResponse response) {
         try {
-            String accessToken = authenticationMASLService.exchangeAuthorizationCodeForToken(authorizationCode);
-            return ResponseEntity.ok(accessToken);
+
+            ResponseEntity<Object> result = authenticationMASLService.exchangeAuthorizationCodeForToken(authorizationCode);
+
+
+            String accessTokenCookie = result.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+            String refreshTokenCookie = result.getHeaders().get(HttpHeaders.SET_COOKIE).get(1);
+
+            response.addHeader("Set-Cookie", accessTokenCookie);
+            response.addHeader("Set-Cookie", refreshTokenCookie);
+
+            response.sendRedirect(webRedirectUri);
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error exchanging authorization code: " + e.getMessage());
+            try {
+                response.sendRedirect("http://localhost:4173/error?message=" + e.getMessage());
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
         }
     }
 

@@ -333,9 +333,9 @@ CREATE TABLE IF NOT EXISTS `karban`.`request_collab` (
 CREATE TABLE IF NOT EXISTS `karban`.`task_attachment` (
                                                          `id` VARCHAR(16) NOT NULL,
                                                          `id_task` INT NOT NULL,
-                                                         `name` VARCHAR(100),
+                                                         `name` VARCHAR(100) NOT NULL,
                                                          `type` VARCHAR(10),
-                                                         `added_on` datetime DEFAULT CURRENT_TIMESTAMP,
+                                                         `added_on` datetime DEFAULT CURRENT_TIMESTAMP  NOT NULL,
                                                          PRIMARY KEY (`id`),
                                                          INDEX `fk_task_attachment_task_idx` (`id_task` ASC) VISIBLE,
                                                          CONSTRAINT `fk_task_attachment_tasksV3`
@@ -344,3 +344,14 @@ CREATE TABLE IF NOT EXISTS `karban`.`task_attachment` (
                                                                  ON DELETE NO ACTION
                                                                  ON UPDATE NO ACTION)
     ENGINE = InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS `karban`.`user_third_party` (
+                                                          `oid` VARCHAR(40) NOT NULL,
+                                                          `name` VARCHAR(100) NOT NULL,
+                                                          `email` VARCHAR(320) NOT NULL,
+                                                          `platform` enum('MICROSOFT') NOT NULL,
+                                                          `register_on` datetime DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+                                                          PRIMARY KEY (`oid`))
+    ENGINE = InnoDB;
+

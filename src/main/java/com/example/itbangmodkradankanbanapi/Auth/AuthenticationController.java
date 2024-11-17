@@ -1,10 +1,14 @@
 package com.example.itbangmodkradankanbanapi.Auth;
 
-import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
+import com.example.itbangmodkradankanbanapi.entities.user.UserdataEntity;
+import com.example.itbangmodkradankanbanapi.entities.userThirdParty.UserThirdParty;
 import com.example.itbangmodkradankanbanapi.exceptions.ErrorResponse;
+import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.exceptions.UnauthorizedLoginException;
 import com.example.itbangmodkradankanbanapi.models.TokenResponse;
-import com.example.itbangmodkradankanbanapi.repositories.userShare.UserDataRepository;
+import com.example.itbangmodkradankanbanapi.repositories.user.UserDataCenterRepository;
+import com.example.itbangmodkradankanbanapi.repositories.userThirdParty.UserThirdPartyRepository;
+import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -51,7 +55,10 @@ public class AuthenticationController {
     AuthenticationManager authenticationManager;
 
     @Autowired
-    UserDataRepository userDataRepository;
+    UserDataCenterRepository userDataCenterRepository;
+
+    @Autowired
+    UserThirdPartyRepository userThirdPartyRepository;
 
 
     @Operation(summary = "User Login", description = "Authenticates the user and returns JWT and Refresh cookies.")
@@ -71,7 +78,7 @@ public class AuthenticationController {
             if (!authentication.isAuthenticated()) {
                 throw new UsernameNotFoundException("Invalid user or password !!!");
             }
-            UserdataEntity userdataEntity = userDataRepository.findByUsername(jwtRequestUser.getUserName());
+            UserdataEntity userdataEntity = userDataCenterRepository.findByUsername(jwtRequestUser.getUserName());
             ResponseCookie jwtCookie = jwtTokenUtil.generateJwtCookie(userdataEntity);
             ResponseCookie refJwtCookie = jwtTokenUtil.generateRefreshJwtCookie(userdataEntity);
 
@@ -100,13 +107,21 @@ public class AuthenticationController {
     @PostMapping("/token")
     public ResponseEntity<Object> refreshToken(HttpServletRequest request) {
         String jwtRefToken = jwtTokenUtil.getRefTokenCookie(request.getCookies());
-        jwtTokenUtil.validateToken(jwtRefToken);
-        String username = jwtTokenUtil.getAllClaimsFromToken(jwtRefToken).getSubject();
-        UserdataEntity userdataEntity = userDataRepository.findByUsername(username);
-        ResponseCookie jwtCookie = jwtTokenUtil.generateJwtCookie(userdataEntity);
-        ResponseCookie refJwtCookie = jwtTokenUtil.generateRefreshJwtCookie(userdataEntity);
+        Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtRefToken);
+        String oid = claims.get("oid").toString();
+        ResponseCookie jwtCookie;
+        ResponseCookie refJwtCookie;
+        if(claims.containsKey("platform"))
+        {
+           UserThirdParty userThirdParty = userThirdPartyRepository.findById(oid).orElseThrow(() -> new ItemNotFoundException("The user has not register in app yet"));
+            jwtCookie = jwtTokenUtil.generateCookieThirdParty(userThirdParty);
+            refJwtCookie = jwtTokenUtil.generateRefreshCookieThirdParty(userThirdParty);
+        }else {
+            UserdataEntity userdataEntity = userDataCenterRepository.findById(oid).orElse(null);
+            jwtCookie = jwtTokenUtil.generateJwtCookie(userdataEntity);
+            refJwtCookie = jwtTokenUtil.generateRefreshJwtCookie(userdataEntity);
+        }
 
-        Map<String, Object> claims = jwtTokenUtil.getAllClaimsFromToken(jwtCookie.getValue());
         TokenResponse response = new TokenResponse(claims, "hidden", "hidden");
 
         return ResponseEntity.ok()
@@ -125,6 +140,7 @@ public class AuthenticationController {
     @GetMapping("/user-info")
     public ResponseEntity<Object> getInfo(HttpServletRequest request) {
         String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
+        System.out.println("user info: " + jwtToken.toString());
         return ResponseEntity.ok(jwtTokenUtil.getAllClaimsFromToken(jwtToken));
     }
 
@@ -137,6 +153,7 @@ public class AuthenticationController {
     @GetMapping("/validate-token")
     public ResponseEntity<Object> validateToken(HttpServletRequest request) {
         String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
+        System.out.println(jwtToken);
         return ResponseEntity.ok(jwtTokenUtil.validateToken(jwtToken));
     }
 

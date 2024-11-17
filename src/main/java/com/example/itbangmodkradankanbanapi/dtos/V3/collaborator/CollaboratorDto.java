@@ -1,7 +1,6 @@
 package com.example.itbangmodkradankanbanapi.dtos.V3.collaborator;
 
 import com.example.itbangmodkradankanbanapi.entities.V3.ShareBoardsRole;
-import com.example.itbangmodkradankanbanapi.entities.userShare.UserdataEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
