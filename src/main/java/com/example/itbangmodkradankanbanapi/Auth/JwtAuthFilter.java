@@ -46,9 +46,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private UserDataCenterRepository userDataCenterRepository;
-
-    @Autowired
     private ShareBoardRepositoryV3 shareBoardRepository;
     @Autowired
     private BoardRepositoryV3 boardRepository;
@@ -82,8 +79,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String nanoId = "";
         Board board = null;
         String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
-        System.out.println("request uri: " +requestURI);
-        System.out.println(jwtToken);
         if(requestURI.contains("/v3/boards/")) {
              nanoId = uriParts[3];
              board = boardRepository.findById(nanoId).orElse(null);

@@ -140,7 +140,6 @@ public class AuthenticationController {
     @GetMapping("/user-info")
     public ResponseEntity<Object> getInfo(HttpServletRequest request) {
         String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
-        System.out.println("user info: " + jwtToken.toString());
         return ResponseEntity.ok(jwtTokenUtil.getAllClaimsFromToken(jwtToken));
     }
 
@@ -153,7 +152,6 @@ public class AuthenticationController {
     @GetMapping("/validate-token")
     public ResponseEntity<Object> validateToken(HttpServletRequest request) {
         String jwtToken = jwtTokenUtil.getTokenCookie(request.getCookies());
-        System.out.println(jwtToken);
         return ResponseEntity.ok(jwtTokenUtil.validateToken(jwtToken));
     }
 
