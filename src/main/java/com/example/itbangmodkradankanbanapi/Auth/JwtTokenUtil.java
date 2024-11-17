@@ -124,7 +124,6 @@ public class JwtTokenUtil implements Serializable {
     }
 
     private String doGenerateToken(Map<String, Object> claims, String subject) {
-        System.out.println(claims);
         return Jwts.builder().setHeaderParam("typ", "JWT")
                 .setClaims(claims)
                 .setSubject(subject)
@@ -145,7 +144,6 @@ public class JwtTokenUtil implements Serializable {
 
 
     public boolean validateToken(String authToken) {
-        System.out.println("validate");
         if (authToken == null) throw  new UnauthorizedLoginException("Must have JWT refresh token");
         try {
             Jwts.parserBuilder().setSigningKey(SECRET_KEY).build().parse(authToken);
@@ -169,7 +167,6 @@ public class JwtTokenUtil implements Serializable {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (jwtCookie.equals(cookie.getName())) {
-                    System.out.println(cookie.getName());
                     jwtToken = cookie.getValue();
                     break;
                 }
