@@ -1,5 +1,6 @@
 package com.example.itbangmodkradankanbanapi.Auth;
 
+import com.example.itbangmodkradankanbanapi.exceptions.ConflictException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,15 +20,36 @@ public class AuthenticationMASLController {
     @Autowired
     AuthenticationMASLService authenticationMASLService;
 
+    @Value("${login.microsoft.redirect.uri}")
+    private String webRedirectUri;
+
     @GetMapping("/login")
     public String login() {
         return authenticationMASLService.login();
     }
 
-    @Value("${value.web.redirect}")
-    private String webRedirectUri;
 
-    @GetMapping("/callback")
+    @GetMapping("/callback/logout")
+    public void logoutCallback(HttpServletResponse response)  {
+        try {
+        ResponseEntity<Object> result = authenticationMASLService.logoutCallback();
+        String accessTokenCookie = result.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+        String refreshTokenCookie = result.getHeaders().get(HttpHeaders.SET_COOKIE).get(1);
+
+        response.addHeader("Set-Cookie", accessTokenCookie);
+        response.addHeader("Set-Cookie", refreshTokenCookie);
+        response.sendRedirect(webRedirectUri+"/login");
+        } catch (Exception e) {
+            throw new ConflictException(e.getMessage());
+        }
+    }
+
+    @GetMapping("/logout")
+    public String logout() {
+        return authenticationMASLService.logout();
+    }
+
+    @GetMapping("/callback/login")
     public void handleCallback(@RequestParam("code") String authorizationCode, HttpServletResponse response) {
         try {
 
@@ -39,15 +61,9 @@ public class AuthenticationMASLController {
 
             response.addHeader("Set-Cookie", accessTokenCookie);
             response.addHeader("Set-Cookie", refreshTokenCookie);
-
             response.sendRedirect(webRedirectUri);
-
         } catch (Exception e) {
-            try {
-                response.sendRedirect("http://localhost:4173/error?message=" + e.getMessage());
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
+            throw new ConflictException(e.getMessage());
         }
     }
 

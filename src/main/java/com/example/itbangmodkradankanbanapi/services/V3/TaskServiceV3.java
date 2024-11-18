@@ -65,7 +65,7 @@ public class TaskServiceV3 {
     @Value("${value.max-file-per-request}")
     private Integer MAX_FILES;
 
-    @Value("${value.server.local.cloud}")
+    @Value("${value.server.storage.address}")
     private String localCloudServer ;
 
     public FullTaskDtoV3 getTask(Integer id){

@@ -15,7 +15,7 @@ import java.io.UnsupportedEncodingException;
 @Service
 public class MailService {
 
-    @Value("${value.mail.invite}")
+    @Value("${value.redirect.mail.invite}")
     private String URL;
 
     @Value("${value.mail.from}")

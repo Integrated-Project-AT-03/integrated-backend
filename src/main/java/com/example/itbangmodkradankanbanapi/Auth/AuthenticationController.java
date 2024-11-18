@@ -97,6 +97,9 @@ public class AuthenticationController {
 
 
 
+
+
+
     @Operation(summary = "Refresh Token", description = "Generates new JWT and Refresh tokens using an existing Refresh token.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Token refreshed successfully",
@@ -107,6 +110,7 @@ public class AuthenticationController {
     @PostMapping("/token")
     public ResponseEntity<Object> refreshToken(HttpServletRequest request) {
         String jwtRefToken = jwtTokenUtil.getRefTokenCookie(request.getCookies());
+        if(jwtRefToken == null ) throw new UnauthorizedLoginException("Not found refreshToken");
         Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtRefToken);
         String oid = claims.get("oid").toString();
         ResponseCookie jwtCookie;

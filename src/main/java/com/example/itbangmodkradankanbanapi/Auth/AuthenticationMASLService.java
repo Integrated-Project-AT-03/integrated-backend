@@ -23,6 +23,12 @@ public class AuthenticationMASLService {
     @Value("${jwt.ref.access.token.cookie.name}")
     private String jwtRefCookie;
 
+    @Value("${value.microsoft.tenant}")
+    private String tenant;
+
+    @Value("${value.server.address}")
+    private String serverAddress;
+
     @Value("${spring.security.oauth2.client.registration.azure.client-id}")
     private String clientId;
 
@@ -75,13 +81,11 @@ public class AuthenticationMASLService {
         requestBody.add("grant_type", "authorization_code");
         requestBody.add("redirect_uri", redirectUri);
 
-        // สร้าง HTTP Request
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(requestBody, headers);
 
-        // ส่งคำขอไปยัง Token Endpoint
         ResponseEntity<String> response = restTemplate.postForEntity(tokenUri, request, String.class);
 
 
@@ -103,6 +107,24 @@ public class AuthenticationMASLService {
             throw new Exception("Failed to exchange authorization code. Response: " + response.getBody());
         }
     }
+
+    public String logout() {
+        return UriComponentsBuilder.fromHttpUrl("https://login.microsoftonline.com/"+tenant+"/oauth2/v2.0/logout")
+                .queryParam("post_logout_redirect_uri",serverAddress+"/auth/misl/callback/logout" )
+                .buildAndExpand()
+                .toUriString();
+    }
+
+    public ResponseEntity<Object> logoutCallback() {
+        ResponseCookie accessTokenCookie = jwtTokenUtil.removeCookie(jwtCookie);
+        ResponseCookie refreshTokenCookie = jwtTokenUtil.removeCookie(jwtRefCookie);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body("User logged out successfully");
+    }
+
 
 
     private UserThirdParty getInfo(String accessToken) throws Exception {
