@@ -29,6 +29,9 @@ public class AuthenticationMASLService {
     @Value("${jwt.ref.access.token.cookie.name}")
     private String jwtRefCookie;
 
+    @Value("${microsoft.access.token.cookie.name}")
+    private String microsoftAccessToken;
+
     @Value("${value.microsoft.tenant}")
     private String tenant;
 
@@ -50,6 +53,8 @@ public class AuthenticationMASLService {
 
     @Value("${spring.security.oauth2.client.registration.azure.client-secret}")
     private String clientSecret;
+
+
 
     @Autowired
     private MISLService mislService;
@@ -101,7 +106,7 @@ public class AuthenticationMASLService {
             JsonNode userInfo = mislService.getInfo(jsonResponse.get("access_token").asText());
 
             UserThirdParty userThirdParty = userThirdPartyRepository.findById(userInfo.get("id").asText()).orElse(null);
-            if(userThirdParty.equals(null))
+            if(userThirdParty == null)
             {
                 userThirdParty = new UserThirdParty();
                 userThirdParty.setOid(userInfo.get("id").asText());
@@ -113,13 +118,13 @@ public class AuthenticationMASLService {
 
             ResponseCookie accessTokenCookie = jwtTokenUtil.generateCookieThirdParty(userThirdParty);
             ResponseCookie refreshTokenCookie = jwtTokenUtil.generateRefreshCookieThirdParty(userThirdParty);
-            ResponseCookie micJwtAccessToken = jwtTokenUtil.generateCookie("micJwtAccessToken",jsonResponse.get("access_token").asText());
+            ResponseCookie micJwtAccessToken = jwtTokenUtil.generateCookie(microsoftAccessToken,jsonResponse.get("access_token").asText());
 
             Map<String,String> result = new HashMap<>();
 
             result.put(jwtCookie,accessTokenCookie.toString());
             result.put(jwtRefCookie,refreshTokenCookie.toString());
-            result.put("micJwtAccessToken",micJwtAccessToken.toString());
+            result.put(microsoftAccessToken,micJwtAccessToken.toString());
             return result;
         } else {
             throw new Exception("Failed to exchange authorization code. Response: " + response.getBody());
@@ -137,7 +142,7 @@ public class AuthenticationMASLService {
         Map<String,String> result = new HashMap<>();
         result.put(jwtCookie,jwtTokenUtil.removeCookie(jwtCookie).toString());
         result.put(jwtRefCookie,jwtTokenUtil.removeCookie(jwtRefCookie).toString());
-        result.put("micJwtAccessToken",jwtTokenUtil.removeCookie("micJwtAccessToken").toString());
+        result.put(microsoftAccessToken,jwtTokenUtil.removeCookie(microsoftAccessToken).toString());
         return result;
     }
 
