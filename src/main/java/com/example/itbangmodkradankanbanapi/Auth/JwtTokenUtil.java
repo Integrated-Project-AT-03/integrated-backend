@@ -171,16 +171,10 @@ public class JwtTokenUtil implements Serializable {
         return jwtToken;
     }
 
-    public String getRefTokenCookie(Cookie[] cookies) {
-        String jwtRefToken = null;
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (jwtRefCookie.equals(cookie.getName())) {
-                    jwtRefToken = cookie.getValue();
-                    break;
-                }
-            }
-        }
-        return jwtRefToken;
+    public Map<String,String> getMapCookie(Cookie[] cookies) {
+        Map<String,String>  temp = new HashMap<>();
+            for (Cookie cookie : cookies) temp.put(cookie.getName(),cookie.getValue());
+        return temp;
     }
+
 }

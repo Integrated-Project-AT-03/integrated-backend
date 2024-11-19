@@ -11,16 +11,22 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.Map;
 
 
 @RestController
 @CrossOrigin(origins = "${value.url.cross.origin}")
 @RequestMapping("/auth/misl")
 public class AuthenticationMASLController {
+
+    @Value("${jwt.access.token.cookie.name}")
+    private String jwtCookie;
+    @Value("${jwt.ref.access.token.cookie.name}")
+    private String jwtRefCookie;
     @Autowired
     AuthenticationMASLService authenticationMASLService;
 
-    @Value("${login.microsoft.redirect.uri}")
+    @Value("${microsoft.login.redirect.uri}")
     private String webRedirectUri;
 
     @GetMapping("/login")
@@ -32,12 +38,10 @@ public class AuthenticationMASLController {
     @GetMapping("/callback/logout")
     public void logoutCallback(HttpServletResponse response)  {
         try {
-        ResponseEntity<Object> result = authenticationMASLService.logoutCallback();
-        String accessTokenCookie = result.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
-        String refreshTokenCookie = result.getHeaders().get(HttpHeaders.SET_COOKIE).get(1);
-
-        response.addHeader("Set-Cookie", accessTokenCookie);
-        response.addHeader("Set-Cookie", refreshTokenCookie);
+        Map<String,String> result = authenticationMASLService.logoutCallback();
+        response.addHeader("Set-Cookie",result.get(jwtCookie));
+        response.addHeader("Set-Cookie", result.get(jwtRefCookie));
+        response.addHeader("Set-Cookie", result.get("micJwtAccessToken"));
         response.sendRedirect(webRedirectUri+"/login");
         } catch (Exception e) {
             throw new ConflictException(e.getMessage());
@@ -53,14 +57,12 @@ public class AuthenticationMASLController {
     public void handleCallback(@RequestParam("code") String authorizationCode, HttpServletResponse response) {
         try {
 
-            ResponseEntity<Object> result = authenticationMASLService.exchangeAuthorizationCodeForToken(authorizationCode);
+            Map<String,String> result = authenticationMASLService.exchangeAuthorizationCodeForToken(authorizationCode);
 
 
-            String accessTokenCookie = result.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
-            String refreshTokenCookie = result.getHeaders().get(HttpHeaders.SET_COOKIE).get(1);
-
-            response.addHeader("Set-Cookie", accessTokenCookie);
-            response.addHeader("Set-Cookie", refreshTokenCookie);
+            response.addHeader("Set-Cookie", result.get(jwtCookie));
+            response.addHeader("Set-Cookie", result.get(jwtRefCookie));
+            response.addHeader("Set-Cookie", result.get("micJwtAccessToken"));
             response.sendRedirect(webRedirectUri);
         } catch (Exception e) {
             throw new ConflictException(e.getMessage());

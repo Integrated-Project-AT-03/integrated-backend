@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,12 @@ public class CollaboratorService {
     private JwtTokenUtil jwtTokenUtil;
     @Autowired
     private MailService mailService;
+
+    @Value("${jwt.access.token.cookie.name}")
+    private String jwtCookie;
+    @Value("${jwt.ref.access.token.cookie.name}")
+    private String jwtRefCookie;
+
 
 
 
@@ -167,21 +174,6 @@ public class CollaboratorService {
     }
 
 
-//    public List<InviteBoardDto> getAllInviteBoard(HttpServletRequest request){
-//        String token = jwtTokenUtil.getTokenCookie(request.getCookies());
-//        Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
-//        String oid = claims.get("oid").toString();
-//        List<Sort.Order> orders = new ArrayList<>();
-//        orders.add(new Sort.Order(Sort.Direction.ASC ,"addedOn"));
-//        List<RequestCollab> shareBoards = requestCollabRepository.findAllByOidUserShare(oid,Sort.by(orders));
-//        AtomicInteger atomicInteger = new AtomicInteger(0);
-//        return listMapper.mapList(shareBoards,InviteBoardDto.class).stream().peek((shareBoard)-> {
-//            ShareBoard shareBoardOwner = repository.findByBoardAndRole(shareBoards.get(  atomicInteger.getAndIncrement()).getBoard(),ShareBoardsRole.OWNER);
-//            UserdataEntity userdata = userDataCenterRepository.findById(shareBoardOwner.getOidUserShare()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
-//            shareBoard.setName(userdata.getName());
-//            shareBoard.setEmail(userdata.getEmail());
-//        }).toList();
-//    }
 
     @Transactional
     public CollaboratorDto receiveCollaborator(HttpServletRequest request,FormReceiveCollaboratorDto form){
@@ -231,21 +223,25 @@ public class CollaboratorService {
     @Transactional
     public RequestCollaboratorDto inviteCollaborator(HttpServletRequest request, String nanoId,FormCollaboratorDto form){
         Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards"));
-        String token = jwtTokenUtil.getTokenCookie(request.getCookies());
-        Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
+        Map<String,String> cookieMap = jwtTokenUtil.getMapCookie(request.getCookies());
+        Claims claims = jwtTokenUtil.getAllClaimsFromToken(cookieMap.get(jwtCookie));
         ShareBoard shareBoard = repository.findById(new ShareBoardId(claims.get("oid").toString(),board)).orElseThrow(()-> new ItemNotFoundException("Not Found this user in board by Token"));
+
+//        if(claims.containsKey("platform")){
+//
+//
+//        }else{
+//
+//        }
+//
         UserdataEntity userdata = userDataCenterRepository.findByEmail(form.getEmail());
         if(userdata == null) throw new ItemNotFoundException("Not Found User");
         ShareBoard shareBoardCollab = repository.findById(new ShareBoardId(userdata.getOid(),board)).orElse(null);
-
         if(shareBoardCollab != null && shareBoardCollab.getRole().equals(ShareBoardsRole.OWNER)) throw new ConflictException("Board owner cannot be collaborator of his/her own board.");
         ShareBoard userAdded = repository.findById(new ShareBoardId(userdata.getOid(),board)).orElse(null);
         RequestCollab userInvited = requestCollabRepository.findById(new RequestCollabId(userdata.getOid(),board)).orElse(null);
         if(userAdded != null || userInvited != null) throw new ConflictException("The user is already the collaborator or pending collaborator of this board.");
         if(!shareBoard.getRole().equals(ShareBoardsRole.OWNER)) throw new NoAccessException("The owner only is allow for this action!!");
-
-
-
         RequestCollab newRequestCollab = new RequestCollab();
         ShareBoardsRole role = form.getAccessRight().equals("WRITE") ? ShareBoardsRole.WRITER : ShareBoardsRole.READER;
         newRequestCollab.setRole(role);

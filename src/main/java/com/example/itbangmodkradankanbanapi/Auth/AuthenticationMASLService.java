@@ -1,10 +1,13 @@
 package com.example.itbangmodkradankanbanapi.Auth;
 
 import com.example.itbangmodkradankanbanapi.entities.userThirdParty.UserThirdParty;
+import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.models.UserThirdPartyPlatform;
 import com.example.itbangmodkradankanbanapi.repositories.userThirdParty.UserThirdPartyRepository;
+import com.example.itbangmodkradankanbanapi.services.V3.MISLService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +17,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AuthenticationMASLService {
@@ -45,8 +51,8 @@ public class AuthenticationMASLService {
     @Value("${spring.security.oauth2.client.registration.azure.client-secret}")
     private String clientSecret;
 
-    @Value("${spring.security.oauth2.client.provider.azure.user-info-uri}")
-    private  String infoUri;
+    @Autowired
+    private MISLService mislService;
 
     @Value("${spring.security.oauth2.client.provider.azure.token-uri}")
     private String tokenUri;
@@ -65,12 +71,13 @@ public class AuthenticationMASLService {
            .queryParam("client_id", clientId)
            .queryParam("response_type", "code")
            .queryParam("redirect_uri", redirectUri)
-           .queryParam("scope", "openid profile email User.Read")
+           .queryParam("scope", "openid profile email User.Read User.ReadBasic.All")
            .queryParam("response_mode", "query")
            .toUriString();
     }
 
-    public ResponseEntity<Object> exchangeAuthorizationCodeForToken(String authorizationCode) throws Exception {
+    @Transactional
+    public Map<String,String> exchangeAuthorizationCodeForToken(String authorizationCode) throws Exception {
         RestTemplate restTemplate = new RestTemplate();
 
         // สร้างข้อมูลใน request body
@@ -88,21 +95,32 @@ public class AuthenticationMASLService {
 
         ResponseEntity<String> response = restTemplate.postForEntity(tokenUri, request, String.class);
 
-
-
         if (response.getStatusCode() == HttpStatus.OK) {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonResponse = objectMapper.readTree(response.getBody());
-            UserThirdParty userThirdParty = getInfo(jsonResponse.get("access_token").asText());
+            JsonNode userInfo = mislService.getInfo(jsonResponse.get("access_token").asText());
+
+            UserThirdParty userThirdParty = userThirdPartyRepository.findById(userInfo.get("id").asText()).orElse(null);
+            if(userThirdParty.equals(null))
+            {
+                userThirdParty = new UserThirdParty();
+                userThirdParty.setOid(userInfo.get("id").asText());
+                userThirdParty.setPlatform(UserThirdPartyPlatform.MICROSOFT);
+            }
+            userThirdParty.setName(userInfo.get("displayName").asText());
+            userThirdParty.setEmail(userInfo.get("userPrincipalName").asText());
+            userThirdPartyRepository.save(userThirdParty);
 
             ResponseCookie accessTokenCookie = jwtTokenUtil.generateCookieThirdParty(userThirdParty);
             ResponseCookie refreshTokenCookie = jwtTokenUtil.generateRefreshCookieThirdParty(userThirdParty);
+            ResponseCookie micJwtAccessToken = jwtTokenUtil.generateCookie("micJwtAccessToken",jsonResponse.get("access_token").asText());
 
+            Map<String,String> result = new HashMap<>();
 
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
-                    .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                     .body("Tokens generated successfully");
+            result.put(jwtCookie,accessTokenCookie.toString());
+            result.put(jwtRefCookie,refreshTokenCookie.toString());
+            result.put("micJwtAccessToken",micJwtAccessToken.toString());
+            return result;
         } else {
             throw new Exception("Failed to exchange authorization code. Response: " + response.getBody());
         }
@@ -115,43 +133,15 @@ public class AuthenticationMASLService {
                 .toUriString();
     }
 
-    public ResponseEntity<Object> logoutCallback() {
-        ResponseCookie accessTokenCookie = jwtTokenUtil.removeCookie(jwtCookie);
-        ResponseCookie refreshTokenCookie = jwtTokenUtil.removeCookie(jwtRefCookie);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                .body("User logged out successfully");
+    public Map<String,String> logoutCallback() {
+        Map<String,String> result = new HashMap<>();
+        result.put(jwtCookie,jwtTokenUtil.removeCookie(jwtCookie).toString());
+        result.put(jwtRefCookie,jwtTokenUtil.removeCookie(jwtRefCookie).toString());
+        result.put("micJwtAccessToken",jwtTokenUtil.removeCookie("micJwtAccessToken").toString());
+        return result;
     }
 
 
 
-    private UserThirdParty getInfo(String accessToken) throws Exception {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        HttpEntity<Void> request = new HttpEntity<>(headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(infoUri, HttpMethod.GET, request, String.class);
-        if (response.getStatusCode() == HttpStatus.OK) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(response.getBody());
-            UserThirdParty userThirdParty = userThirdPartyRepository.findById(jsonNode.get("id").asText()).orElse(null);
-            if(userThirdParty.equals(null))
-            {
-                userThirdParty = new UserThirdParty();
-                userThirdParty.setOid(jsonNode.get("id").asText());
-                userThirdParty.setPlatform(UserThirdPartyPlatform.MICROSOFT);
-            }
-                userThirdParty.setName(jsonNode.get("displayName").asText());
-                userThirdParty.setEmail(jsonNode.get("userPrincipalName").asText());
-                userThirdPartyRepository.save(userThirdParty);
-
-            return  userThirdParty;
-        } else {
-            throw new Exception("Failed to get user info. Response: " + response.getBody());
-        }
-    }
 
 }

@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -60,6 +61,9 @@ public class AuthenticationController {
     @Autowired
     UserThirdPartyRepository userThirdPartyRepository;
 
+    private String jwtCookie;
+    @Value("${jwt.ref.access.token.cookie.name}")
+    private String jwtRefCookie;
 
     @Operation(summary = "User Login", description = "Authenticates the user and returns JWT and Refresh cookies.")
     @ApiResponses(value = {
@@ -109,7 +113,8 @@ public class AuthenticationController {
     })
     @PostMapping("/token")
     public ResponseEntity<Object> refreshToken(HttpServletRequest request) {
-        String jwtRefToken = jwtTokenUtil.getRefTokenCookie(request.getCookies());
+        Map<String,String> cookieMap = jwtTokenUtil.getMapCookie(request.getCookies());
+        String jwtRefToken = cookieMap.getOrDefault(jwtRefCookie,null) ;
         if(jwtRefToken == null ) throw new UnauthorizedLoginException("Not found refreshToken");
         Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtRefToken);
         String oid = claims.get("oid").toString();
