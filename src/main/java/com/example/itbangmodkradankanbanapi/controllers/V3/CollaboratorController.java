@@ -21,6 +21,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
+import java.rmi.ServerException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.NoSuchElementException;
@@ -88,10 +89,6 @@ private CollaboratorService service;
     }
 
 
-//    @GetMapping("collabs/invite")
-//    public ResponseEntity<Object> getAllInvite(HttpServletRequest request) {
-//        return ResponseEntity.ok(service.getAllInviteBoard(request));
-//    }
 
     @Operation(summary = "Remove a collaborator from a board", description = "Removes a specific collaborator from a board.")
     @ApiResponses(value = {
@@ -128,7 +125,7 @@ private CollaboratorService service;
             @ApiResponse(responseCode = "403", description = "No access to add collaborator")
     })
     @PostMapping("boards/{nanoId}/collabs")
-    public ResponseEntity<Object> InviteCollaborator(HttpServletRequest request, @PathVariable String nanoId, @Valid @RequestBody FormCollaboratorDto form) {
+    public ResponseEntity<Object> InviteCollaborator(HttpServletRequest request, @PathVariable String nanoId, @Valid @RequestBody FormCollaboratorDto form) throws ServerException {
         return ResponseEntity.ok(service.inviteCollaborator(request, nanoId, form));
     }
     @Operation(summary = "Cancel invite (Owner)", description = "Cancel invite from request collaborator.")
@@ -168,4 +165,5 @@ private CollaboratorService service;
         ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.NOT_FOUND.value(),null, ex.getReason(), request.getDescription(false).substring(4));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er);
     }
+
 }

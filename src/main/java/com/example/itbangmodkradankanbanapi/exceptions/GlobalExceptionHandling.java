@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.method.ParameterValidationResult;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -13,6 +14,7 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import java.rmi.ServerException;
 import java.sql.Timestamp;
 import java.time.Instant;
 
@@ -21,6 +23,23 @@ public class GlobalExceptionHandling {
 
     @Value("${spring.servlet.multipart.max-file-size}")
     String MAX_FILE_SIZE;
+
+    @ExceptionHandler(ServerException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ResponseEntity<ErrorResponse> handleServerException(ServerException ex, WebRequest request) {
+        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.SERVICE_UNAVAILABLE.value(),null, ex.getMessage(), request.getDescription(false).substring(4));
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(er);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex, WebRequest request) {
+        ErrorResponse er = new ErrorResponse(Timestamp.from(Instant.now()),HttpStatus.BAD_REQUEST.value(),null, ex.getMessage(), request.getDescription(false).substring(4));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(er);
+    }
+
+
+
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

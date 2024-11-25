@@ -2,9 +2,12 @@ package com.example.itbangmodkradankanbanapi.Auth;
 
 import com.example.itbangmodkradankanbanapi.entities.userThirdParty.UserThirdParty;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
+import com.example.itbangmodkradankanbanapi.exceptions.NoAccessException;
+import com.example.itbangmodkradankanbanapi.exceptions.UnauthorizedLoginException;
 import com.example.itbangmodkradankanbanapi.models.UserThirdPartyPlatform;
 import com.example.itbangmodkradankanbanapi.repositories.userThirdParty.UserThirdPartyRepository;
 import com.example.itbangmodkradankanbanapi.services.V3.MISLService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
@@ -15,9 +18,12 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.rmi.ServerException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,52 +88,61 @@ public class AuthenticationMASLService {
     }
 
     @Transactional
-    public Map<String,String> exchangeAuthorizationCodeForToken(String authorizationCode) throws Exception {
-        RestTemplate restTemplate = new RestTemplate();
+    public Map<String,String> exchangeAuthorizationCodeForToken(String authorizationCode) throws ServerException {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
 
-        // สร้างข้อมูลใน request body
-        MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("client_id", clientId);
-        requestBody.add("client_secret", clientSecret);
-        requestBody.add("code", authorizationCode);
-        requestBody.add("grant_type", "authorization_code");
-        requestBody.add("redirect_uri", redirectUri);
+            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+            requestBody.add("client_id", clientId);
+            requestBody.add("client_secret", clientSecret);
+            requestBody.add("code", authorizationCode);
+            requestBody.add("grant_type", "authorization_code");
+            requestBody.add("redirect_uri", redirectUri);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(requestBody, headers);
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(requestBody, headers);
+            ResponseEntity<String> response = restTemplate.postForEntity(tokenUri, request, String.class);
+//            if (response.getStatusCode().value() == 401) {
+//                throw new NoAccessException("Token is expired or invalid : " + response.getBody());
+//            } else if (response.getStatusCode().value() != 200) {
+//                throw new ServerException("Something went wrong : " + response.getBody());
+//            }
 
-        ResponseEntity<String> response = restTemplate.postForEntity(tokenUri, request, String.class);
+//            if (response.getStatusCode() == HttpStatus.OK) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonResponse = objectMapper.readTree(response.getBody());
+                JsonNode userInfo = mislService.getInfo(jsonResponse.get("access_token").asText());
+                UserThirdParty userThirdParty = userThirdPartyRepository.findById(userInfo.get("id").asText()).orElse(null);
+                if (userThirdParty == null) {
+                    userThirdParty = new UserThirdParty();
+                    userThirdParty.setOid(userInfo.get("id").asText());
+                    userThirdParty.setPlatform(UserThirdPartyPlatform.MICROSOFT);
+                }
+                userThirdParty.setName(userInfo.get("displayName").asText());
+                userThirdParty.setEmail(userInfo.get("userPrincipalName").asText());
+                userThirdPartyRepository.save(userThirdParty);
 
-        if (response.getStatusCode() == HttpStatus.OK) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonResponse = objectMapper.readTree(response.getBody());
-            JsonNode userInfo = mislService.getInfo(jsonResponse.get("access_token").asText());
+                ResponseCookie accessTokenCookie = jwtTokenUtil.generateCookieThirdParty(userThirdParty);
+                ResponseCookie refreshTokenCookie = jwtTokenUtil.generateRefreshCookieThirdParty(userThirdParty);
+                ResponseCookie micJwtAccessToken = jwtTokenUtil.generateCookie(microsoftAccessToken, jsonResponse.get("access_token").asText());
 
-            UserThirdParty userThirdParty = userThirdPartyRepository.findById(userInfo.get("id").asText()).orElse(null);
-            if(userThirdParty == null)
-            {
-                userThirdParty = new UserThirdParty();
-                userThirdParty.setOid(userInfo.get("id").asText());
-                userThirdParty.setPlatform(UserThirdPartyPlatform.MICROSOFT);
-            }
-            userThirdParty.setName(userInfo.get("displayName").asText());
-            userThirdParty.setEmail(userInfo.get("userPrincipalName").asText());
-            userThirdPartyRepository.save(userThirdParty);
+                Map<String, String> result = new HashMap<>();
 
-            ResponseCookie accessTokenCookie = jwtTokenUtil.generateCookieThirdParty(userThirdParty);
-            ResponseCookie refreshTokenCookie = jwtTokenUtil.generateRefreshCookieThirdParty(userThirdParty);
-            ResponseCookie micJwtAccessToken = jwtTokenUtil.generateCookie(microsoftAccessToken,jsonResponse.get("access_token").asText());
+                result.put(jwtCookie, accessTokenCookie.toString());
+                result.put(jwtRefCookie, refreshTokenCookie.toString());
+                result.put(microsoftAccessToken, micJwtAccessToken.toString());
+                return result;
+//            } else {
+//                throw new Exception("Failed to exchange authorization code. Response: " + response.getBody());
+//            }
 
-            Map<String,String> result = new HashMap<>();
-
-            result.put(jwtCookie,accessTokenCookie.toString());
-            result.put(jwtRefCookie,refreshTokenCookie.toString());
-            result.put(microsoftAccessToken,micJwtAccessToken.toString());
-            return result;
-        } else {
-            throw new Exception("Failed to exchange authorization code. Response: " + response.getBody());
+        }catch(HttpClientErrorException er){
+                if(er.getStatusCode() == HttpStatus.UNAUTHORIZED || er.getStatusCode() == HttpStatus.BAD_REQUEST ) throw new UnauthorizedLoginException("Authorization code is invalid or expired");
+                else throw new ServerException("Microsoft error response: "+ er);
+            } catch (Exception er) {
+            throw new ServerException("Error Server: "+er);
         }
     }
 

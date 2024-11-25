@@ -3,7 +3,9 @@ package com.example.itbangmodkradankanbanapi.services.V3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.mail.FormMailDto;
 import com.example.itbangmodkradankanbanapi.exceptions.ConflictException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
+import com.example.itbangmodkradankanbanapi.exceptions.NoAccessException;
 import com.example.itbangmodkradankanbanapi.exceptions.UnauthorizedLoginException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
@@ -14,9 +16,11 @@ import org.springframework.http.*;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
+import java.rmi.ServerException;
 
 @Service
 public class MISLService {
@@ -41,22 +45,32 @@ public class MISLService {
         }
     }
 
-        public JsonNode findUserByEmail(String email,String accessToken) throws Exception {
+        public JsonNode findUserByEmail(String email,String accessToken) throws JsonProcessingException, ServerException {
+        try {
+
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
         HttpEntity<Void> request = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(uri+"/users/"+email, HttpMethod.GET, request, String.class);
+
         if (response.getStatusCode() == HttpStatus.OK) {
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readTree(response.getBody());
         } else if (response.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-            throw new UnauthorizedLoginException("token microsoft is invalid or expired!!!");
+            throw new NoAccessException("token microsoft is invalid or expired!!!");
         }else if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
-            throw new ItemNotFoundException("Failed to get user info. Response: " + response.getBody());
+            return null;
         }else {
             throw  new ConflictException("something when wrong");
         }
+
+        } catch(HttpClientErrorException er){
+            if(er.getStatusCode() == HttpStatus.NOT_FOUND) return null;
+            if(er.getStatusCode() == HttpStatus.UNAUTHORIZED) return null;
+                else throw new ServerException("Microsoft error response: "+ er);
+            }
     }
+
 
 }

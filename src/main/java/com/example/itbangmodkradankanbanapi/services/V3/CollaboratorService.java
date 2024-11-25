@@ -11,6 +11,7 @@ import com.example.itbangmodkradankanbanapi.repositories.V3.RequestCollabReposit
 import com.example.itbangmodkradankanbanapi.repositories.V3.ShareBoardRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.user.UserDataCenterRepository;
 import com.example.itbangmodkradankanbanapi.utils.ListMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
+import java.rmi.ServerException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -225,7 +228,7 @@ public class CollaboratorService {
 
 
     @Transactional
-    public RequestCollaboratorDto inviteCollaborator(HttpServletRequest request, String nanoId,FormCollaboratorDto form)  {
+    public RequestCollaboratorDto inviteCollaborator(HttpServletRequest request, String nanoId,FormCollaboratorDto form) throws ServerException {
         Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards"));
         Map<String,String> cookieMap = jwtTokenUtil.getMapCookie(request.getCookies());
         Claims claims = jwtTokenUtil.getAllClaimsFromToken(cookieMap.get(jwtCookie));
@@ -234,11 +237,12 @@ public class CollaboratorService {
         UserdataEntity userdata = null;
         if(cookieMap.containsKey(microsoftAccessToken)){
             try {
-                System.out.println("find by microsoft");
                 userMicrosoft = mislService.findUserByEmail(form.getEmail(),cookieMap.get(microsoftAccessToken));
+            }
+            catch (NoAccessException er){
+                throw new NoAccessException("Not found in microsoft try to center data!!" + er.getMessage());
             }catch (Exception er){
-                System.out.println("Not found in microsoft try to center data!!");
-                throw new ItemNotFoundException("Not found in microsoft try to center data!!" + er.getMessage());
+                throw new ServerException(er.toString());
             }
         }
 
