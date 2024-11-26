@@ -114,6 +114,7 @@ public class AuthenticationController {
     @PostMapping("/token")
     public ResponseEntity<Object> refreshToken(HttpServletRequest request) {
         Map<String,String> cookieMap = jwtTokenUtil.getMapCookie(request.getCookies());
+        if(cookieMap == null ) throw new ItemNotFoundException("Not found any cookie");
         String jwtRefToken = cookieMap.getOrDefault(jwtRefCookie,null) ;
         if(jwtRefToken == null ) throw new UnauthorizedLoginException("Not found refreshToken");
         Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtRefToken);

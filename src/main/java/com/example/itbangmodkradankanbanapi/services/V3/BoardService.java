@@ -6,11 +6,13 @@ import com.example.itbangmodkradankanbanapi.dtos.V3.status.StatusDtoV3;
 import com.example.itbangmodkradankanbanapi.dtos.V3.task.TaskDtoV3;
 import com.example.itbangmodkradankanbanapi.entities.V3.*;
 import com.example.itbangmodkradankanbanapi.entities.user.UserdataEntity;
+import com.example.itbangmodkradankanbanapi.entities.userThirdParty.UserThirdParty;
 import com.example.itbangmodkradankanbanapi.exceptions.InvalidFieldInputException;
 import com.example.itbangmodkradankanbanapi.exceptions.ItemNotFoundException;
 import com.example.itbangmodkradankanbanapi.exceptions.NotAllowedException;
 import com.example.itbangmodkradankanbanapi.repositories.V3.*;
 import com.example.itbangmodkradankanbanapi.repositories.user.UserDataCenterRepository;
+import com.example.itbangmodkradankanbanapi.repositories.userThirdParty.UserThirdPartyRepository;
 import com.example.itbangmodkradankanbanapi.utils.CustomNanoId;
 import com.example.itbangmodkradankanbanapi.utils.ListMapper;
 import io.jsonwebtoken.Claims;
@@ -51,6 +53,8 @@ public class BoardService {
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+    @Autowired
+    private UserThirdPartyRepository userThirdPartyRepository;
     private final ModelMapper modelMapper = new ModelMapper();
 
     public FormBoardSettingDtoV3 updateBoardSettings(String nanoId,FormBoardSettingDtoV3 settingForm){
@@ -68,13 +72,23 @@ public class BoardService {
     public FullBoardDtoV3 getBoard(String nanoId,HttpServletRequest request){
         Board board = repository.findById(nanoId).orElseThrow(() -> new NoSuchElementException("Board id "+ nanoId + " not found"));
         FullBoardDtoV3 boardDto = modelMapper.map(board,FullBoardDtoV3.class);
+
         String oidOwner = board.getShareBoards().stream().filter(shareBoard -> shareBoard.getRole() == ShareBoardsRole.OWNER).findFirst().orElseThrow(()-> new NotAllowedException("The default board is not allowed to access")).getOidUserShare();
-        UserdataEntity user = userDataCenterRepository.findById(oidOwner).orElseThrow(()-> new ItemNotFoundException("Not found user oid "+ oidOwner ));
+
+        UserThirdParty userThirdParty = null;
+        UserdataEntity userdataEntity =  null;
+
+        userdataEntity = userDataCenterRepository.findById(oidOwner).orElse(null);
+        userThirdParty = userThirdPartyRepository.findById(oidOwner).orElse(null);
+
+        if(userdataEntity==null && userThirdParty == null) throw new ItemNotFoundException("Not found user id " + oidOwner);
+
 
         FullBoardDtoV3.Owner owner = new FullBoardDtoV3.Owner();
-        owner.setOid(user.getOid());
-        owner.setUsername(user.getName());
+        owner.setOid(userdataEntity != null ? userdataEntity.getOid() : userThirdParty.getOid());
+        owner.setUsername(userdataEntity != null ? userdataEntity.getName() : userThirdParty.getName());
         boardDto.setOwner(owner);
+
         String token = jwtTokenUtil.getTokenCookie(request.getCookies());
         if(token != null){
             Claims claims = jwtTokenUtil.getAllClaimsFromToken(token);
@@ -97,10 +111,17 @@ public class BoardService {
 
     @Transactional
     public BoardDtoV3 createBoard(HttpServletRequest request,FormBoardDtoV3 newBoardForm){
-        String jwt = jwtTokenUtil.getTokenCookie(request.getCookies());
-        String oid = jwtTokenUtil.getAllClaimsFromToken(jwt).get("oid").toString();
+        Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtTokenUtil.getTokenCookie(request.getCookies()));
+        String oid = claims.get("oid").toString();
+        UserThirdParty userThirdParty = null;
+        UserdataEntity userdataEntity =  null;
 
-      UserdataEntity user = userDataCenterRepository.findById(oid).orElseThrow(()-> new InvalidFieldInputException("owner","not found user id " + oid));
+        if(claims.containsKey("platform"))
+            userThirdParty = userThirdPartyRepository.findById(oid).orElseThrow(() -> new ItemNotFoundException("The user has not register in app yet"));
+        else
+            userdataEntity = userDataCenterRepository.findById(oid).orElseThrow(()-> new InvalidFieldInputException("owner","not found user id " + oid));
+
+
         Board newBoard = new Board();
         String nanoId = CustomNanoId.generate(10);
         AtomicInteger time = new AtomicInteger(0);
@@ -118,8 +139,8 @@ public class BoardService {
         shareBoardRepository.save(newShareBoard);
         FullBoardDtoV3.Owner owner = new FullBoardDtoV3.Owner();
         BoardDtoV3 boardDto = modelMapper.map(board,BoardDtoV3.class);
-        owner.setOid(user.getOid());
-        owner.setUsername(user.getName());
+        owner.setOid(userThirdParty != null ? userThirdParty.getOid() : userdataEntity.getOid());
+        owner.setUsername(userThirdParty != null ? userThirdParty.getName() : userdataEntity.getName());
         return boardDto;
     }
 

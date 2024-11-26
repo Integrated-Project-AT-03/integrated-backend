@@ -172,6 +172,7 @@ public class JwtTokenUtil implements Serializable {
     }
 
     public Map<String,String> getMapCookie(Cookie[] cookies) {
+        if(cookies == null) return null;
         Map<String,String>  temp = new HashMap<>();
             for (Cookie cookie : cookies) temp.put(cookie.getName(),cookie.getValue());
         return temp;

@@ -5,11 +5,13 @@ import com.example.itbangmodkradankanbanapi.dtos.V3.collaborator.*;
 import com.example.itbangmodkradankanbanapi.dtos.V3.mail.FormMailDto;
 import com.example.itbangmodkradankanbanapi.entities.V3.*;
 import com.example.itbangmodkradankanbanapi.entities.user.UserdataEntity;
+import com.example.itbangmodkradankanbanapi.entities.userThirdParty.UserThirdParty;
 import com.example.itbangmodkradankanbanapi.exceptions.*;
 import com.example.itbangmodkradankanbanapi.repositories.V3.BoardRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.V3.RequestCollabRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.V3.ShareBoardRepositoryV3;
 import com.example.itbangmodkradankanbanapi.repositories.user.UserDataCenterRepository;
+import com.example.itbangmodkradankanbanapi.repositories.userThirdParty.UserThirdPartyRepository;
 import com.example.itbangmodkradankanbanapi.utils.ListMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -54,7 +56,8 @@ public class CollaboratorService {
     @Value("${microsoft.access.token.cookie.name}")
     private String microsoftAccessToken;
 
-
+    @Autowired
+    private UserThirdPartyRepository userThirdPartyRepository;
 
 
     @Autowired
@@ -68,16 +71,26 @@ public class CollaboratorService {
         List<CollaboratorDto> tempCollaboratorsDto = new ArrayList<>();
 
         tempCollaboratorsDto.addAll(listMapper.mapList(shareBoards,CollaboratorDto.class).stream().peek((collab)-> {
-           UserdataEntity userdata = userDataCenterRepository.findById(collab.getOid()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
-            collab.setName(userdata.getName());
-            collab.setEmail(userdata.getEmail());
+            UserThirdParty userThirdParty = null;
+            UserdataEntity userdataEntity =  null;
+
+            userdataEntity = userDataCenterRepository.findById(collab.getOid()).orElse(null);
+            userThirdParty = userThirdPartyRepository.findById(collab.getOid()).orElse(null);
+            if(userdataEntity==null && userThirdParty == null) throw new ItemNotFoundException("Not found user id " + collab.getOid());
+
+            collab.setName(userThirdParty != null ? userThirdParty.getName() : userdataEntity.getName());
+            collab.setEmail(userThirdParty != null ? userThirdParty.getEmail() : userdataEntity.getEmail());
             collab.setStatus("ACTIVE");
        }).toList());
 
         tempCollaboratorsDto.addAll(listMapper.mapList(requestCollabs,CollaboratorDto.class).stream().peek((requestCollab)-> {
-            UserdataEntity userdata = userDataCenterRepository.findById(requestCollab.getOid()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
-            requestCollab.setName(userdata.getName());
-            requestCollab.setEmail(userdata.getEmail());
+            UserThirdParty userThirdParty = null;
+            UserdataEntity userdataEntity =  null;
+            userdataEntity = userDataCenterRepository.findById(requestCollab.getOid()).orElse(null);
+            userThirdParty = userThirdPartyRepository.findById(requestCollab.getOid()).orElse(null);
+            if(userdataEntity==null && userThirdParty == null) throw new ItemNotFoundException("Not found user id " + requestCollab.getOid());
+            requestCollab.setName(userThirdParty != null ? userThirdParty.getName() : userdataEntity.getName());
+            requestCollab.setEmail(userThirdParty != null ? userThirdParty.getEmail() : userdataEntity.getEmail());
             requestCollab.setStatus("PENDING");
         }).toList());
 
@@ -89,9 +102,15 @@ public class CollaboratorService {
         ShareBoard shareBoard = repository.findByBoardAndOidUserShareAndRoleNot(board,oid,ShareBoardsRole.OWNER);
         if(shareBoard == null) throw  new ItemNotFoundException("Not found this collaborator");
         CollaboratorDto collaborator = mapper.map(shareBoard,CollaboratorDto.class);
-        UserdataEntity userdata = userDataCenterRepository.findById(collaborator.getOid()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
-        collaborator.setName(userdata.getName());
-        collaborator.setEmail(userdata.getEmail());
+        UserThirdParty userThirdParty = null;
+        UserdataEntity userdataEntity =  null;
+        userdataEntity = userDataCenterRepository.findById(collaborator.getOid()).orElse(null);
+        userThirdParty = userThirdPartyRepository.findById(collaborator.getOid()).orElse(null);
+        if(userdataEntity==null && userThirdParty == null) throw new ItemNotFoundException("Not found user id " + collaborator.getOid());
+
+
+        collaborator.setName(userThirdParty != null ? userThirdParty.getName() : userdataEntity.getName());
+        collaborator.setEmail(userThirdParty != null ? userThirdParty.getEmail() : userdataEntity.getEmail());
         return  collaborator;
     }
 
@@ -100,9 +119,15 @@ public class CollaboratorService {
         RequestCollab requestCollab = requestCollabRepository.findFirstByBoardAndOidUserShare(board,oid);
         if(requestCollab == null) throw  new ItemNotFoundException("Not found this request");
         RequestCollaboratorDto requestCollaboratorDto = mapper.map(requestCollab,RequestCollaboratorDto.class);
-        UserdataEntity userdata = userDataCenterRepository.findById(requestCollaboratorDto.getOid()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
-        requestCollaboratorDto.setName(userdata.getName());
-        requestCollaboratorDto.setEmail(userdata.getEmail());
+        UserThirdParty userThirdParty = null;
+        UserdataEntity userdataEntity =  null;
+        String ownerOid = requestCollaboratorDto.getOid();
+        userdataEntity = userDataCenterRepository.findById(ownerOid).orElse(null);
+        userThirdParty = userThirdPartyRepository.findById(ownerOid).orElse(null);
+        if(userdataEntity==null && userThirdParty == null) throw new ItemNotFoundException("Not found user id " + ownerOid);
+
+        requestCollaboratorDto.setName(userThirdParty != null ? userThirdParty.getName() : userdataEntity.getName());
+        requestCollaboratorDto.setEmail(userThirdParty != null ? userThirdParty.getEmail() : userdataEntity.getEmail());
         return  requestCollaboratorDto;
     }
 
@@ -163,18 +188,34 @@ public class CollaboratorService {
         tempCollaboratorBoardDtos.addAll(
          listMapper.mapList(inviteBoards,CollaboratorBoardDto.class).stream().peek((inviteBoard)-> {
             ShareBoard shareBoardOwner = repository.findByBoardAndRole(inviteBoards.get(  atomicInviteBoards.getAndIncrement()).getBoard(),ShareBoardsRole.OWNER);
-            UserdataEntity userdata = userDataCenterRepository.findById(shareBoardOwner.getOidUserShare()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
-             inviteBoard.setName(userdata.getName());
-             inviteBoard.setEmail(userdata.getEmail());
+             UserThirdParty userThirdParty = null;
+             UserdataEntity userdataEntity =  null;
+             String ownerOid = shareBoardOwner.getOidUserShare();
+             userdataEntity = userDataCenterRepository.findById(ownerOid).orElse(null);
+             userThirdParty = userThirdPartyRepository.findById(ownerOid).orElse(null);
+             if(userdataEntity==null && userThirdParty == null) throw new ItemNotFoundException("Not found user id " + ownerOid);
+
+
+             inviteBoard.setName(userThirdParty != null ? userThirdParty.getName() : userdataEntity.getName());
+             inviteBoard.setEmail(userThirdParty != null ? userThirdParty.getEmail() : userdataEntity.getEmail());
              inviteBoard.setStatus("PENDING");
         }).toList());
 
         tempCollaboratorBoardDtos.addAll(
                 listMapper.mapList(shareBoards,CollaboratorBoardDto.class).stream().peek((shareBoard)-> {
                     ShareBoard shareBoardOwner = repository.findByBoardAndRole(shareBoards.get( atomicIntegerShareBoards.getAndIncrement()).getBoard(),ShareBoardsRole.OWNER);
-                    UserdataEntity userdata = userDataCenterRepository.findById(shareBoardOwner.getOidUserShare()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
-                    shareBoard.setName(userdata.getName());
-                    shareBoard.setEmail(userdata.getEmail());
+                    UserThirdParty userThirdParty = null;
+                    UserdataEntity userdataEntity =  null;
+                    String ownerOid = shareBoardOwner.getOidUserShare();
+                    userdataEntity = userDataCenterRepository.findById(ownerOid).orElse(null);
+                    userThirdParty = userThirdPartyRepository.findById(ownerOid).orElse(null);
+                    if(userdataEntity==null && userThirdParty == null) throw new ItemNotFoundException("Not found user id " + ownerOid);
+
+
+
+//                    UserdataEntity userdata = userDataCenterRepository.findById(shareBoardOwner.getOidUserShare()).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
+                    shareBoard.setName(userThirdParty != null ? userThirdParty.getName() : userdataEntity.getName());
+                    shareBoard.setEmail(userThirdParty != null ? userThirdParty.getEmail() : userdataEntity.getEmail());
                     shareBoard.setStatus("ACTIVE");
                 }).toList());
         return tempCollaboratorBoardDtos;
@@ -188,7 +229,14 @@ public class CollaboratorService {
        String token = jwtTokenUtil.getTokenCookie(request.getCookies());
        String oid = jwtTokenUtil.getAllClaimsFromToken(token).get("oid").toString();
        RequestCollab requestCollab =  requestCollabRepository.findById(new RequestCollabId(oid,board)).orElseThrow(()-> new ItemNotFoundException("You not invited for this board"));
-        UserdataEntity userdata = userDataCenterRepository.findById(oid).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
+        UserThirdParty userThirdParty = null;
+        UserdataEntity userdataEntity =  null;
+        userdataEntity = userDataCenterRepository.findById(oid).orElse(null);
+        userThirdParty = userThirdPartyRepository.findById(oid).orElse(null);
+        if(userdataEntity==null && userThirdParty == null) throw new ItemNotFoundException("Not found user id " + oid);
+
+
+//        UserdataEntity userdata = userDataCenterRepository.findById(oid).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
 
         ShareBoard newShareBoard = new ShareBoard();
         newShareBoard.setRole(requestCollab.getRole());
@@ -205,8 +253,8 @@ public class CollaboratorService {
             result.setStatus("DECLINE");
         }
         requestCollabRepository.delete(requestCollab);
-        result.setName(userdata.getName());
-        result.setEmail(userdata.getEmail());
+        result.setName(userdataEntity != null ? userdataEntity.getName() :  userThirdParty.getName());
+        result.setEmail(userdataEntity != null ? userdataEntity.getEmail():  userThirdParty.getEmail());
         result.setStatus(form.getReceiveInvite());
         return  result;
     }
@@ -215,13 +263,9 @@ public class CollaboratorService {
     @Transactional
     public RequestCollaboratorDto cancelInviteCollaborator(String nanoId,String oid){
         Board board = boardRepository.findById(nanoId).orElseThrow(()-> new ItemNotFoundException("Not Found Boards: "+ nanoId));
-        UserdataEntity userdata = userDataCenterRepository.findById(oid).orElseThrow(()-> new ItemNotFoundException("Not Found User"));
         RequestCollab requestCollab =  requestCollabRepository.findById(new RequestCollabId(oid,board)).orElseThrow(()-> new ItemNotFoundException(" Not found invite for this board"));
         RequestCollaboratorDto result = mapper.map(requestCollab, RequestCollaboratorDto.class);
         requestCollabRepository.delete(requestCollab);
-        result.setName(userdata.getName());
-        result.setEmail(userdata.getEmail());
-        result.setStatus("CANCEL");
         return  result;
     }
 
