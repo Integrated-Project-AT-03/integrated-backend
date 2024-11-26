@@ -161,6 +161,11 @@ public class BoardService {
         tempStatus.addAll(centerStatus);
         tempStatus.addAll( board.getStatuses());
 
-        return listMapper.mapList(tempStatus, StatusDtoV3.class);
+        return tempStatus.stream().map((status)-> {
+           StatusDtoV3 statusDto = modelMapper.map(status,StatusDtoV3.class);
+           statusDto.setNumOfTask(taskRepositoryV3.countByStatusAndAndBoard(status,board));
+            return statusDto;
+        }).toList();
+
     }
 }

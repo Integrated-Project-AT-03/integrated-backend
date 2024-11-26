@@ -38,9 +38,6 @@ public class StatusServiceV3 {
 
     @Autowired
     private ColorRepository colorRepository;
-    @Autowired
-    private SettingService settingService;
-
 
     @Autowired
     ModelMapper modelMapper;
@@ -140,23 +137,22 @@ public class StatusServiceV3 {
         Board board = boardRepository.findById(nanoIdBoard).orElseThrow(() -> new ItemNotFoundException("board " + nanoIdBoard + " dose not exist !!!!"));
         StatusV3 deletedStatus = repository.findById(deletedStatusId).orElseThrow(() -> new NotAllowedException("destination status for task transfer not specified."));
         StatusV3 changeStatus = repository.findById(changeStatusId).orElseThrow(() -> new NotAllowedException("the specified status for task transfer does not exist"));
-
+        int countDesStatusTasks = taskRepository.countByStatusAndAndBoard(changeStatus,board);
         if (deletedStatus.getCenterStatus() != null && !deletedStatus.getCenterStatus().getEnableConfig() )
             throw new NotAllowedException(deletedStatus.getName().toLowerCase() + " cannot be deleted.");
 
 
         if (deletedStatus.equals(changeStatus))
             throw new NotAllowedException("destination status for task transfer must be different from current status");
-
         List<TasksV3> transferTask =  taskRepository.findAllByStatusAndBoard(deletedStatus,board).stream().peek(task -> {
             task.setStatus(changeStatus);
         }).toList();
 
         if(changeStatus.getCenterStatus() != null) {
-            if (changeStatus.getCenterStatus().getEnableConfig() && board.getEnableLimitsTask() && changeStatus.getTasks().size() + transferTask.size() > board.getLimitsTask())
+            if (changeStatus.getCenterStatus().getEnableConfig() && board.getEnableLimitsTask() && countDesStatusTasks + transferTask.size() > board.getLimitsTask())
                 throw new InvalidFieldInputException("status", "the destination status cannot be over the limit after transfer");
         }else {
-            if (board.getEnableLimitsTask() && changeStatus.getTasks().size() + transferTask.size() > board.getLimitsTask())
+            if (board.getEnableLimitsTask() && countDesStatusTasks + transferTask.size() > board.getLimitsTask())
                 throw new InvalidFieldInputException("status", "the destination status cannot be over the limit after transfer");
         }
 

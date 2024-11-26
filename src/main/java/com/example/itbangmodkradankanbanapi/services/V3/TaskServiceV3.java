@@ -218,12 +218,12 @@ public class TaskServiceV3 {
         updateTask.setDescription(formTask.getDescription());
         StatusV3 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new InvalidFieldInputException("status","does not exist"));
         Board board = updateTask.getBoard();
-
+        int countTask = repository.countByStatusAndAndBoard(status,board);
         if(status.getCenterStatus() != null) {
-            if (!oldStatus.equals(status) && status.getCenterStatus().getEnableConfig() && board.getEnableLimitsTask() && status.getTasks().size() >= board.getLimitsTask())
+            if (!oldStatus.equals(status) && status.getCenterStatus().getEnableConfig() && board.getEnableLimitsTask() && countTask >= board.getLimitsTask())
                 throw new InvalidFieldInputException("status", "status cannot be over the limit ");
         }else {
-            if (!oldStatus.equals(status) && board.getEnableLimitsTask() && status.getTasks().size() >= board.getLimitsTask())
+            if (!oldStatus.equals(status) && board.getEnableLimitsTask() && countTask >= board.getLimitsTask())
                 throw new InvalidFieldInputException("status", "status cannot be over the limit ");
         }
         updateTask.setStatus(status);
@@ -240,12 +240,16 @@ public class TaskServiceV3 {
         Board board = boardRepository.findById(nanoId).orElseThrow(() -> new InvalidFieldInputException("boardNanoId","does not exist"));
         newTask.setBoard(board);
         StatusV3 status = statusRepository.findById(formTask.getStatusId()).orElseThrow(() -> new InvalidFieldInputException("status","does not exist"));
+        int countTask = repository.countByStatusAndAndBoard(status,board);
+
         if(status.getCenterStatus() != null) {
-            if (status.getCenterStatus().getEnableConfig() && board.getEnableLimitsTask() && status.getTasks().size() >= board.getLimitsTask())
+            if (status.getCenterStatus().getEnableConfig() && board.getEnableLimitsTask() && countTask >= board.getLimitsTask()){
                 throw new InvalidFieldInputException("status", "status cannot be over the limit");
+            }
         }else {
-            if (board.getEnableLimitsTask() && status.getTasks().size() >= board.getLimitsTask())
+            if (board.getEnableLimitsTask() && countTask >= board.getLimitsTask()) {
                 throw new InvalidFieldInputException("status", "status cannot be over the limit");
+            }
         }
         newTask.setStatus(status);
 

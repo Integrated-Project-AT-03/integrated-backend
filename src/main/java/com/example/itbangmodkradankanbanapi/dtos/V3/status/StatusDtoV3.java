@@ -25,4 +25,6 @@ public class StatusDtoV3 {
     public String getColorHex(){
         return "#"+colorHex;
     }
+
+    public int numOfTask;
 }

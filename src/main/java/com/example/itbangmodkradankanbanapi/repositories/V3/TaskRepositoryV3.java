@@ -13,5 +13,6 @@ public interface TaskRepositoryV3 extends JpaRepository<TasksV3,Integer> {
     List<TasksV3> findAllByBoard(Board board, Sort sort);
     List<TasksV3> findAllByStatusIn(List<StatusV3> statusV3, Sort sort);
 
+    int countByStatusAndAndBoard(StatusV3 status , Board board);
     List<TasksV3> findAllByStatusAndBoard(StatusV3 statusV3 , Board board);
 }

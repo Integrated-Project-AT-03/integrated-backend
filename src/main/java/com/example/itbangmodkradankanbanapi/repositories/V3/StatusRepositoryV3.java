@@ -11,4 +11,6 @@ public interface StatusRepositoryV3 extends JpaRepository<StatusV3,Integer> {
 
     public StatusV3 findByName(String name);
 
+
+
 }
