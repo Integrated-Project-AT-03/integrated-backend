@@ -145,7 +145,6 @@ public class BoardController {
         return ResponseEntity.ok(service.updateVisibilityBoard(nanoId, updateBoard));
     }
 
-    // Exception Handlers with Swagger Annotations
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, WebRequest request) {

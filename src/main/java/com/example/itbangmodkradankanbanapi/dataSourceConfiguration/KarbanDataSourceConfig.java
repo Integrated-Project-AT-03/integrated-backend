@@ -1,4 +1,4 @@
-package com.example.itbangmodkradankanbanapi.DataSourceConfiguration;
+package com.example.itbangmodkradankanbanapi.dataSourceConfiguration;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;

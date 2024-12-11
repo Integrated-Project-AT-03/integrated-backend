@@ -37,8 +37,8 @@ public class AuthenticationMASLController {
     private String webRedirectUri;
 
     @GetMapping("/login")
-    public String login() {
-        return authenticationMASLService.login();
+    public void login(HttpServletResponse response) throws IOException {
+            response.sendRedirect(authenticationMASLService.login());
     }
 
 
@@ -53,8 +53,8 @@ public class AuthenticationMASLController {
     }
 
     @GetMapping("/logout")
-    public String logout() {
-        return authenticationMASLService.logout();
+    public void logout(HttpServletResponse response) throws IOException {
+        response.sendRedirect(authenticationMASLService.logout());
     }
 
     @GetMapping("/callback/login")
