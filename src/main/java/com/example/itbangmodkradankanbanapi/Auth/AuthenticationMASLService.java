@@ -104,13 +104,7 @@ public class AuthenticationMASLService {
 
             HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(requestBody, headers);
             ResponseEntity<String> response = restTemplate.postForEntity(tokenUri, request, String.class);
-//            if (response.getStatusCode().value() == 401) {
-//                throw new NoAccessException("Token is expired or invalid : " + response.getBody());
-//            } else if (response.getStatusCode().value() != 200) {
-//                throw new ServerException("Something went wrong : " + response.getBody());
-//            }
 
-//            if (response.getStatusCode() == HttpStatus.OK) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode jsonResponse = objectMapper.readTree(response.getBody());
                 JsonNode userInfo = mislService.getInfo(jsonResponse.get("access_token").asText());
@@ -134,9 +128,6 @@ public class AuthenticationMASLService {
                 result.put(jwtRefCookie, refreshTokenCookie.toString());
                 result.put(microsoftAccessToken, micJwtAccessToken.toString());
                 return result;
-//            } else {
-//                throw new Exception("Failed to exchange authorization code. Response: " + response.getBody());
-//            }
 
         }catch(HttpClientErrorException er){
                 if(er.getStatusCode() == HttpStatus.UNAUTHORIZED || er.getStatusCode() == HttpStatus.BAD_REQUEST ) throw new UnauthorizedLoginException("Authorization code is invalid or expired");

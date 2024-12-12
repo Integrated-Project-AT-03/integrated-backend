@@ -30,7 +30,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .csrf(csrf -> csrf.disable())  // Disable CSRF protection
+                .csrf(csrf -> csrf.disable())
                 .authorizeRequests(authorize -> authorize
                         .requestMatchers("/login","/auth/**","/swagger-ui/**","v3/api-docs/**", "/validate-token","/v2/**","/v1/**","/token","v3/boards/**","/v3/user/**","/clear-cookie").permitAll()
 
